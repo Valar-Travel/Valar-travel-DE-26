@@ -1,0 +1,18 @@
+{
+  "functions": {
+    "app/api/luxury-properties/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/cron/scrape-luxury-properties/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/cron/scrape-luxury-properties",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}
