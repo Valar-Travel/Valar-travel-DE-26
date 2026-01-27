@@ -54,6 +54,7 @@ export async function createCheckoutSession(booking: CheckoutDetails) {
     .insert({
       villa_id: booking.villaId,
       villa_name: booking.villaName,
+      location: booking.location,
       user_id: user?.id || null,
       guest_name: user?.email?.split("@")[0] || "Guest",
       guest_email: user?.email || "",

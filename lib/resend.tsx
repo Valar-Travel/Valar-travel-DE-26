@@ -733,6 +733,229 @@ export async function sendFAQResponse(data: {
   }
 }
 
+// Booking confirmation email - sent after successful payment
+export async function sendBookingConfirmationEmail(data: {
+  guestName: string
+  guestEmail: string
+  villaName: string
+  location: string
+  checkIn: string
+  checkOut: string
+  nights: number
+  guests: number
+  depositAmount: number
+  totalAmount: number
+  remainingAmount: number
+  depositPercentage: number
+  currency: string
+  bookingId?: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const {
+      guestName,
+      guestEmail,
+      villaName,
+      location,
+      checkIn,
+      checkOut,
+      nights,
+      guests,
+      depositAmount,
+      totalAmount,
+      remainingAmount,
+      depositPercentage,
+      currency,
+      bookingId,
+    } = data
+
+    const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$"
+
+    // Format dates nicely
+    const checkInDate = new Date(checkIn)
+    const checkOutDate = new Date(checkOut)
+    const formattedCheckIn = checkInDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+    const formattedCheckOut = checkOutDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+
+    // Determine payment due date based on deposit percentage
+    const paymentDueInfo: Record<number, string> = {
+      30: "30 days before arrival",
+      50: "14 days before arrival",
+      70: "on arrival",
+    }
+
+    const content = `
+      <h2 style="${emailStyles.heading}">Booking Confirmed! 🎉</h2>
+      
+      <p style="${emailStyles.text}">
+        Dear ${guestName || "Valued Guest"},
+      </p>
+      
+      <p style="${emailStyles.text}">
+        Wonderful news! Your reservation at <strong>${villaName}</strong> in <strong>${location}</strong> has been confirmed. 
+        We're excited to host you for what promises to be an unforgettable Caribbean experience.
+      </p>
+      
+      <div style="background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%); color: white; padding: 24px; border-radius: 12px; margin: 24px 0;">
+        <h3 style="color: white; margin: 0 0 16px 0; font-size: 18px;">Booking Summary</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #bae6fd; width: 40%;">Property</td>
+            <td style="padding: 8px 0; color: white; font-weight: 600;">${villaName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #bae6fd;">Location</td>
+            <td style="padding: 8px 0; color: white;">${location}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #bae6fd;">Check-in</td>
+            <td style="padding: 8px 0; color: white;">${formattedCheckIn}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #bae6fd;">Check-out</td>
+            <td style="padding: 8px 0; color: white;">${formattedCheckOut}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #bae6fd;">Duration</td>
+            <td style="padding: 8px 0; color: white;">${nights} night${nights > 1 ? "s" : ""}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #bae6fd;">Guests</td>
+            <td style="padding: 8px 0; color: white;">${guests} guest${guests > 1 ? "s" : ""}</td>
+          </tr>
+          ${bookingId ? `<tr><td style="padding: 8px 0; color: #bae6fd;">Booking Reference</td><td style="padding: 8px 0; color: white; font-family: monospace;">${bookingId}</td></tr>` : ""}
+        </table>
+      </div>
+      
+      <div style="${emailStyles.highlight}">
+        <h3 style="color: #0c4a6e; margin: 0 0 16px 0;">Payment Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #374151;">Total Booking Value</td>
+            <td style="padding: 8px 0; color: #374151; text-align: right; font-weight: 600;">${currencySymbol}${totalAmount.toLocaleString()}</td>
+          </tr>
+          <tr style="background-color: #dcfce7;">
+            <td style="padding: 12px 8px; color: #166534; font-weight: 600;">✓ Deposit Paid (${depositPercentage}%)</td>
+            <td style="padding: 12px 8px; color: #166534; text-align: right; font-weight: 700; font-size: 18px;">${currencySymbol}${depositAmount.toLocaleString()}</td>
+          </tr>
+          ${
+            remainingAmount > 0
+              ? `
+          <tr>
+            <td style="padding: 8px 0; color: #374151;">Remaining Balance</td>
+            <td style="padding: 8px 0; color: #374151; text-align: right; font-weight: 600;">${currencySymbol}${remainingAmount.toLocaleString()}</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding: 12px 0 0 0; color: #64748b; font-size: 14px;">
+              <em>Balance due ${paymentDueInfo[depositPercentage] || "before arrival"}</em>
+            </td>
+          </tr>
+          `
+              : ""
+          }
+        </table>
+      </div>
+      
+      <h3 style="color: #0c4a6e;">What's Next?</h3>
+      <ol style="color: #374151; line-height: 1.8;">
+        <li><strong>Confirmation Email:</strong> This email serves as your booking confirmation</li>
+        <li><strong>Pre-Arrival Details:</strong> You'll receive villa access codes and check-in instructions 48 hours before arrival</li>
+        <li><strong>Concierge Contact:</strong> Our team will reach out to discuss any special requests</li>
+        ${remainingAmount > 0 ? `<li><strong>Final Payment:</strong> We'll send a payment reminder ${paymentDueInfo[depositPercentage]}</li>` : ""}
+      </ol>
+      
+      <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 20px; border-radius: 8px; margin: 24px 0;">
+        <h3 style="color: #0c4a6e; margin: 0 0 12px 0;">Popular Add-On Services</h3>
+        <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.8;">
+          <li>Private Chef Experience - Caribbean cuisine at your villa</li>
+          <li>Airport Transfer - Luxury vehicle pickup and drop-off</li>
+          <li>Yacht Charter - Explore nearby islands in style</li>
+          <li>Spa Services - In-villa massage and wellness treatments</li>
+        </ul>
+        <p style="margin: 16px 0 0 0; font-size: 14px; color: #64748b;">
+          Reply to this email or message us on WhatsApp to arrange any of these services.
+        </p>
+      </div>
+      
+      <p style="${emailStyles.text}">
+        If you have any questions before your trip, don't hesitate to reach out. I'm here to ensure your 
+        Caribbean getaway is absolutely perfect.
+      </p>
+      
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="https://wa.me/4916092527436?text=Hi! I have a question about my booking at ${encodeURIComponent(villaName)}" style="${emailStyles.button}">Message Us on WhatsApp</a>
+      </p>
+    `
+
+    // Send to guest
+    await resend.emails.send({
+      from: `Sarah at Valar Travel <${COMPANY_EMAIL}>`,
+      to: guestEmail,
+      replyTo: COMPANY_EMAIL,
+      subject: `Booking Confirmed - ${villaName} | ${formattedCheckIn.split(",")[0]}, ${checkInDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+      html: emailWrapper(content, `Your reservation at ${villaName} is confirmed! Check-in: ${formattedCheckIn}`),
+    })
+
+    // Also notify Sarah/admin about the new booking
+    const adminContent = `
+      <h2 style="${emailStyles.heading}">New Booking Received! 🎉</h2>
+      
+      <div style="${emailStyles.highlight}">
+        <p style="margin: 0;"><strong>Guest:</strong> ${guestName || "Guest"}</p>
+        <p style="margin: 8px 0 0 0;"><strong>Email:</strong> <a href="mailto:${guestEmail}" style="color: #0ea5e9;">${guestEmail}</a></p>
+        <p style="margin: 8px 0 0 0;"><strong>Property:</strong> ${villaName}</p>
+        <p style="margin: 8px 0 0 0;"><strong>Location:</strong> ${location}</p>
+        <p style="margin: 8px 0 0 0;"><strong>Dates:</strong> ${checkIn} to ${checkOut} (${nights} nights)</p>
+        <p style="margin: 8px 0 0 0;"><strong>Guests:</strong> ${guests}</p>
+      </div>
+      
+      <h3 style="color: #0c4a6e;">Payment Details</h3>
+      <table style="width: 100%; border-collapse: collapse; max-width: 400px;">
+        <tr>
+          <td style="padding: 8px 0; color: #374151;">Total Booking Value</td>
+          <td style="padding: 8px 0; color: #374151; text-align: right; font-weight: 600;">${currencySymbol}${totalAmount.toLocaleString()}</td>
+        </tr>
+        <tr style="background-color: #dcfce7;">
+          <td style="padding: 8px; color: #166534; font-weight: 600;">Deposit Received (${depositPercentage}%)</td>
+          <td style="padding: 8px; color: #166534; text-align: right; font-weight: 700;">${currencySymbol}${depositAmount.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #374151;">Remaining Balance</td>
+          <td style="padding: 8px 0; color: #374151; text-align: right; font-weight: 600;">${currencySymbol}${remainingAmount.toLocaleString()}</td>
+        </tr>
+      </table>
+      
+      ${bookingId ? `<p style="margin-top: 16px; color: #64748b; font-size: 14px;">Booking ID: ${bookingId}</p>` : ""}
+      
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="${SITE_URL}/admin/bookings" style="${emailStyles.button}">View in Admin Dashboard</a>
+      </p>
+    `
+
+    await resend.emails.send({
+      from: `Valar Travel Bookings <${COMPANY_EMAIL}>`,
+      to: COMPANY_EMAIL,
+      replyTo: guestEmail,
+      subject: `[New Booking] ${villaName} - ${guestName || "Guest"} - ${currencySymbol}${depositAmount.toLocaleString()} deposit`,
+      html: emailWrapper(adminContent),
+    })
+
+    return { success: true }
+  } catch (error) {
+    console.error("Error sending booking confirmation email:", error)
+    return { success: false, error: error instanceof Error ? error.message : "Failed to send email" }
+  }
+}
+
 // Partnership welcome email - sends to Sarah and welcome email to partner
 export async function sendPartnershipEmail(data: {
   brandName: string
