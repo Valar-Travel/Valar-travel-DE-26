@@ -2,6 +2,7 @@ import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
 import { createClient } from "@/lib/supabase/server"
+import { sendBookingConfirmationEmail } from "@/lib/resend"
 import type Stripe from "stripe"
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -132,6 +133,36 @@ export async function POST(req: Request) {
         ? `${depositPct}% deposit payment` 
         : "full payment"
       console.log(`Booking ${paymentDescription} confirmed for ${villaName}: ${checkIn} to ${checkOut}`)
+
+      // Send booking confirmation email
+      if (session.customer_details?.email && villaName && checkIn && checkOut) {
+        try {
+          const depositAmountValue = depositAmountCents ? parseInt(depositAmountCents) / 100 : (session.amount_total || 0) / 100
+          const totalAmountValue = totalAmountCents ? parseInt(totalAmountCents) / 100 : (session.amount_total || 0) / 100
+          const remainingAmountValue = remainingAmountCents ? parseInt(remainingAmountCents) / 100 : 0
+
+          await sendBookingConfirmationEmail({
+            guestName: session.customer_details.name || "Guest",
+            guestEmail: session.customer_details.email,
+            villaName: villaName,
+            location: session.metadata?.location || "Caribbean",
+            checkIn: checkIn,
+            checkOut: checkOut,
+            nights: nights ? parseInt(nights) : 1,
+            guests: guests ? parseInt(guests) : 2,
+            depositAmount: depositAmountValue,
+            totalAmount: totalAmountValue,
+            remainingAmount: remainingAmountValue,
+            depositPercentage: depositPct,
+            currency: (metadataCurrency || session.currency || "USD").toUpperCase(),
+            bookingId: bookingId || undefined,
+          })
+          console.log(`Booking confirmation email sent to ${session.customer_details.email}`)
+        } catch (emailError) {
+          console.error("Failed to send booking confirmation email:", emailError)
+          // Don't fail the webhook if email fails
+        }
+      }
       break
     }
 

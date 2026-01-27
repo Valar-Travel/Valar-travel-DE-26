@@ -61,23 +61,42 @@ interface Booking {
   guest_phone?: string
   check_in: string
   check_out: string
+  nights?: number
   guests: number
   total_price: number
-  status: "pending" | "confirmed" | "cancelled" | "completed"
+  deposit_amount?: number
+  deposit_percentage?: number
+  remaining_amount?: number
+  currency: string
+  status: "pending" | "confirmed" | "cancelled" | "completed" | "deposit_received"
+  payment_status?: string
   notes?: string
   created_at: string
+  source: "checkout" | "inquiry"
+  stripe_session_id?: string
+  deposit_paid_at?: string
 }
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
   confirmed: "bg-green-100 text-green-800",
+  deposit_received: "bg-emerald-100 text-emerald-800",
   cancelled: "bg-red-100 text-red-800",
   completed: "bg-blue-100 text-blue-800",
+}
+
+const paymentStatusColors: Record<string, string> = {
+  deposit_pending: "bg-amber-100 text-amber-800",
+  deposit_paid: "bg-emerald-100 text-emerald-800",
+  paid: "bg-green-100 text-green-800",
+  refunded: "bg-gray-100 text-gray-800",
+  expired: "bg-red-100 text-red-800",
 }
 
 const statusIcons: Record<string, any> = {
   pending: Clock,
   confirmed: CheckCircle,
+  deposit_received: DollarSign,
   cancelled: XCircle,
   completed: CheckCircle,
 }
@@ -148,10 +167,15 @@ const BookingsPage = () => {
   const stats = {
     total: bookings.length,
     pending: bookings.filter((b) => b.status === "pending").length,
-    confirmed: bookings.filter((b) => b.status === "confirmed").length,
+    confirmed: bookings.filter((b) => b.status === "confirmed" || b.status === "deposit_received").length,
     revenue: bookings
-      .filter((b) => b.status === "confirmed" || b.status === "completed")
+      .filter((b) => b.status === "confirmed" || b.status === "completed" || b.status === "deposit_received")
       .reduce((sum, b) => sum + (b.total_price || 0), 0),
+    depositsReceived: bookings
+      .filter((b) => b.deposit_amount && b.deposit_amount > 0)
+      .reduce((sum, b) => sum + (b.deposit_amount || 0), 0),
+    checkoutBookings: bookings.filter((b) => b.source === "checkout").length,
+    inquiryBookings: bookings.filter((b) => b.source === "inquiry").length,
   }
 
   const formatDate = (dateString: string) => {
@@ -210,12 +234,51 @@ const BookingsPage = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-neutral-500">Revenue</p>
+                  <p className="text-sm text-neutral-500">Total Revenue</p>
                   <p className="text-2xl font-bold text-emerald-600">
                     ${stats.revenue.toLocaleString()}
                   </p>
                 </div>
                 <DollarSign className="h-8 w-8 text-emerald-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Additional Stats Row */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-neutral-500">Deposits Collected</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    ${stats.depositsReceived.toLocaleString()}
+                  </p>
+                </div>
+                <DollarSign className="h-8 w-8 text-blue-400" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-neutral-500">Online Bookings</p>
+                  <p className="text-2xl font-bold text-purple-600">{stats.checkoutBookings}</p>
+                </div>
+                <Calendar className="h-8 w-8 text-purple-400" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-neutral-500">Inquiry Bookings</p>
+                  <p className="text-2xl font-bold text-orange-600">{stats.inquiryBookings}</p>
+                </div>
+                <Mail className="h-8 w-8 text-orange-400" />
               </div>
             </CardContent>
           </Card>
@@ -263,13 +326,15 @@ const BookingsPage = () => {
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
+<TableHeader>
+                <TableRow>
                     <TableHead>Guest</TableHead>
                     <TableHead>Property</TableHead>
                     <TableHead>Dates</TableHead>
                     <TableHead>Amount</TableHead>
+                    <TableHead>Payment</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Source</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -296,12 +361,33 @@ const BookingsPage = () => {
                           </p>
                         </TableCell>
                         <TableCell>
-                          <p className="font-medium">${booking.total_price?.toLocaleString()}</p>
+                          <div>
+                            <p className="font-medium">${booking.total_price?.toLocaleString()}</p>
+                            {booking.deposit_amount && (
+                              <p className="text-xs text-emerald-600">
+                                ${booking.deposit_amount.toLocaleString()} deposit ({booking.deposit_percentage}%)
+                              </p>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
-                          <Badge className={statusColors[booking.status]}>
+                          {booking.payment_status ? (
+                            <Badge className={paymentStatusColors[booking.payment_status] || "bg-gray-100 text-gray-800"}>
+                              {booking.payment_status.replace(/_/g, " ")}
+                            </Badge>
+                          ) : (
+                            <span className="text-neutral-400 text-sm">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={statusColors[booking.status] || "bg-gray-100 text-gray-800"}>
                             <StatusIcon className="h-3 w-3 mr-1" />
-                            {booking.status}
+                            {booking.status.replace(/_/g, " ")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={booking.source === "checkout" ? "border-purple-300 text-purple-700" : "border-orange-300 text-orange-700"}>
+                            {booking.source === "checkout" ? "Online" : "Inquiry"}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -424,6 +510,41 @@ const BookingsPage = () => {
                     </p>
                   </div>
                 </div>
+                
+                {/* Payment Details */}
+                {selectedBooking.source === "checkout" && (
+                  <div className="border rounded-lg p-4 bg-emerald-50">
+                    <h4 className="font-medium text-emerald-800 mb-3">Payment Information</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      {selectedBooking.deposit_amount && (
+                        <div>
+                          <p className="text-neutral-500">Deposit Paid</p>
+                          <p className="font-semibold text-emerald-700">${selectedBooking.deposit_amount.toLocaleString()} ({selectedBooking.deposit_percentage}%)</p>
+                        </div>
+                      )}
+                      {selectedBooking.remaining_amount !== undefined && selectedBooking.remaining_amount > 0 && (
+                        <div>
+                          <p className="text-neutral-500">Remaining Balance</p>
+                          <p className="font-semibold text-amber-700">${selectedBooking.remaining_amount.toLocaleString()}</p>
+                        </div>
+                      )}
+                      {selectedBooking.payment_status && (
+                        <div>
+                          <p className="text-neutral-500">Payment Status</p>
+                          <Badge className={paymentStatusColors[selectedBooking.payment_status] || "bg-gray-100"}>
+                            {selectedBooking.payment_status.replace(/_/g, " ")}
+                          </Badge>
+                        </div>
+                      )}
+                      {selectedBooking.deposit_paid_at && (
+                        <div>
+                          <p className="text-neutral-500">Deposit Paid On</p>
+                          <p className="font-medium">{formatDate(selectedBooking.deposit_paid_at)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 {selectedBooking.notes && (
                   <div className="space-y-1">
                     <p className="text-sm text-neutral-500">Notes</p>
