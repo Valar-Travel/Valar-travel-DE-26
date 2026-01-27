@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { CreditCard } from "lucide-react"
 import { VillaCheckout } from "./villa-checkout"
@@ -19,6 +20,8 @@ interface VillaBookingButtonProps {
   size?: "default" | "sm" | "lg"
   className?: string
   children?: React.ReactNode
+  /** If true, navigates to the dedicated checkout page instead of opening modal */
+  useCheckoutPage?: boolean
 }
 
 export function VillaBookingButton({ 
@@ -26,9 +29,19 @@ export function VillaBookingButton({
   variant = "default", 
   size = "default",
   className = "",
-  children 
+  children,
+  useCheckoutPage = false
 }: VillaBookingButtonProps) {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const router = useRouter()
+
+  const handleClick = () => {
+    if (useCheckoutPage) {
+      router.push(`/checkout/${villa.id}`)
+    } else {
+      setIsCheckoutOpen(true)
+    }
+  }
 
   return (
     <>
@@ -36,7 +49,7 @@ export function VillaBookingButton({
         variant={variant}
         size={size}
         className={className}
-        onClick={() => setIsCheckoutOpen(true)}
+        onClick={handleClick}
       >
         {children || (
           <>
@@ -46,11 +59,13 @@ export function VillaBookingButton({
         )}
       </Button>
 
-      <VillaCheckout
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        villa={villa}
-      />
+      {!useCheckoutPage && (
+        <VillaCheckout
+          isOpen={isCheckoutOpen}
+          onClose={() => setIsCheckoutOpen(false)}
+          villa={villa}
+        />
+      )}
     </>
   )
 }

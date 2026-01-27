@@ -717,6 +717,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
                         maxGuests: maxGuests || 10,
                         image: villaImages[0],
                       }}
+                      useCheckoutPage={true}
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-12 font-semibold"
                     >
                       Book Now
@@ -804,6 +805,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
                       maxGuests: maxGuests || 10,
                       image: villaImages[0],
                     }}
+                    useCheckoutPage={true}
                     size="lg"
                     className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
                   >
