@@ -1,7 +1,6 @@
 "use client"
 
 import useSWR from "swr"
-import PropertyCard from "@/components/property-card"
 import { LuxuryPropertyCard } from "@/components/luxury-property-card"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -104,13 +103,9 @@ export default function LuxuryProperties() {
               viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-6"
             }
           >
-            {data.map((property: any) =>
-              viewMode === "grid" ? (
-                <PropertyCard key={property.id} property={property} />
-              ) : (
-                <LuxuryPropertyCard key={property.id} property={property} variant="list" />
-              ),
-            )}
+            {data.map((property: any) => (
+              <LuxuryPropertyCard key={property.id} property={property} variant={viewMode === "grid" ? "grid" : "list"} />
+            ))}
           </div>
         ) : (
           <div className="text-center py-12">

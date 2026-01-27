@@ -138,17 +138,17 @@ export const LAYOUT_TESTS = {
     targetMetric: "search_initiated",
     trafficSplit: 80,
   },
-  PROPERTY_CARDS: {
-    id: "property-cards-v1",
-    name: "Property Card Design",
-    description: "Test different property card layouts for engagement",
+  VILLA_CARDS: {
+    id: "villa-cards-v1",
+    name: "Villa Card Design",
+    description: "Test different villa card layouts for engagement",
     variants: [
       { id: "control", name: "Current Cards", weight: 50, config: { cardStyle: "current" } },
       { id: "compact", name: "Compact Cards", weight: 50, config: { cardStyle: "compact" } },
     ],
     status: "running" as const,
     startDate: new Date(),
-    targetMetric: "property_click",
+    targetMetric: "villa_click",
     trafficSplit: 60,
   },
 }
