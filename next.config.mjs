@@ -115,7 +115,7 @@ const nextConfig = {
   },
   serverExternalPackages: ['playwright', 'playwright-core', 'cheerio', 'cloudinary', 'openai', 'p-limit'],
   experimental: {
-    ppr: true, // Partial Prerendering - static shell + dynamic data streaming
+    // ppr: true, // Partial Prerendering - enable after deployment testing
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'date-fns', 'recharts'],
   },
   webpack: (config, { isServer }) => {

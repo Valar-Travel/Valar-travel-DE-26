@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { Resend } from "resend"
-import { validateAdminSessionFromRequest } from "@/lib/admin-auth"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: Request) {
   try {
-    const user = await validateAdminSessionFromRequest(request)
-    if (!user) {
+    const authHeader = request.headers.get("x-admin-auth")
+    if (authHeader !== "valar-admin-logged-in") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

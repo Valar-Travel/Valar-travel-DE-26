@@ -98,7 +98,11 @@ const BookingsPage = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/bookings?status=${statusFilter}`)
+      const response = await fetch(`/api/admin/bookings?status=${statusFilter}`, {
+        headers: {
+          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
+        },
+      })
       if (response.ok) {
         const data = await response.json()
         setBookings(data)
@@ -117,6 +121,7 @@ const BookingsPage = () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
         },
         body: JSON.stringify({ status: newStatus }),
       })

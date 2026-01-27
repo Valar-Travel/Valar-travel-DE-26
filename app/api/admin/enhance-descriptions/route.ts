@@ -4,11 +4,6 @@ import { generatePropertyDescription, batchGenerateDescriptions } from "@/lib/ai
 
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get("x-admin-auth")
-    if (authHeader !== "valar-admin-logged-in") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { propertyId, batchUpdate } = await request.json()
 
     const supabase = await createClient()
@@ -94,13 +89,8 @@ export async function POST(request: Request) {
 }
 
 // GET endpoint to check how many properties need descriptions
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const authHeader = request.headers.get("x-admin-auth")
-    if (authHeader !== "valar-admin-logged-in") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const supabase = await createClient()
 
     const { count, error } = await supabase

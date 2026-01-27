@@ -13,7 +13,9 @@ import { Label } from "@/components/ui/label"
 import { CalendarIcon, Users, MapPin, CreditCard, Check } from "lucide-react"
 import { format } from "date-fns"
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null
 
 interface VillaCheckoutProps {
   isOpen: boolean
@@ -222,15 +224,22 @@ export function VillaCheckout({ isOpen, onClose, villa }: VillaCheckoutProps) {
             
             {/* Stripe Embedded Checkout */}
             <div id="checkout">
-              <EmbeddedCheckoutProvider
-                stripe={stripePromise}
-                options={{ 
-                  fetchClientSecret: startCheckout,
-                  onComplete: () => setStep("success")
-                }}
-              >
-                <EmbeddedCheckout />
-              </EmbeddedCheckoutProvider>
+              {stripePromise ? (
+                <EmbeddedCheckoutProvider
+                  stripe={stripePromise}
+                  options={{ 
+                    fetchClientSecret: startCheckout,
+                    onComplete: () => setStep("success")
+                  }}
+                >
+                  <EmbeddedCheckout />
+                </EmbeddedCheckoutProvider>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Payment processing is not configured.</p>
+                  <p className="text-sm">Please contact us to complete your booking.</p>
+                </div>
+              )}
             </div>
             
             <Button variant="ghost" onClick={() => setStep("dates")} className="w-full">
