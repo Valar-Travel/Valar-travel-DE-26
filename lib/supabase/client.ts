@@ -1,7 +1,9 @@
 import { createBrowserClient } from "@supabase/ssr"
 
-// Module-level singleton for the browser client
-let browserClient: ReturnType<typeof createBrowserClient> | null = null
+// Use a global variable to ensure true singleton across module reloads (HMR)
+const globalForSupabase = globalThis as typeof globalThis & {
+  supabaseBrowserClient?: ReturnType<typeof createBrowserClient>
+}
 
 const mockClient = {
   auth: {
@@ -24,9 +26,9 @@ const mockClient = {
 } as any
 
 export function createClient() {
-  // Return existing singleton if available
-  if (browserClient) {
-    return browserClient
+  // Return existing global singleton if available
+  if (globalForSupabase.supabaseBrowserClient) {
+    return globalForSupabase.supabaseBrowserClient
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -38,8 +40,8 @@ export function createClient() {
 
   // Only create client in browser environment
   if (typeof window !== "undefined") {
-    browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
-    return browserClient
+    globalForSupabase.supabaseBrowserClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
+    return globalForSupabase.supabaseBrowserClient
   }
 
   // Return mock for SSR (should use server client instead)
