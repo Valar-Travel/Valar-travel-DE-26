@@ -37,13 +37,19 @@ export async function createVillaBookingSession(booking: BookingDetails) {
     .from("bookings")
     .insert({
       villa_id: booking.villaId,
+      villa_name: booking.villaName,
       user_id: user?.id || null,
+      guest_name: user?.email?.split("@")[0] || "Guest",
+      guest_email: user?.email || "",
       check_in: booking.checkIn,
       check_out: booking.checkOut,
+      nights: nights,
       guests: booking.guests,
-      total_price: totalPriceCents / 100,
+      price_per_night: Math.round(booking.pricePerNight * 100),
+      subtotal: totalPriceCents,
+      total_amount: totalPriceCents,
       currency: booking.currency,
-      status: "pending",
+      booking_status: "pending",
       payment_status: "pending"
     })
     .select()

@@ -1,4 +1,4 @@
-// v0 deployment fix - 2026-01-19
+// v0 deployment fix - 2026-01-27
 import type { Metadata } from "next"
 import PageClient from "@/components/home-page-client"
 import { getFeaturedVillas } from "@/app/actions/get-featured-villas"
