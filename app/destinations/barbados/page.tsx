@@ -32,30 +32,20 @@ export const metadata: Metadata = {
   },
 }
 
-const BARBADOS_SOURCE_URLS = [
-  "sunnyvillaholidays.com",
-  "villasbarbados.com",
-  "barbadosdreamvillas.com",
-  "barbadosluxuryvillas.com",
-]
-
 async function getBarbadosProperties() {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("scraped_luxury_properties")
+      .select("*")
+      .ilike("location", "%barbados%")
+      .limit(12)
 
-  const { data: properties, error } = await supabase
-    .from("scraped_luxury_properties")
-    .select("*")
-    .or(`location.ilike.%Barbados%,${BARBADOS_SOURCE_URLS.map((url) => `source_url.ilike.%${url}%`).join(",")}`)
-    .order("rating", { ascending: false })
-    .limit(12)
-
-  if (error) {
-    console.error("[v0] Error fetching Barbados properties:", error)
+    if (error || !data) return []
+    return data
+  } catch {
     return []
   }
-
-  console.log("[v0] Found Barbados properties:", properties?.length || 0)
-  return properties || []
 }
 
 export default async function BarbadosPage() {
@@ -69,7 +59,6 @@ export default async function BarbadosPage() {
     bathrooms: prop.bathrooms || 3,
     guests: prop.max_guests || (prop.bedrooms || 4) * 2,
     image: prop.images?.[0] || getImageUrl(UNSPLASH_IMAGES.barbados.villa1, 800),
-    rating: prop.rating || 4.9,
     features: prop.amenities?.slice(0, 4) || ["Ocean View", "Private Pool", "WiFi", "Beach Access"],
     description: prop.description || "",
   }))
@@ -178,10 +167,6 @@ export default async function BarbadosPage() {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                      <Badge className="absolute top-4 right-4 bg-white text-gray-900">
-                        <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
-                        {villa.rating}
-                      </Badge>
                     </div>
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">

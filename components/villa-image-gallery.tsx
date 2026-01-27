@@ -293,10 +293,10 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
 
       {/* Gallery Popup - Better mobile experience */}
       <Dialog open={showGalleryPopup} onOpenChange={setShowGalleryPopup}>
-        <DialogContent className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-white border-0 rounded-none [&>button]:hidden">
-          <div className="h-screen flex flex-col overflow-hidden">
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-[95vw] h-[95vh] sm:max-w-full sm:max-h-full sm:w-screen sm:h-screen p-0 bg-white border-0 sm:rounded-none rounded-lg [&>button]:hidden">
+          <div className="h-full flex flex-col overflow-hidden">
             {/* Header - Mobile-optimized header */}
-            <div className="flex-shrink-0 bg-white px-4 md:px-6 py-3 md:py-4 flex items-center justify-between border-b safe-area-inset-top">
+            <div className="flex-shrink-0 bg-white px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 flex items-center justify-between border-b safe-area-inset-top">
               <Button
                 size="icon"
                 variant="ghost"
@@ -333,7 +333,7 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
 
             {/* Scrollable content - Mobile padding adjustments */}
             <div className="flex-1 overflow-y-auto overscroll-contain -webkit-overflow-scrolling-touch">
-              <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-12 py-4 md:py-8">
+              <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-12 py-3 sm:py-4 md:py-8">
                 <button
                   onClick={() => setShowGalleryPopup(false)}
                   className="mb-4 md:mb-8 flex items-center gap-1 text-foreground hover:underline"
@@ -343,9 +343,9 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
                 </button>
 
                 {/* Image groups - Single column on mobile */}
-                <div className="space-y-2 md:space-y-3">
+                <div className="space-y-2 sm:space-y-3 md:space-y-4">
                   {imageGroups.map((group, groupIdx) => (
-                    <div key={groupIdx} className={group.type === "full" ? "" : "grid grid-cols-2 gap-3"}>
+                    <div key={groupIdx} className={group.type === "full" ? "" : "grid grid-cols-2 gap-2 sm:gap-3"}>
                       {group.type === "full" ? (
                         <div
                           className="relative w-full aspect-[16/10] rounded-lg overflow-hidden cursor-pointer group"
@@ -386,7 +386,7 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
                   ))}
                 </div>
 
-                <div className="h-8 md:h-12" />
+                <div className="h-6 sm:h-8 md:h-12" />
               </div>
             </div>
           </div>

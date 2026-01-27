@@ -171,7 +171,7 @@ export default function PrivacyPage() {
                   </p>
                   <div className="bg-gray-50 p-6 rounded-lg">
                     <p>
-                      <strong>Email:</strong> privacy@valartravel.de
+                      <strong>Email:</strong> hello@valartravel.de
                     </p>
                     <p>
                       <strong>Phone:</strong> +1 (555) 123-4567

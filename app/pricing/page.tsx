@@ -13,13 +13,12 @@ export default async function PricingPage() {
     plans = []
   } else {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
 
       if (!supabase?.from || typeof supabase.from !== "function") {
         console.warn("Supabase client not available, using fallback plans")
         plans = []
       } else {
-        // Get subscription plans from database
         const { data } = await supabase
           .from("subscription_plans")
           .select("*")
@@ -30,7 +29,6 @@ export default async function PricingPage() {
       }
     } catch (error) {
       console.error("Pricing page error:", error)
-      // Use fallback plans if database is not available
       plans = []
     }
   }
@@ -73,7 +71,7 @@ export default async function PricingPage() {
                 stripe_price_id: plan.stripe_price_id,
                 features: plan.features || [],
               }}
-              isPopular={index === 1} // Make middle plan popular
+              isPopular={index === 1}
             />
           ))}
         </div>

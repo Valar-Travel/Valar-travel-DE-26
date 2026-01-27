@@ -1,5 +1,7 @@
+// v0 deployment fix - 2026-01-27
 import type { Metadata } from "next"
 import PageClient from "@/components/home-page-client"
+import { getFeaturedVillas } from "@/app/actions/get-featured-villas"
 
 export const metadata: Metadata = {
   title: "Luxury Caribbean Villa Rentals - Barbados, St. Lucia, Jamaica & St. Barthélemy",
@@ -20,6 +22,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default function HomePage() {
-  return <PageClient />
+export default async function HomePage() {
+  let featuredVillas: any[] = []
+  
+  try {
+    featuredVillas = await getFeaturedVillas()
+  } catch (error) {
+    console.error("[v0] Error fetching featured villas:", error)
+    // Continue with empty array - homepage will still render
+  }
+  
+  return <PageClient featuredVillas={featuredVillas} />
 }

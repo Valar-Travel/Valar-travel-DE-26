@@ -1,51 +1,47 @@
 import { createBrowserClient } from "@supabase/ssr"
 
-let supabaseClient: ReturnType<typeof createBrowserClient> | null = null
+// Module-level singleton for the browser client
+let browserClient: ReturnType<typeof createBrowserClient> | null = null
+
+const mockClient = {
+  auth: {
+    getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+    signOut: () => Promise.resolve({ error: null }),
+    signInWithPassword: () => Promise.resolve({ data: null, error: new Error("Supabase not configured") }),
+    signUp: () => Promise.resolve({ data: null, error: new Error("Supabase not configured") }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+  },
+  from: () => ({
+    select: () => ({
+      eq: () => ({ single: () => Promise.resolve({ data: null, error: null }) }),
+      order: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }),
+      then: (resolve: any) => resolve({ data: [], error: null }),
+    }),
+    insert: () => Promise.resolve({ data: null, error: null }),
+    update: () => Promise.resolve({ data: null, error: null }),
+    delete: () => Promise.resolve({ data: null, error: null }),
+  }),
+} as any
 
 export function createClient() {
+  // Return existing singleton if available
+  if (browserClient) {
+    return browserClient
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    // Return a mock client that won't cause URL construction errors
-    return {
-      auth: {
-        getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-        signOut: () => Promise.resolve({ error: null }),
-        signInWithPassword: () => Promise.resolve({ data: null, error: new Error("Supabase not configured") }),
-        signUp: () => Promise.resolve({ data: null, error: new Error("Supabase not configured") }),
-      },
-      from: () => ({
-        select: () => Promise.resolve({ data: [], error: null }),
-        insert: () => Promise.resolve({ data: null, error: null }),
-        update: () => Promise.resolve({ data: null, error: null }),
-        delete: () => Promise.resolve({ data: null, error: null }),
-      }),
-    } as any
+  if (!supabaseUrl || !supabaseAnonKey || !supabaseUrl.startsWith("http")) {
+    return mockClient
   }
 
-  if (!supabaseUrl.startsWith("http")) {
-    console.error("[v0] Invalid Supabase URL format, skipping authentication")
-    return {
-      auth: {
-        getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-        signOut: () => Promise.resolve({ error: null }),
-        signInWithPassword: () => Promise.resolve({ data: null, error: new Error("Supabase not configured") }),
-        signUp: () => Promise.resolve({ data: null, error: new Error("Supabase not configured") }),
-      },
-      from: () => ({
-        select: () => Promise.resolve({ data: [], error: null }),
-        insert: () => Promise.resolve({ data: null, error: null }),
-        update: () => Promise.resolve({ data: null, error: null }),
-        delete: () => Promise.resolve({ data: null, error: null }),
-      }),
-    } as any
+  // Only create client in browser environment
+  if (typeof window !== "undefined") {
+    browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
+    return browserClient
   }
 
-  if (supabaseClient) {
-    return supabaseClient
-  }
-
-  supabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
-  return supabaseClient
+  // Return mock for SSR (should use server client instead)
+  return mockClient
 }

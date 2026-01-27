@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import ContactClientPage from "./client-page"
 
-const CONTACT_EMAIL = "sarah@valartravel.de"
+const CONTACT_EMAIL = "hello@valartravel.de"
 const CONTACT_PHONE = "+49 160 92527436"
 const WHATSAPP_LINK = "https://wa.me/4916092527436"
 

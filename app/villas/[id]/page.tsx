@@ -21,7 +21,6 @@ import {
   Calendar,
   MessageSquare,
   ArrowLeft,
-  Home,
   Phone,
   Tv,
   Utensils,
@@ -49,14 +48,17 @@ import {
 import { createClient } from "@/lib/supabase/server"
 import { VillaImageGallery } from "@/components/villa-image-gallery"
 import { InternalLinks, destinationLinks } from "@/components/internal-links"
+import { VillaBookingButton } from "@/components/booking/villa-booking-button"
+import { PropertyJsonLd } from "@/components/seo/property-json-ld"
 
 const CONTACT_PHONE = "+49 160 92527436"
 const WHATSAPP_LINK = "https://wa.me/4916092527436"
-const CONTACT_EMAIL = "sarah@valartravel.de"
+const CONTACT_EMAIL = "hello@valartravel.de"
 const SITE_URL = "https://valartravel.de"
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const villa = await getVillaData(params.id)
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const villa = await getVillaData(id)
 
   if (!villa) {
     return {
@@ -87,7 +89,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     openGraph: {
       title: `${villa.name} | Luxury Villa in ${locationText}`,
       description: description.slice(0, 160),
-      url: `${SITE_URL}/villas/${params.id}`,
+      url: `${SITE_URL}/villas/${id}`,
       siteName: "Valar Travel",
       images: villa.images?.[0]
         ? [
@@ -109,7 +111,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       images: villa.images?.[0] ? [villa.images[0]] : [],
     },
     alternates: {
-      canonical: `${SITE_URL}/villas/${params.id}`,
+      canonical: `${SITE_URL}/villas/${id}`,
     },
   }
 }
@@ -277,8 +279,9 @@ function getSeasonalPricing(basePrice: number, currency: string) {
   ]
 }
 
-export default async function VillaDetailPage({ params }: { params: { id: string } }) {
-  const villa = await getVillaData(params.id)
+export default async function VillaDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const villa = await getVillaData(id)
 
   if (!villa) {
     notFound()
@@ -371,6 +374,25 @@ export default async function VillaDetailPage({ params }: { params: { id: string
 
   return (
     <div className="min-h-screen bg-background">
+      {/* JSON-LD Structured Data for SEO */}
+      <PropertyJsonLd
+        property={{
+          id: villa.id,
+          name: villa.name,
+          description: villa.description,
+          location: villa.location,
+          price_per_night: pricePerNight,
+          currency: currency,
+          bedrooms: bedrooms,
+          bathrooms: bathrooms,
+          max_guests: maxGuests,
+          images: villaImages,
+          amenities: amenities,
+          rating: villa.rating,
+        }}
+        url={`${SITE_URL}/villas/${villa.id}`}
+      />
+
       {/* Breadcrumb Navigation - SEO */}
       <nav aria-label="Breadcrumb" className="container mx-auto px-4 py-3">
         <ol className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -419,6 +441,47 @@ export default async function VillaDetailPage({ params }: { params: { id: string
         <VillaImageGallery images={villaImages} villaName={villa.name} location={villa.location || "Caribbean"} />
       </div>
 
+      {/* Property Stats - Added directly under images */}
+      {(bedrooms || bathrooms || maxGuests) && (
+        <div className="container mx-auto px-4 mb-6">
+          <div className="flex flex-wrap items-center gap-6 md:gap-8 justify-center md:justify-start p-4 bg-slate-50 rounded-lg border border-slate-200">
+            {bedrooms && (
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Bed className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{bedrooms}</p>
+                  <p className="text-sm text-muted-foreground">Bedrooms</p>
+                </div>
+              </div>
+            )}
+            {bathrooms && (
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Bath className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{bathrooms}</p>
+                  <p className="text-sm text-muted-foreground">Bathrooms</p>
+                </div>
+              </div>
+            )}
+            {maxGuests && (
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{maxGuests}</p>
+                  <p className="text-sm text-muted-foreground">Sleeps</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <section className="container mx-auto px-4 py-4 md:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12">
@@ -435,15 +498,6 @@ export default async function VillaDetailPage({ params }: { params: { id: string
               </h1>
 
               <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-3 md:mt-4">
-                {villa.rating && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 bg-amber-50 text-amber-700 border-amber-200 font-medium text-xs md:text-sm"
-                  >
-                    <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-amber-400 text-amber-400" />
-                    {villa.rating}
-                  </Badge>
-                )}
                 <Badge
                   variant="outline"
                   className="gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 font-medium text-xs md:text-sm"
@@ -451,27 +505,6 @@ export default async function VillaDetailPage({ params }: { params: { id: string
                   <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-600" />
                   Verified
                 </Badge>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-2 mt-4 md:mt-5 text-xs md:text-sm text-muted-foreground">
-                {bedrooms && (
-                  <span className="flex items-center gap-1.5 md:gap-2">
-                    <Bed className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-600" />
-                    <span>{bedrooms} Bedrooms</span>
-                  </span>
-                )}
-                {bathrooms && (
-                  <span className="flex items-center gap-1.5 md:gap-2">
-                    <Bath className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-600" />
-                    <span>{bathrooms} Bathrooms</span>
-                  </span>
-                )}
-                {maxGuests && (
-                  <span className="flex items-center gap-1.5 md:gap-2">
-                    <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-600" />
-                    <span>Sleeps {maxGuests}</span>
-                  </span>
-                )}
               </div>
             </div>
 
@@ -498,46 +531,6 @@ export default async function VillaDetailPage({ params }: { params: { id: string
                 </div>
               </div>
             </div>
-
-            {/* Property Overview Cards - Simplified card design */}
-            {(bedrooms || bathrooms || maxGuests) && (
-              <>
-                <Separator className="bg-border/40" />
-                <div>
-                  <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4 md:mb-5 tracking-tight">
-                    Property Details
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-                    {bedrooms && (
-                      <Card className="p-3 md:p-5 text-center bg-slate-50 border-slate-100">
-                        <Bed className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-1.5 md:mb-2 text-emerald-600" />
-                        <p className="text-xl md:text-3xl font-bold">{bedrooms}</p>
-                        <p className="text-xs text-muted-foreground">Bedrooms</p>
-                      </Card>
-                    )}
-                    {bathrooms && (
-                      <Card className="p-3 md:p-5 text-center bg-slate-50 border-slate-100">
-                        <Bath className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-1.5 md:mb-2 text-emerald-600" />
-                        <p className="text-xl md:text-3xl font-bold">{bathrooms}</p>
-                        <p className="text-xs text-muted-foreground">Bathrooms</p>
-                      </Card>
-                    )}
-                    {maxGuests && (
-                      <Card className="p-3 md:p-5 text-center bg-slate-50 border-slate-100">
-                        <Users className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-1.5 md:mb-2 text-emerald-600" />
-                        <p className="text-xl md:text-3xl font-bold">{maxGuests}</p>
-                        <p className="text-xs text-muted-foreground">Guests</p>
-                      </Card>
-                    )}
-                    <Card className="p-3 md:p-5 text-center bg-slate-50 border border-slate-100">
-                      <Home className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-1.5 md:mb-2 text-emerald-600" />
-                      <p className="text-xl md:text-3xl font-bold">Villa</p>
-                      <p className="text-xs text-muted-foreground">Type</p>
-                    </Card>
-                  </div>
-                </div>
-              </>
-            )}
 
             {/* Amenities - Cleaner grid with better spacing */}
             {amenitiesWithIcons.length > 0 && (
@@ -714,8 +707,23 @@ export default async function VillaDetailPage({ params }: { params: { id: string
 
                   {/* CTA Buttons */}
                   <div className="space-y-2.5">
-                    <Button
+                    <VillaBookingButton
+                      villa={{
+                        id: villa.id,
+                        name: villa.name,
+                        location: villa.location || "Caribbean",
+                        pricePerNight: pricePerNight,
+                        currency: currency,
+                        maxGuests: maxGuests || 10,
+                        image: villaImages[0],
+                      }}
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-12 font-semibold"
+                    >
+                      Book Now
+                    </VillaBookingButton>
+                    <Button
+                      variant="outline"
+                      className="w-full h-11 bg-transparent"
                       asChild
                     >
                       <a
@@ -726,12 +734,6 @@ export default async function VillaDetailPage({ params }: { params: { id: string
                         <MessageSquare className="w-4 h-4 mr-2" />
                         WhatsApp Us
                       </a>
-                    </Button>
-                    <Button variant="outline" className="w-full h-11 bg-transparent" asChild>
-                      <Link href="/contact">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Check Availability
-                      </Link>
                     </Button>
                   </div>
 
@@ -792,16 +794,21 @@ export default async function VillaDetailPage({ params }: { params: { id: string
                       <Phone className="w-4 h-4" />
                     </a>
                   </Button>
-                  <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6" asChild>
-                    <a
-                      href={`${WHATSAPP_LINK}?text=${encodeURIComponent(`Hi, I'm interested in ${villa.name}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      WhatsApp
-                    </a>
-                  </Button>
+                  <VillaBookingButton
+                    villa={{
+                      id: villa.id,
+                      name: villa.name,
+                      location: villa.location || "Caribbean",
+                      pricePerNight: pricePerNight,
+                      currency: currency,
+                      maxGuests: maxGuests || 10,
+                      image: villaImages[0],
+                    }}
+                    size="lg"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
+                  >
+                    Book Now
+                  </VillaBookingButton>
                 </div>
               </div>
             </div>

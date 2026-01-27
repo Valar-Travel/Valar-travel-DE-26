@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       usage: {
         projects: savedTrips?.length || 0,
         apiCalls: totalApiCalls,
-        storage: 0, // Placeholder - would calculate actual storage usage
+        storage: 0,
       },
     })
   } catch (error: any) {

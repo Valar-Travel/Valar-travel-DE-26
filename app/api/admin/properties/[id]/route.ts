@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 export const dynamic = "force-dynamic"
 
@@ -13,7 +13,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { id } = await params
     const body = await request.json()
 
-    const supabase = createClient()
+    const supabase = createAdminClient()
 
     const updates: Record<string, any> = { updated_at: new Date().toISOString() }
 
@@ -24,6 +24,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (body.images !== undefined) updates.images = body.images
     if (body.amenities !== undefined) updates.amenities = body.amenities
     if (body.rating !== undefined) updates.rating = body.rating
+    if (body.is_published !== undefined) updates.is_published = body.is_published
+    if (body.is_active !== undefined) updates.is_active = body.is_active
 
     const { data, error } = await supabase
       .from("scraped_luxury_properties")
@@ -60,7 +62,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     const { id } = await params
 
-    const supabase = createClient()
+    const supabase = createAdminClient()
 
     const { error } = await supabase.from("scraped_luxury_properties").delete().eq("id", id)
 

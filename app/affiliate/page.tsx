@@ -104,7 +104,7 @@ export default function AffiliateDisclosurePage() {
               If you have any questions about our affiliate relationships or this disclosure, please contact us at:
               <br />
               <br />
-              Email: affiliates@valartravel.de
+              Email: hello@valartravel.de
               <br />
               Phone: +1 (246) 555-0100
             </p>

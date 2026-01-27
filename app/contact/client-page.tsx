@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Mail, Phone, MapPin, Clock, Building2, Users, Briefcase, CheckCircle } from "lucide-react"
 
-const CONTACT_EMAIL = "sarah@valartravel.de"
+const CONTACT_EMAIL = "hello@valartravel.de"
 const CONTACT_PHONE = "+49 160 92527436"
 const WHATSAPP_LINK = "https://wa.me/4916092527436"
 

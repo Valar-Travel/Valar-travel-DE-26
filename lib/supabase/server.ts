@@ -5,7 +5,9 @@ function createMockClient() {
   const mockQueryBuilder = {
     select: (columns?: string) => mockQueryBuilder,
     eq: (column: string, value: any) => mockQueryBuilder,
+    neq: (column: string, value: any) => mockQueryBuilder,
     ilike: (column: string, pattern: string) => mockQueryBuilder,
+    not: (column: string, operator: string, value: any) => mockQueryBuilder,
     order: (column: string, options?: any) => mockQueryBuilder,
     limit: (count: number) => mockQueryBuilder,
     single: () => Promise.resolve({ data: null, error: null }),
@@ -16,11 +18,15 @@ function createMockClient() {
     select: (columns?: string) => mockQueryBuilder,
     insert: (data: any) => Promise.resolve({ data: null, error: null }),
     update: (data: any) => ({
-      eq: (column: string, value: any) => Promise.resolve({ data: null, error: null }),
+      eq: (column: string, value: any) => ({
+        select: () => Promise.resolve({ data: [], error: null }),
+        then: (resolve: any) => resolve({ data: [], error: null }),
+      }),
     }),
     delete: () => ({
       eq: (column: string, value: any) => Promise.resolve({ data: null, error: null }),
     }),
+    upsert: (data: any) => Promise.resolve({ data: null, error: null }),
   }
 
   return {
@@ -36,23 +42,21 @@ function createMockClient() {
   } as any
 }
 
-export function createClient() {
+export async function createClient() {
   const isBuildTime =
     process.env.NEXT_PHASE === "phase-production-build" ||
     (process.env.NODE_ENV === "production" && !process.env.VERCEL_ENV)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // During build time or when env vars are missing, return mock client
   if (isBuildTime || !supabaseUrl || !supabaseAnonKey) {
-    console.warn("Build time or missing Supabase environment variables, returning mock client")
     return createMockClient()
   }
 
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
 
-    return createServerClient(supabaseUrl, supabaseAnonKey, {
+    const client = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return cookieStore.getAll()
@@ -61,15 +65,15 @@ export function createClient() {
           try {
             cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // Ignore - called from Server Component
           }
         },
       },
     })
+
+    return client
   } catch (error) {
-    console.warn("Failed to create Supabase client, returning mock client:", error)
+    console.warn("Failed to create Supabase client:", error)
     return createMockClient()
   }
 }

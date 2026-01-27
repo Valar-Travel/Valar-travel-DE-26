@@ -4,9 +4,11 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Star, Bed, Bath, Users, Music, Waves, Coffee, Sun } from "lucide-react"
+import { MapPin, Bed, Bath, Users, Music, Waves, Coffee, Sun } from "lucide-react"
 import { UNSPLASH_IMAGES, getImageUrl } from "@/lib/unsplash-images"
 import { createClient } from "@/lib/supabase/server"
+
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Luxury Villas in Jamaica | Beachfront & Hillside Rentals | Valar Travel",
@@ -30,36 +32,33 @@ export const metadata: Metadata = {
   },
 }
 
-const JAMAICA_SOURCE_URLS = [
-  "jamaicavillas.com",
-  "villasjamaica.com",
-  "jamaicaluxuryvillas.com",
-  "tryallclub.com",
-  "roundhilljamaica.com",
-]
-
 async function getJamaicaVillas() {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("scraped_luxury_properties")
-    .select("*")
-    .or(`location.ilike.%jamaica%,${JAMAICA_SOURCE_URLS.map((url) => `source_url.ilike.%${url}%`).join(",")}`)
-    .order("rating", { ascending: false })
-    .limit(12)
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("scraped_luxury_properties")
+      .select("*")
+      .ilike("location", "%jamaica%")
+      .limit(12)
 
-  if (error || !data) return []
+    if (error || !data) return []
 
-  return data.map((prop) => ({
-    id: prop.id,
-    name: prop.name,
-    price: prop.price_per_night || 850,
-    bedrooms: prop.bedrooms || 4,
-    bathrooms: prop.bathrooms || 3,
-    guests: (prop.bedrooms || 4) * 2,
-    image: prop.images?.[0] || getImageUrl(UNSPLASH_IMAGES.jamaica.villa1, 800),
-    rating: prop.rating || 4.8,
-    features: prop.amenities?.slice(0, 4) || ["Pool", "Ocean View", "Staff"],
-  }))
+    return data.map((prop) => ({
+      id: prop.id,
+      name: prop.name,
+      description: prop.description || "",
+      price: prop.price_per_night || 850,
+      bedrooms: prop.bedrooms || 4,
+      bathrooms: prop.bathrooms || 3,
+      guests: prop.max_guests || (prop.bedrooms || 4) * 2,
+      image: prop.images?.[0] || getImageUrl(UNSPLASH_IMAGES.jamaica.villa1, 800),
+      features: prop.amenities?.slice(0, 4) || ["Pool", "Ocean View", "Staff"],
+      rating: prop.rating || 4.5,
+      location: prop.location || "Jamaica",
+    }))
+  } catch {
+    return []
+  }
 }
 
 export default async function JamaicaPage() {
@@ -161,17 +160,16 @@ export default async function JamaicaPage() {
                 <Card key={villa.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-[4/3] relative">
                     <Image src={villa.image || "/placeholder.svg"} alt={villa.name} fill className="object-cover" />
-                    <Badge className="absolute top-4 right-4 bg-white text-gray-900">
-                      <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
-                      {villa.rating}
-                    </Badge>
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                       <MapPin className="w-4 h-4" />
                       Jamaica
                     </div>
-                    <h3 className="text-xl font-bold mb-3">{villa.name}</h3>
+                    <h3 className="text-xl font-bold mb-2">{villa.name}</h3>
+                    {villa.description && (
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{villa.description}</p>
+                    )}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                       <div className="flex items-center gap-1">
                         <Bed className="w-4 h-4" />

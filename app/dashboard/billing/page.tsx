@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic"
 
 export default async function BillingPage() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     if (!supabase || !supabase.auth || typeof supabase.auth.getUser !== "function") {
       console.warn("Supabase auth not available, using fallback")

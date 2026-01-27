@@ -19,7 +19,7 @@ export default function ImpressumPage() {
           <section>
             <h2 className="text-2xl font-bold mb-4">Contact</h2>
             <p>
-              Email: info@valartravel.de
+              Email: hello@valartravel.de
               <br />
               Phone: +1 (246) 555-0100
               <br />

@@ -14,7 +14,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/", "/auth/", "/_next/", "/private/", "/scripts/"],
       },
     ],
-    sitemap: "https://valartravel.de/sitemap.xml",
     host: "https://valartravel.de",
   }
 }

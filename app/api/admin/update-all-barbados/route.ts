@@ -3,13 +3,13 @@ import { NextResponse } from "next/server"
 
 export async function POST() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Update all properties to have location "Barbados"
     const { data, error } = await supabase
       .from("scraped_luxury_properties")
       .update({ location: "Barbados" })
-      .neq("location", "Barbados") // Only update those not already Barbados
+      .neq("location", "Barbados")
       .select("id")
 
     if (error) {
@@ -42,7 +42,7 @@ export async function POST() {
 
 export async function GET() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Get counts by location
     const { data: properties } = await supabase.from("scraped_luxury_properties").select("location")

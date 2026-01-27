@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { type NextRequest, NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     const { searchParams } = new URL(request.url)
     const filter = searchParams.get("filter") || "all"
@@ -20,6 +20,12 @@ export async function GET(request: NextRequest) {
     console.log("[v0] Properties GET - search:", search)
 
     let query = supabase.from("scraped_luxury_properties").select("*").order("created_at", { ascending: false })
+
+    if (filter === "pending") {
+      query = query.or("is_published.is.null,is_published.eq.false")
+    } else if (filter === "published") {
+      query = query.eq("is_published", true)
+    }
 
     // Only apply search filter if it's a real search term (not a URL from scraper)
     if (search && !search.startsWith("http")) {
@@ -58,7 +64,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     const body = await request.json()
 
@@ -103,7 +109,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     // Delete all properties from the table
     const { error } = await supabase

@@ -33,14 +33,15 @@ export const dynamic = "force-dynamic"
 
 const CONTACT_PHONE = "+49 160 92527436"
 const WHATSAPP_LINK = "https://wa.me/4916092527436"
-const CONTACT_EMAIL = "sarah@valartravel.de"
+const CONTACT_EMAIL = "hello@valartravel.de"
 
 type Props = {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const property = await getPropertyBySlug(params.slug)
+  const { slug } = await params
+  const property = await getPropertyBySlug(slug)
 
   if (!property) {
     return {
@@ -75,7 +76,8 @@ async function getPropertyBySlug(slug: string) {
 }
 
 export default async function BarbadosVillaPage({ params }: Props) {
-  const property = await getPropertyBySlug(params.slug)
+  const { slug } = await params
+  const property = await getPropertyBySlug(slug)
 
   if (!property) {
     notFound()

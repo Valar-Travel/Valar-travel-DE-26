@@ -51,6 +51,28 @@ const destinations = [
     startingPrice: 1500,
     highlights: ["Gustavia Harbor", "Designer Shopping", "Gourmet Dining", "Pristine Beaches"],
   },
+  {
+    id: "st-maarten",
+    name: "St. Maarten",
+    slug: "st-maarten",
+    tagline: "Two nations, one paradise island",
+    description: "Dutch-French charm with world-class beaches, dining, and nightlife",
+    image: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80",
+    villas: 8,
+    startingPrice: 900,
+    highlights: ["Maho Beach", "Duty-Free Shopping", "300+ Restaurants", "French & Dutch Culture"],
+  },
+  {
+    id: "antigua",
+    name: "Antigua",
+    slug: "antigua",
+    tagline: "A beach for every day of the year",
+    description: "365 beaches, historic English Harbour, and world-class sailing",
+    image: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&q=80",
+    villas: 6,
+    startingPrice: 800,
+    highlights: ["365 Beaches", "English Harbour", "Nelson's Dockyard", "Sailing Paradise"],
+  },
 ]
 
 export default function DestinationsPage() {
@@ -65,7 +87,7 @@ export default function DestinationsPage() {
           </div>
           <h1 className="text-5xl font-bold mb-6 text-balance">Discover Your Caribbean Paradise</h1>
           <p className="text-xl text-white/90 max-w-3xl mx-auto text-pretty">
-            Four extraordinary islands, each with its own character and charm. From the sophisticated shores of St.
+            Six extraordinary islands, each with its own character and charm. From the sophisticated shores of St.
             Barthélemy to the vibrant culture of Jamaica, find your perfect luxury villa escape.
           </p>
         </div>
@@ -73,7 +95,7 @@ export default function DestinationsPage() {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {destinations.map((destination) => (
               <Card key={destination.id} className="overflow-hidden group hover:shadow-2xl transition-all duration-300">
                 <div className="relative h-80 overflow-hidden">
@@ -81,6 +103,7 @@ export default function DestinationsPage() {
                     src={destination.image || "/placeholder.svg"}
                     alt={destination.name}
                     fill
+                    loading="lazy"
                     className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>

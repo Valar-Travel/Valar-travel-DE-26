@@ -152,7 +152,7 @@ export default function TermsPage() {
             </p>
             <div className="bg-gray-50 p-6 rounded-lg">
               <p className="text-gray-700 mb-2">
-                <strong>Email:</strong> legal@valartravel.de
+                <strong>Email:</strong> hello@valartravel.de
               </p>
               <p className="text-gray-700 mb-2">
                 <strong>Phone:</strong> +1 (555) 123-4567

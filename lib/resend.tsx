@@ -4,7 +4,7 @@ import { Resend } from "resend"
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Company email configuration
-const COMPANY_EMAIL = "sarah@valartravel.de"
+const COMPANY_EMAIL = "hello@valartravel.de"
 const COMPANY_NAME = "Valar Travel"
 const SUPPORT_PHONE = "+49 160 92527436"
 const SITE_URL = "https://valartravel.de"
@@ -729,6 +729,112 @@ export async function sendFAQResponse(data: {
     return { success: true }
   } catch (error) {
     console.error("Error sending FAQ response:", error)
+    return { success: false, error: error instanceof Error ? error.message : "Failed to send email" }
+  }
+}
+
+// Partnership welcome email - sends to Sarah and welcome email to partner
+export async function sendPartnershipEmail(data: {
+  brandName: string
+  contactName: string
+  email: string
+  phone?: string
+  collaborationType: string
+  message: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { brandName, contactName, email, phone, collaborationType, message } = data
+
+    // Send notification to Sarah
+    const notificationContent = `
+      <h2 style="${emailStyles.heading}">New Partnership Inquiry</h2>
+      
+      <div style="${emailStyles.highlight}">
+        <p style="margin: 0;"><strong>Brand:</strong> ${brandName}</p>
+        <p style="margin: 8px 0 0 0;"><strong>Contact:</strong> ${contactName}</p>
+        <p style="margin: 8px 0 0 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #0ea5e9;">${email}</a></p>
+        ${phone ? `<p style="margin: 8px 0 0 0;"><strong>Phone:</strong> <a href="tel:${phone}" style="color: #0ea5e9;">${phone}</a></p>` : ""}
+        <p style="margin: 8px 0 0 0;"><strong>Collaboration Type:</strong> ${collaborationType}</p>
+      </div>
+      
+      <h3 style="color: #0c4a6e; margin-top: 24px;">Partnership Proposal:</h3>
+      <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-top: 12px;">
+        <p style="${emailStyles.text}; margin: 0; white-space: pre-wrap;">${message}</p>
+      </div>
+      
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="mailto:${email}?subject=Re: Partnership Inquiry - ${brandName}" style="${emailStyles.button}">Reply to ${contactName}</a>
+      </p>
+    `
+
+    await resend.emails.send({
+      from: `Valar Travel Partnerships <${COMPANY_EMAIL}>`,
+      to: COMPANY_EMAIL,
+      replyTo: email,
+      subject: `[Partnership Inquiry] ${brandName} - ${collaborationType}`,
+      html: emailWrapper(notificationContent),
+    })
+
+    // Send welcome email to partner
+    const welcomeContent = `
+      <h2 style="${emailStyles.heading}">Thank you for your partnership interest, ${contactName}!</h2>
+      
+      <p style="${emailStyles.text}">
+        I'm thrilled that <strong>${brandName}</strong> is interested in collaborating with Valar Travel. 
+        Your inquiry about <strong>${collaborationType}</strong> has been received, and I'm excited to explore the possibilities.
+      </p>
+      
+      <div style="${emailStyles.highlight}">
+        <p style="margin: 0;"><strong>What Happens Next:</strong></p>
+        <ol style="color: #374151; margin: 10px 0 0 0; padding-left: 20px; line-height: 1.8;">
+          <li><strong>Review:</strong> I'll personally review your partnership proposal</li>
+          <li><strong>Response:</strong> You'll hear back from me within 48 hours</li>
+          <li><strong>Discovery Call:</strong> If there's a good fit, we'll schedule a call to discuss details</li>
+          <li><strong>Collaboration:</strong> Together, we'll create unforgettable luxury experiences</li>
+        </ol>
+      </div>
+      
+      <h3 style="color: #0c4a6e; margin-top: 24px;">Why Partner with Valar Travel?</h3>
+      <ul style="color: #374151; line-height: 1.8;">
+        <li><strong>500+ VIP Guests Annually</strong> - Access to discerning luxury travelers</li>
+        <li><strong>50+ Exclusive Properties</strong> - Premium venues across the Caribbean</li>
+        <li><strong>High-Net-Worth Audience</strong> - Affluent clientele with appreciation for quality</li>
+        <li><strong>Curated Experiences</strong> - Thoughtful integration of brand partnerships</li>
+        <li><strong>Strong Social Presence</strong> - Engaged luxury travel community</li>
+      </ul>
+      
+      <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 8px; margin: 24px 0;">
+        <p style="margin: 0; color: #166534;"><strong>Current Partner Brands:</strong></p>
+        <p style="margin: 8px 0 0 0; color: #15803d;">
+          Dom Pérignon • Leica • NetJets • La Mer • Cartier • Four Seasons • Hermès • Bulgari
+        </p>
+      </div>
+      
+      <p style="${emailStyles.text}">
+        In the meantime, feel free to explore our current collaborations and see how we've worked with luxury brands to create exceptional guest experiences.
+      </p>
+      
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="${SITE_URL}/collaborations" style="${emailStyles.button}">View Our Collaborations</a>
+      </p>
+      
+      <p style="${emailStyles.text}">
+        For urgent matters, please don't hesitate to reach me directly via WhatsApp at 
+        <a href="https://wa.me/4916092527436" style="color: #0ea5e9;">${SUPPORT_PHONE}</a>.
+      </p>
+    `
+
+    await resend.emails.send({
+      from: `Sarah at Valar Travel <${COMPANY_EMAIL}>`,
+      to: email,
+      replyTo: COMPANY_EMAIL,
+      subject: `Welcome ${brandName} - Partnership Inquiry Received | Valar Travel`,
+      html: emailWrapper(welcomeContent, "Thank you for your partnership interest in Valar Travel"),
+    })
+
+    return { success: true }
+  } catch (error) {
+    console.error("Error sending partnership email:", error)
     return { success: false, error: error instanceof Error ? error.message : "Failed to send email" }
   }
 }

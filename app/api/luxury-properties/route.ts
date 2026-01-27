@@ -9,6 +9,8 @@ const DESTINATION_SOURCE_URLS: Record<string, string[]> = {
   jamaica: ["jamaicavillas.com", "villasinjamaica.com"],
   "st-lucia": ["stluciavillas.com", "villasinstlucia.com"],
   "st-barthelemy": ["stbarthvillas.com", "wimco.com"],
+  "st-maarten": ["stmaartenvillasrentals.com", "villasstmaarten.com"],
+  antigua: ["antiguavillas.com", "villasantigua.com"],
 }
 
 export async function GET(request: NextRequest) {
