@@ -16,8 +16,6 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
-    console.log("[v0] Admin login attempt for:", email)
-
     if (!email || !password) {
       return NextResponse.json({ success: false, error: "Email and password required" }, { status: 400 })
     }
@@ -32,10 +30,7 @@ export async function POST(request: NextRequest) {
       .eq("is_active", true)
       .single()
 
-    console.log("[v0] User query result:", { user: user?.email, error: userError?.message })
-
     if (userError || !user) {
-      console.log("[v0] User not found or error:", userError?.message || "No user")
       return NextResponse.json({ 
         success: false, 
         error: userError?.message === "JSON object requested, multiple (or no) rows returned" 
@@ -45,23 +40,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    console.log("[v0] Verifying password for user:", user.email)
-    
-    // Temporary master password for initial setup - REMOVE AFTER SETTING UP PROPER PASSWORD
-    const TEMP_MASTER_PASSWORD = "ValarTemp2026!"
-    const isTempPassword = password === TEMP_MASTER_PASSWORD
-    
-    const isValid = isTempPassword || await bcrypt.compare(password, user.password_hash)
-    console.log("[v0] Password valid:", isValid, "isTempPassword:", isTempPassword)
+    const isValid = await bcrypt.compare(password, user.password_hash)
     if (!isValid) {
       return NextResponse.json({ success: false, error: "Invalid email or password" }, { status: 401 })
-    }
-    
-    // If using temp password, generate and log the proper hash for the user to update
-    if (isTempPassword) {
-      const newHash = await bcrypt.hash("Admin123!", 10)
-      console.log("[v0] IMPORTANT: Update your password hash in Supabase with this SQL:")
-      console.log(`UPDATE admin_users SET password_hash = '${newHash}' WHERE email = '${email}';`)
     }
 
     // Create session token
@@ -84,10 +65,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (sessionError) {
-      console.error("[v0] Session creation error:", sessionError)
-      return NextResponse.json({ success: false, error: "Failed to create session: " + sessionError.message }, { status: 500 })
+      console.error("Session creation error:", sessionError)
+      return NextResponse.json({ success: false, error: "Failed to create session" }, { status: 500 })
     }
-    console.log("[v0] Session created successfully")
 
     // Update last login
     await supabase.from("admin_users").update({ last_login: new Date().toISOString() }).eq("id", user.id)
