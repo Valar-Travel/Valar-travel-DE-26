@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import {
   Building2,
   CalendarCheck,
@@ -12,6 +13,9 @@ import {
   DollarSign,
   ArrowRight,
   Loader2,
+  Database,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react"
 
 interface DashboardStats {
@@ -28,6 +32,8 @@ interface DashboardStats {
 export function AdminDashboardClient({ userName }: { userName: string }) {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [migrationStatus, setMigrationStatus] = useState<"idle" | "running" | "success" | "error">("idle")
+  const [migrationMessage, setMigrationMessage] = useState("")
 
   useEffect(() => {
     fetchStats()
@@ -44,6 +50,30 @@ export function AdminDashboardClient({ userName }: { userName: string }) {
       console.error("Failed to fetch stats:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const runMigration = async () => {
+    setMigrationStatus("running")
+    setMigrationMessage("")
+    try {
+      const response = await fetch("/api/admin/run-migration", {
+        method: "POST",
+        headers: {
+          "x-admin-auth": "valar-admin-logged-in",
+        },
+      })
+      const data = await response.json()
+      if (response.ok && data.success) {
+        setMigrationStatus("success")
+        setMigrationMessage(data.message || "Database schema updated successfully")
+      } else {
+        setMigrationStatus("error")
+        setMigrationMessage(data.error || "Migration failed")
+      }
+    } catch (error) {
+      setMigrationStatus("error")
+      setMigrationMessage(error instanceof Error ? error.message : "Migration failed")
     }
   }
 
@@ -176,6 +206,56 @@ export function AdminDashboardClient({ userName }: { userName: string }) {
             <div className="p-4 bg-neutral-100 rounded-lg">
               <p className="text-sm text-neutral-600 font-medium">Conversion Rate</p>
               <p className="text-2xl font-bold text-neutral-900 mt-1">3.2%</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Database Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-blue-600" />
+            Database Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-neutral-900">Bookings Table Schema</p>
+              <p className="text-sm text-neutral-500 mt-1">
+                Update the bookings table to support deposit payments (30%, 50%, 70% tiers)
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {migrationStatus === "success" && (
+                <span className="flex items-center gap-1 text-sm text-emerald-600">
+                  <CheckCircle className="h-4 w-4" />
+                  Updated
+                </span>
+              )}
+              {migrationStatus === "error" && (
+                <span className="flex items-center gap-1 text-sm text-red-600">
+                  <AlertCircle className="h-4 w-4" />
+                  {migrationMessage}
+                </span>
+              )}
+              <Button
+                onClick={runMigration}
+                disabled={migrationStatus === "running"}
+                variant={migrationStatus === "success" ? "outline" : "default"}
+              >
+                {migrationStatus === "running" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Running...
+                  </>
+                ) : migrationStatus === "success" ? (
+                  "Run Again"
+                ) : (
+                  "Update Schema"
+                )}
+              </Button>
             </div>
           </div>
         </CardContent>
