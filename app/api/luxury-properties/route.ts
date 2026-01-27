@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
       }
       if (maxPrice < 100000) {
         query = query.or(`price_per_night.lte.${maxPrice},price_per_night.is.null`)
+      }
 
       if (location && location !== "all") {
         const normalizedLocation = location.toLowerCase().replace(/[^a-z]/g, "")

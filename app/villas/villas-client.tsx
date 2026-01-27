@@ -106,7 +106,17 @@ export default function VillasClientPage() {
       filtered = filtered.filter((villa) => villa.bedrooms >= Number.parseInt(bedrooms))
     }
 
-    filtered = filtered.filter((villa) => villa.price >= priceRange[0] && villa.price <= priceRange[1])
+    // Only filter by price if user has modified the default range
+    // Include properties with price 0 (contact for pricing) unless user explicitly filtered them out
+    if (priceRange[0] > 0 || priceRange[1] < 10000) {
+      filtered = filtered.filter((villa) => {
+        // Always include properties with no price (contact for pricing) unless min price is set
+        if (villa.price === 0 || villa.price === null) {
+          return priceRange[0] === 0
+        }
+        return villa.price >= priceRange[0] && villa.price <= priceRange[1]
+      })
+    }
 
     switch (sortBy) {
       case "price-low":
@@ -146,7 +156,11 @@ export default function VillasClientPage() {
   }
 
   const hasActiveFilters =
-    searchQuery !== "" || bedrooms !== "all" || destination !== "all" || priceRange[0] > 0 || priceRange[1] < 10000
+    searchQuery !== "" || 
+    bedrooms !== "all" || 
+    destination !== "all" || 
+    priceRange[0] > 0 || 
+    priceRange[1] < 10000
 
   return (
     <div className="min-h-screen bg-background">
