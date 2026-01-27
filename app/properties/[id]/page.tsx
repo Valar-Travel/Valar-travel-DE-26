@@ -7,6 +7,10 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
   MapPin,
+  Star,
+  Bed,
+  Bath,
+  Users,
   Wifi,
   Waves,
   UtensilsCrossed,
@@ -14,12 +18,7 @@ import {
   Wind,
   Dumbbell,
   Sparkles,
-  Calendar,
   MessageSquare,
-  Home,
-  Bed,
-  Bath,
-  Users,
   ArrowLeft,
   Phone,
   Tv,
@@ -44,20 +43,188 @@ import {
   Headphones,
   CalendarDays,
   Info,
-  Star,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { VillaImageGallery } from "@/components/villa-image-gallery"
-import { PropertyJsonLd } from "@/components/seo/property-json-ld"
-import { VillaBookingButton } from "@/components/booking/villa-booking-button"
 import { InternalLinks, destinationLinks } from "@/components/internal-links"
-
-export const dynamic = "force-dynamic"
+import { VillaBookingButton } from "@/components/booking/villa-booking-button"
+import { PropertyJsonLd } from "@/components/seo/property-json-ld"
 
 const CONTACT_PHONE = "+49 160 92527436"
 const WHATSAPP_LINK = "https://wa.me/4916092527436"
 const CONTACT_EMAIL = "hello@valartravel.de"
 const SITE_URL = "https://valartravel.de"
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const property = await getPropertyData(id)
+
+  if (!property) {
+    return {
+      title: "Property Not Found | Valar Travel",
+      description:
+        "The requested luxury property could not be found. Browse our collection of handpicked Caribbean properties.",
+    }
+  }
+
+  const bedroomText = property.bedrooms ? `${property.bedrooms} bedroom` : ""
+  const locationText = property.location || "Caribbean"
+  const priceText = property.price_per_night ? `from $${property.price_per_night}/night` : ""
+  const amenitiesText = property.amenities?.slice(0, 3).join(", ") || ""
+
+  const description = `${property.name} - ${bedroomText ? `Luxurious ${bedroomText} property in ${locationText}` : `Exclusive luxury property in ${locationText}`}${priceText ? ` ${priceText}` : ""}. ${amenitiesText ? `Features: ${amenitiesText}.` : ""} Book your Caribbean dream escape with Valar Travel's personalized concierge service.`
+
+  return {
+    title: `${property.name} | Luxury Property in ${locationText} | Valar Travel`,
+    description: description.slice(0, 160),
+    keywords: [
+      property.name,
+      `${locationText} property`,
+      "luxury property rental",
+      "Caribbean vacation",
+      "private villa",
+      ...(property.amenities?.slice(0, 5) || []),
+    ],
+    openGraph: {
+      title: `${property.name} | Luxury Property in ${locationText}`,
+      description: description.slice(0, 160),
+      url: `${SITE_URL}/properties/${id}`,
+      siteName: "Valar Travel",
+      images: property.images?.[0]
+        ? [
+            {
+              url: property.images[0],
+              width: 1200,
+              height: 630,
+              alt: `${property.name} - Luxury property exterior view in ${locationText}`,
+            },
+          ]
+        : [],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${property.name} | Valar Travel`,
+      description: description.slice(0, 160),
+      images: property.images?.[0] ? [property.images[0]] : [],
+    },
+    alternates: {
+      canonical: `${SITE_URL}/properties/${id}`,
+    },
+  }
+}
+
+async function getPropertyData(id: string) {
+  const supabase = await createClient()
+
+  // 1. Try to find by UUID in scraped_luxury_properties
+  if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    const { data: scrapedProperty } = await supabase
+      .from("scraped_luxury_properties")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle()
+
+    if (scrapedProperty) {
+      return scrapedProperty
+    }
+  }
+
+  // 2. Try to find by slug in scraped_luxury_properties
+  const { data: propertyBySlug } = await supabase
+    .from("scraped_luxury_properties")
+    .select("*")
+    .ilike("name", `%${id.replace(/-/g, " ")}%`)
+    .maybeSingle()
+
+  if (propertyBySlug) return propertyBySlug
+
+  // 3. Try villas table by slug
+  const { data: villaFromVillas } = await supabase.from("villas").select("*").eq("slug", id).maybeSingle()
+
+  if (villaFromVillas) return villaFromVillas
+
+  // 4. Try by numeric ID in villas table
+  if (!isNaN(Number(id))) {
+    const { data: villaById } = await supabase.from("villas").select("*").eq("id", Number(id)).maybeSingle()
+
+    if (villaById) return villaById
+  }
+
+  return null
+}
+
+function extractAmenitiesFromDescription(description: string): string[] {
+  const amenityKeywords = [
+    // Pool & Water
+    { keywords: ["pool", "swimming pool", "infinity pool", "plunge pool"], label: "Private Pool" },
+    { keywords: ["jacuzzi", "hot tub", "whirlpool"], label: "Jacuzzi/Hot Tub" },
+    { keywords: ["beach access", "beach club", "beachfront"], label: "Beach Access" },
+
+    // Climate & Comfort
+    { keywords: ["air conditioning", "a/c", "ac", "air-conditioning", "climate control"], label: "Air Conditioning" },
+    { keywords: ["ceiling fan", "fans"], label: "Ceiling Fans" },
+    { keywords: ["heating", "heated"], label: "Heating" },
+
+    // Kitchen & Dining
+    {
+      keywords: ["full kitchen", "fully equipped kitchen", "gourmet kitchen", "modern kitchen"],
+      label: "Full Kitchen",
+    },
+    { keywords: ["chef", "private chef", "chef service"], label: "Private Chef Available" },
+    { keywords: ["bbq", "barbecue", "grill"], label: "BBQ/Grill" },
+    { keywords: ["dishwasher"], label: "Dishwasher" },
+    { keywords: ["coffee maker", "espresso", "nespresso"], label: "Coffee Maker" },
+
+    // Entertainment
+    { keywords: ["wifi", "wi-fi", "internet", "high-speed internet"], label: "High-Speed WiFi" },
+    { keywords: ["tv", "television", "smart tv", "cable tv", "satellite"], label: "Smart TV" },
+    { keywords: ["sound system", "sonos", "bluetooth speaker"], label: "Sound System" },
+    { keywords: ["game room", "games", "billiards", "pool table"], label: "Game Room" },
+    { keywords: ["home theater", "cinema", "movie room"], label: "Home Theater" },
+
+    // Outdoor & Views
+    { keywords: ["ocean view", "sea view", "water view", "oceanfront"], label: "Ocean View" },
+    { keywords: ["garden", "tropical garden", "landscaped"], label: "Tropical Garden" },
+    { keywords: ["terrace", "patio", "deck", "balcony", "veranda"], label: "Outdoor Terrace" },
+    { keywords: ["gazebo", "pergola"], label: "Gazebo" },
+    { keywords: ["sun lounger", "sun bed", "loungers"], label: "Sun Loungers" },
+
+    // Services
+    { keywords: ["housekeeping", "daily housekeeping", "maid service", "cleaning"], label: "Daily Housekeeping" },
+    { keywords: ["concierge", "butler"], label: "Concierge Service" },
+    { keywords: ["laundry", "washer", "dryer", "washing machine"], label: "Laundry Facilities" },
+    { keywords: ["spa", "massage", "wellness"], label: "Spa Services" },
+
+    // Sports & Fitness
+    { keywords: ["gym", "fitness", "exercise", "workout"], label: "Fitness Center" },
+    { keywords: ["tennis", "tennis court"], label: "Tennis Court" },
+    { keywords: ["golf", "golf course", "golf access"], label: "Golf Access" },
+    { keywords: ["kayak", "paddleboard", "water sports"], label: "Water Sports Equipment" },
+
+    // Safety & Security
+    { keywords: ["security", "alarm", "gated", "safe"], label: "Security System" },
+    { keywords: ["parking", "garage", "car park"], label: "Private Parking" },
+
+    // Family & Pets
+    { keywords: ["child", "kids", "family friendly", "crib", "high chair"], label: "Family Friendly" },
+    { keywords: ["pet friendly", "pets allowed", "dog friendly"], label: "Pet Friendly" },
+  ]
+
+  const foundAmenities: string[] = []
+  const lowerDescription = description.toLowerCase()
+
+  for (const amenity of amenityKeywords) {
+    if (amenity.keywords.some((keyword) => lowerDescription.includes(keyword))) {
+      if (!foundAmenities.includes(amenity.label)) {
+        foundAmenities.push(amenity.label)
+      }
+    }
+  }
+
+  return foundAmenities
+}
 
 function getSeasonalPricing(basePrice: number, currency: string) {
   const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$"
@@ -111,78 +278,6 @@ function getSeasonalPricing(basePrice: number, currency: string) {
   ]
 }
 
-async function getPropertyData(id: string) {
-  const supabase = await createClient()
-
-  const { data: property, error } = await supabase.from("scraped_luxury_properties").select("*").eq("id", id).single()
-
-  if (error) {
-    console.error("[v0] Error fetching property:", error)
-    return null
-  }
-
-  return property
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params
-  const property = await getPropertyData(id)
-
-  if (!property) {
-    return {
-      title: "Property Not Found | Valar Travel",
-      description: "The requested luxury property could not be found. Browse our collection of handpicked Caribbean properties.",
-    }
-  }
-
-  const bedroomText = property.bedrooms ? `${property.bedrooms} bedroom` : ""
-  const locationText = property.location || "Caribbean"
-  const priceText = property.price_per_night ? `from $${property.price_per_night}/night` : ""
-  const amenitiesText = property.amenities?.slice(0, 3).join(", ") || ""
-
-  const description = `${property.name} - ${bedroomText ? `Luxurious ${bedroomText} property in ${locationText}` : `Exclusive luxury property in ${locationText}`}${priceText ? ` ${priceText}` : ""}. ${amenitiesText ? `Features: ${amenitiesText}.` : ""} Book your Caribbean dream escape with Valar Travel's personalized concierge service.`
-
-  return {
-    title: `${property.name} | Luxury Property in ${locationText} | Valar Travel`,
-    description: description.slice(0, 160),
-    keywords: [
-      property.name,
-      `${locationText} property`,
-      "luxury property rental",
-      "Caribbean vacation",
-      "private villa",
-      ...(property.amenities?.slice(0, 5) || []),
-    ],
-    openGraph: {
-      title: `${property.name} | Luxury Property in ${locationText}`,
-      description: description.slice(0, 160),
-      url: `${SITE_URL}/properties/${id}`,
-      siteName: "Valar Travel",
-      images: property.images?.[0]
-        ? [
-            {
-              url: property.images[0],
-              width: 1200,
-              height: 630,
-              alt: `${property.name} - Luxury property in ${locationText}`,
-            },
-          ]
-        : [],
-      locale: "en_US",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${property.name} | Valar Travel`,
-      description: description.slice(0, 160),
-      images: property.images?.[0] ? [property.images[0]] : [],
-    },
-    alternates: {
-      canonical: `${SITE_URL}/properties/${id}`,
-    },
-  }
-}
-
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const property = await getPropertyData(id)
@@ -202,12 +297,11 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     // Climate
     "Air Conditioning": Wind,
     "Ceiling Fans": Fan,
-    Heating: Sun,
+    Heating: Flame,
 
     // Kitchen
     "Full Kitchen": Utensils,
     "Private Chef Available": UtensilsCrossed,
-    "Chef Service": UtensilsCrossed,
     "BBQ/Grill": Flame,
     Dishwasher: Sparkles,
     "Coffee Maker": Coffee,
@@ -230,7 +324,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     // Services
     "Daily Housekeeping": Sparkles,
     Housekeeping: Sparkles,
-    "Concierge Service": Award,
+    "Concierge Service": Star,
     "Laundry Facilities": Shirt,
     "Spa Services": Sparkles,
 
@@ -250,23 +344,28 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     "Pet Friendly": Dog,
   }
 
-  const pricePerNight = property.price_per_night || 0
-  const currency = property.currency || "USD"
+  let amenities = property.amenities || []
+  if (Array.isArray(amenities) && amenities.length === 0 && property.description) {
+    amenities = extractAmenitiesFromDescription(property.description)
+  }
 
-  const amenitiesWithIcons = (property.amenities || []).map((amenity: string) => ({
-    icon: amenityIcons[amenity] || Sparkles,
+  const amenitiesWithIcons = (Array.isArray(amenities) ? amenities : []).map((amenity: string) => ({
+    icon: amenityIcons[amenity] || amenityIcons[amenity?.toLowerCase()] || Sparkles,
     label: amenity,
   }))
 
   const propertyImages =
-    property.images && property.images.length > 0
+    property.images && Array.isArray(property.images) && property.images.length > 0
       ? property.images
       : [
-          `/placeholder.svg?height=600&width=800&query=${encodeURIComponent(property.name + " luxury villa")}`,
-          `/placeholder.svg?height=400&width=600&query=${encodeURIComponent(property.name + " bedroom")}`,
-          `/placeholder.svg?height=400&width=600&query=${encodeURIComponent(property.name + " kitchen")}`,
-          `/placeholder.svg?height=400&width=600&query=${encodeURIComponent(property.name + " outdoor")}`,
+          `/placeholder.svg?height=600&width=800&query=${encodeURIComponent(property.name + " luxury villa exterior")}`,
+          `/placeholder.svg?height=400&width=600&query=${encodeURIComponent(property.name + " bedroom suite")}`,
+          `/placeholder.svg?height=400&width=600&query=${encodeURIComponent(property.name + " modern kitchen")}`,
+          `/placeholder.svg?height=400&width=600&query=${encodeURIComponent(property.name + " pool terrace")}`,
         ]
+
+  const pricePerNight = property.price_per_night || property.price || 0
+  const currency = property.currency || "USD"
 
   const bedrooms = property.bedrooms || null
   const bathrooms = property.bathrooms || null
@@ -281,18 +380,19 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           name: property.name,
           description: property.description,
           location: property.location,
-          price_per_night: property.price_per_night,
-          currency: property.currency,
+          price_per_night: pricePerNight,
+          currency: currency,
           bedrooms: bedrooms,
           bathrooms: bathrooms,
           max_guests: maxGuests,
           images: propertyImages,
-          amenities: property.amenities,
+          amenities: amenities,
           rating: property.rating,
         }}
         url={`${SITE_URL}/properties/${property.id}`}
       />
 
+      {/* Breadcrumb Navigation - SEO */}
       <nav aria-label="Breadcrumb" className="container mx-auto px-4 py-3">
         <ol className="flex items-center gap-2 text-sm text-muted-foreground">
           <li>
@@ -306,11 +406,25 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
               Properties
             </Link>
           </li>
+          {property.location && (
+            <>
+              <li>/</li>
+              <li>
+                <Link
+                  href={`/destinations/${property.location.toLowerCase().replace(/\s+/g, "-")}`}
+                  className="hover:text-foreground transition-colors"
+                >
+                  {property.location}
+                </Link>
+              </li>
+            </>
+          )}
           <li>/</li>
           <li className="text-foreground font-medium truncate max-w-[200px]">{property.name}</li>
         </ol>
       </nav>
 
+      {/* Back Link */}
       <div className="container mx-auto px-4 pb-4">
         <Link
           href="/villas"
@@ -321,14 +435,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         </Link>
       </div>
 
+      {/* Image Gallery - pass location for better alt text */}
       <div className="container mx-auto px-4 mb-6 md:mb-8">
-        <VillaImageGallery
-          images={propertyImages}
-          villaName={property.name}
-          location={property.location || "Caribbean"}
-        />
+        <VillaImageGallery images={propertyImages} villaName={property.name} location={property.location || "Caribbean"} />
       </div>
 
+      {/* Property Stats - Added directly under images */}
       {(bedrooms || bathrooms || maxGuests) && (
         <div className="container mx-auto px-4 mb-6">
           <div className="flex flex-wrap items-center gap-6 md:gap-8 justify-center md:justify-start p-4 bg-slate-50 rounded-lg border border-slate-200">
@@ -369,69 +481,85 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         </div>
       )}
 
-      {/* Property Details */}
-      <section className="container mx-auto px-4 py-4 md:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main Content */}
+      <section className="container mx-auto px-4 py-4 md:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Header */}
+          <div className="lg:col-span-2 space-y-6 md:space-y-10">
+            {/* Header - Cleaner typography */}
             <div>
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <MapPin className="w-4 h-4" />
-                {property.location}
+              <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mb-2">
+                <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-600" />
+                <span className="uppercase tracking-widest font-medium">{property.location || "Caribbean"}</span>
               </div>
-              <h1 className="text-4xl font-bold mb-4">{property.name}</h1>
-              <div className="flex items-center gap-6 text-lg flex-wrap">
-                <div className="flex items-center gap-2">
-                  <Home className="w-5 h-5 text-muted-foreground" />
-                  <span>Luxury Property</span>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-balance leading-tight tracking-tight">
+                {property.name}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-3 md:mt-4">
+                <Badge
+                  variant="outline"
+                  className="gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 font-medium text-xs md:text-sm"
+                >
+                  <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-600" />
+                  Verified
+                </Badge>
+              </div>
+            </div>
+
+            <Separator className="bg-border/40" />
+
+            {/* Description - Improved readability with better typography */}
+            <div>
+              <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4 md:mb-5 tracking-tight">
+                About This Property
+              </h2>
+              <div className="prose prose-sm md:prose-lg max-w-none">
+                <div className="text-muted-foreground leading-relaxed space-y-3 md:space-y-4">
+                  {(property.description || "Experience luxury Caribbean living at this stunning property.")
+                    .split(/\n\n|\n/)
+                    .filter((p: string) => p.trim())
+                    .map((paragraph: string, idx: number) => (
+                      <p
+                        key={idx}
+                        className="text-sm md:text-base lg:text-lg leading-6 md:leading-7 lg:leading-8 text-pretty"
+                      >
+                        {paragraph.trim()}
+                      </p>
+                    ))}
                 </div>
               </div>
             </div>
 
-            <Separator />
-
-            {/* Description */}
-            <div>
-              <h2 className="text-2xl font-bold mb-4">About This Property</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {property.description || "Luxury Caribbean property with stunning views and world-class amenities."}
-              </p>
-            </div>
-
-            <Separator />
-
-            {/* Amenities */}
+            {/* Amenities - Cleaner grid with better spacing */}
             {amenitiesWithIcons.length > 0 && (
               <>
+                <Separator className="bg-border/40" />
                 <div>
-                  <h2 className="text-2xl font-bold mb-4">Amenities</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {amenitiesWithIcons.map((amenity: any, idx: number) => (
-                      <div key={idx} className="flex items-center gap-3">
-                        <amenity.icon className="w-5 h-5 text-green-700" />
-                        <span>{amenity.label}</span>
-                      </div>
-                    ))}
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4 md:mb-5 tracking-tight">
+                    Amenities & Features
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+                    {amenitiesWithIcons.map((amenity: { icon: any; label: string }, idx: number) => {
+                      const Icon = amenity.icon
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2.5 md:gap-3 p-2.5 md:p-4 rounded-lg bg-slate-50 border border-slate-100"
+                        >
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                            <Icon className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                          </div>
+                          <span className="text-xs md:text-sm font-medium leading-tight">{amenity.label}</span>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
-                <Separator />
               </>
             )}
 
-            {/* Source Link */}
-            {property.source_url && (
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">View more details about this property</p>
-                <Button asChild variant="outline" size="sm">
-                  <Link href={property.source_url} target="_blank" rel="noopener noreferrer">
-                    View Original Listing
-                  </Link>
-                </Button>
-              </div>
-            )}
-
-            {/* Seasonal Pricing */}
+            {/* Seasonal Pricing - Cleaner table-like design */}
             {pricePerNight > 0 && (
               <>
                 <Separator className="bg-border/40" />
@@ -490,7 +618,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
               </>
             )}
 
-            {/* Why Book With Us */}
+            {/* Why Book With Us - Simplified benefits section */}
             <Separator className="bg-border/40" />
             <div>
               <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4 md:mb-5 tracking-tight">
@@ -524,7 +652,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             </div>
           </div>
 
-          {/* Booking Sidebar */}
+          {/* Booking Sidebar - Sticky on mobile at bottom */}
           <div className="lg:col-span-1">
             {/* Desktop sidebar */}
             <div className="hidden lg:block sticky top-24">
