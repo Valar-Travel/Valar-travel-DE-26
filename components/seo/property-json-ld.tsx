@@ -41,7 +41,6 @@ export function PropertyJsonLd({ property, url }: PropertyJsonLdProps) {
         ratingValue: property.rating,
         bestRating: 5,
         worstRating: 1,
-        ratingCount: Math.floor(Math.random() * 50) + 10, // Placeholder - replace with real count
       },
     }),
     amenityFeature: (property.amenities || []).map((amenity) => ({
