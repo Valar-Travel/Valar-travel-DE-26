@@ -16,13 +16,13 @@ function SignUpForm() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
   const router = useRouter()
-  const supabase = createClient()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setMessage("")
 
+    const supabase = createClient()
     const { error } = await supabase.auth.signUp({
       email,
       password,

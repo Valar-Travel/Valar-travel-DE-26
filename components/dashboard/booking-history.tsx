@@ -22,13 +22,13 @@ interface SavedTrip {
 export function BookingHistory({ userId }: { userId: string }) {
   const [trips, setTrips] = useState<SavedTrip[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
   useEffect(() => {
     fetchTrips()
   }, [userId])
 
   const fetchTrips = async () => {
+    const supabase = createClient()
     const { data, error } = await supabase
       .from("saved_trips")
       .select("*")
@@ -42,6 +42,7 @@ export function BookingHistory({ userId }: { userId: string }) {
   }
 
   const deleteTrip = async (tripId: string) => {
+    const supabase = createClient()
     const { error } = await supabase.from("saved_trips").delete().eq("id", tripId)
 
     if (!error) {

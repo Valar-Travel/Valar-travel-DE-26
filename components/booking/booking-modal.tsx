@@ -30,9 +30,9 @@ export function BookingModal({ isOpen, onClose, deal }: BookingModalProps) {
   const [guests, setGuests] = useState(2)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
-  const supabase = createClient()
 
   const handleBooking = async () => {
+    const supabase = createClient()
     setLoading(true)
     setMessage("")
 
