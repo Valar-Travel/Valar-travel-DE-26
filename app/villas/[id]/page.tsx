@@ -56,8 +56,9 @@ const WHATSAPP_LINK = "https://wa.me/4916092527436"
 const CONTACT_EMAIL = "hello@valartravel.de"
 const SITE_URL = "https://valartravel.de"
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const villa = await getVillaData(params.id)
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const villa = await getVillaData(id)
 
   if (!villa) {
     return {
@@ -88,7 +89,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     openGraph: {
       title: `${villa.name} | Luxury Villa in ${locationText}`,
       description: description.slice(0, 160),
-      url: `${SITE_URL}/villas/${params.id}`,
+      url: `${SITE_URL}/villas/${id}`,
       siteName: "Valar Travel",
       images: villa.images?.[0]
         ? [
@@ -110,7 +111,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       images: villa.images?.[0] ? [villa.images[0]] : [],
     },
     alternates: {
-      canonical: `${SITE_URL}/villas/${params.id}`,
+      canonical: `${SITE_URL}/villas/${id}`,
     },
   }
 }
@@ -278,8 +279,9 @@ function getSeasonalPricing(basePrice: number, currency: string) {
   ]
 }
 
-export default async function VillaDetailPage({ params }: { params: { id: string } }) {
-  const villa = await getVillaData(params.id)
+export default async function VillaDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const villa = await getVillaData(id)
 
   if (!villa) {
     notFound()

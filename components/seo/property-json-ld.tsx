@@ -50,9 +50,9 @@ export function PropertyJsonLd({ property, url }: PropertyJsonLdProps) {
       value: true,
     })),
     numberOfRooms: property.bedrooms || undefined,
-    ...(property.max_guests || property.guests) && {
+    ...((property.max_guests || property.guests) ? {
       maximumAttendeeCapacity: property.max_guests || property.guests,
-    },
+    } : {}),
   }
 
   // Offer schema for pricing

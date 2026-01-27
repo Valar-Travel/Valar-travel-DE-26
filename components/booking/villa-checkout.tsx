@@ -225,7 +225,7 @@ export function VillaCheckout({ isOpen, onClose, villa }: VillaCheckoutProps) {
               <EmbeddedCheckoutProvider
                 stripe={stripePromise}
                 options={{ 
-                  clientSecret: startCheckout,
+                  fetchClientSecret: startCheckout,
                   onComplete: () => setStep("success")
                 }}
               >

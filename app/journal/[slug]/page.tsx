@@ -35,8 +35,9 @@ async function getRelatedPosts(currentSlug: string, category: string) {
   return posts.filter((post: any) => post.slug !== currentSlug).slice(0, 3)
 }
 
-export default async function JournalPostPage({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug)
+export default async function JournalPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const post = await getPost(slug)
 
   if (!post) {
     notFound()

@@ -44,8 +44,9 @@ async function getPropertyData(id: string) {
   return property
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const property = await getPropertyData(params.id)
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const property = await getPropertyData(id)
 
   if (!property) {
     return {
@@ -75,7 +76,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     openGraph: {
       title: `${property.name} | Luxury Property in ${locationText}`,
       description: description.slice(0, 160),
-      url: `${SITE_URL}/properties/${params.id}`,
+      url: `${SITE_URL}/properties/${id}`,
       siteName: "Valar Travel",
       images: property.images?.[0]
         ? [
@@ -97,13 +98,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       images: property.images?.[0] ? [property.images[0]] : [],
     },
     alternates: {
-      canonical: `${SITE_URL}/properties/${params.id}`,
+      canonical: `${SITE_URL}/properties/${id}`,
     },
   }
 }
 
-export default async function PropertyDetailPage({ params }: { params: { id: string } }) {
-  const property = await getPropertyData(params.id)
+export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const property = await getPropertyData(id)
 
   if (!property) {
     notFound()
