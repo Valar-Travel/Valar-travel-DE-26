@@ -20,7 +20,6 @@ export function AccountSettings({ user }: AccountSettingsProps) {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const supabase = createClient()
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,7 +30,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
     }
 
     setLoading(true)
-
+    const supabase = createClient()
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     })

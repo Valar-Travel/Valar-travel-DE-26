@@ -21,12 +21,12 @@ export function ProfileSettings({ user, profile }: ProfileSettingsProps) {
   const [loading, setLoading] = useState(false)
   const [displayName, setDisplayName] = useState(profile?.display_name || "")
   const [bio, setBio] = useState(profile?.bio || "")
-  const supabase = createClient()
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
+    const supabase = createClient()
     const { error } = await supabase.from("profiles").upsert({
       id: user.id,
       display_name: displayName,
