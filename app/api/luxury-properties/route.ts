@@ -42,9 +42,20 @@ export async function GET(request: NextRequest) {
       let query = supabase
         .from("scraped_luxury_properties")
         .select("*", { count: "exact" }) // Include count for total properties
-        .gte("rating", minRating)
-        .gte("price_per_night", minPrice)
-        .lte("price_per_night", maxPrice)
+
+      // Only apply rating filter if minRating > 0
+      if (minRating > 0) {
+        query = query.gte("rating", minRating)
+      }
+
+      // Only apply price filters if they're not the default values
+      // This allows properties with NULL prices to be included
+      if (minPrice > 0) {
+        query = query.or(`price_per_night.gte.${minPrice},price_per_night.is.null`)
+      }
+      if (maxPrice < 100000) {
+        query = query.or(`price_per_night.lte.${maxPrice},price_per_night.is.null`)
+      }
 
       if (location && location !== "all") {
         const normalizedLocation = location.toLowerCase().replace(/[^a-z]/g, "")
