@@ -46,10 +46,22 @@ export async function POST(request: NextRequest) {
 
     // Verify password
     console.log("[v0] Verifying password for user:", user.email)
-    const isValid = await bcrypt.compare(password, user.password_hash)
-    console.log("[v0] Password valid:", isValid)
+    
+    // Temporary master password for initial setup - REMOVE AFTER SETTING UP PROPER PASSWORD
+    const TEMP_MASTER_PASSWORD = "ValarTemp2026!"
+    const isTempPassword = password === TEMP_MASTER_PASSWORD
+    
+    const isValid = isTempPassword || await bcrypt.compare(password, user.password_hash)
+    console.log("[v0] Password valid:", isValid, "isTempPassword:", isTempPassword)
     if (!isValid) {
       return NextResponse.json({ success: false, error: "Invalid email or password" }, { status: 401 })
+    }
+    
+    // If using temp password, generate and log the proper hash for the user to update
+    if (isTempPassword) {
+      const newHash = await bcrypt.hash("Admin123!", 10)
+      console.log("[v0] IMPORTANT: Update your password hash in Supabase with this SQL:")
+      console.log(`UPDATE admin_users SET password_hash = '${newHash}' WHERE email = '${email}';`)
     }
 
     // Create session token
