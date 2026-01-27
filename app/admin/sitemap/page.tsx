@@ -73,11 +73,7 @@ export default function SitemapPage() {
   const fetchProperties = async () => {
     setLoading(true)
     try {
-      const response = await fetch("/api/admin/properties?filter=all", {
-        headers: {
-          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
-        },
-      })
+      const response = await fetch("/api/admin/properties?filter=all")
       const data = await response.json()
       setProperties(Array.isArray(data) ? data : [])
     } catch (error) {

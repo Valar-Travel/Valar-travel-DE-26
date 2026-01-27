@@ -1,12 +1,13 @@
 import { createAdminClient } from "@/lib/supabase/admin"
 import { type NextRequest, NextResponse } from "next/server"
+import { validateAdminSessionFromRequest } from "@/lib/admin-auth"
 
 export const dynamic = "force-dynamic"
 
 export async function GET(request: NextRequest) {
   try {
-    const adminAuth = request.headers.get("x-admin-auth")
-    if (adminAuth !== "valar-admin-logged-in") {
+    const user = await validateAdminSessionFromRequest(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -59,8 +60,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const adminAuth = request.headers.get("x-admin-auth")
-    if (adminAuth !== "valar-admin-logged-in") {
+    const user = await validateAdminSessionFromRequest(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -104,8 +105,8 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const adminAuth = request.headers.get("x-admin-auth")
-    if (adminAuth !== "valar-admin-logged-in") {
+    const user = await validateAdminSessionFromRequest(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

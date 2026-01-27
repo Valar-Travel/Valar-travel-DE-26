@@ -91,11 +91,7 @@ export default function CustomersPage() {
   const fetchCustomers = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/customers?segment=${segmentFilter}`, {
-        headers: {
-          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
-        },
-      })
+      const response = await fetch(`/api/admin/customers?segment=${segmentFilter}`)
       if (response.ok) {
         const data = await response.json()
         setCustomers(data)

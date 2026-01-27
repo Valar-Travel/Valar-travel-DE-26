@@ -80,10 +80,51 @@ export async function createAdminSession(
   return token
 }
 
-// Validate admin session and get user
+// Validate admin session and get user (for server components)
 export async function validateAdminSession(): Promise<AdminUser | null> {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value
+
+  if (!sessionToken) {
+    return null
+  }
+
+  const supabase = createAdminClient()
+
+  // Get session with user
+  const { data: session, error } = await supabase
+    .from("admin_sessions")
+    .select(`
+      *,
+      admin_users (*)
+    `)
+    .eq("token", sessionToken)
+    .gt("expires_at", new Date().toISOString())
+    .single()
+
+  if (error || !session || !session.admin_users) {
+    return null
+  }
+
+  const user = session.admin_users as AdminUser
+
+  // Check if user is still active
+  if (!user.is_active) {
+    return null
+  }
+
+  return user
+}
+
+// Validate admin session from API request (extracts session token from request cookies)
+export async function validateAdminSessionFromRequest(request: Request): Promise<AdminUser | null> {
+  // Extract session token from request headers (cookies are sent as Cookie header)
+  const cookieHeader = request.headers.get("cookie") || ""
+  const sessionToken = cookieHeader
+    .split(";")
+    .find((c) => c.trim().startsWith(SESSION_COOKIE_NAME + "="))
+    ?.split("=")[1]
+    ?.trim()
 
   if (!sessionToken) {
     return null

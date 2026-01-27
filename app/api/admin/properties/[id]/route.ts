@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { validateAdminSessionFromRequest } from "@/lib/admin-auth"
 
 export const dynamic = "force-dynamic"
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const adminAuth = request.headers.get("x-admin-auth")
-    if (adminAuth !== "valar-admin-logged-in") {
+    const user = await validateAdminSessionFromRequest(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -55,8 +56,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const adminAuth = request.headers.get("x-admin-auth")
-    if (adminAuth !== "valar-admin-logged-in") {
+    const user = await validateAdminSessionFromRequest(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

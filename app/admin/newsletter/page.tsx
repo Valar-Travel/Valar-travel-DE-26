@@ -112,11 +112,7 @@ export default function NewsletterPage() {
   const fetchSubscribers = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/admin/newsletter/subscribers", {
-        headers: {
-          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
-        },
-      })
+      const response = await fetch("/api/admin/newsletter/subscribers")
       if (response.ok) {
         const data = await response.json()
         setSubscribers(data)
@@ -132,11 +128,7 @@ export default function NewsletterPage() {
   const fetchCampaigns = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/admin/newsletter/campaigns", {
-        headers: {
-          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
-        },
-      })
+      const response = await fetch("/api/admin/newsletter/campaigns")
       if (response.ok) {
         const data = await response.json()
         setCampaigns(data)
@@ -161,7 +153,6 @@ export default function NewsletterPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
         },
         body: JSON.stringify(campaignForm),
       })
@@ -189,9 +180,6 @@ export default function NewsletterPage() {
     try {
       const response = await fetch(`/api/admin/newsletter/subscribers/${id}`, {
         method: "DELETE",
-        headers: {
-          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
-        },
       })
 
       if (response.ok) {

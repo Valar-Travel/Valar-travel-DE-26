@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { validateAdminSessionFromRequest } from "@/lib/admin-auth"
 
 export async function GET(request: Request) {
   try {
-    const authHeader = request.headers.get("x-admin-auth")
-    if (authHeader !== "valar-admin-logged-in") {
+    const user = await validateAdminSessionFromRequest(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
