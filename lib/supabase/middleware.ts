@@ -71,6 +71,12 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  try {
+    await supabase.auth.getUser()
+  } catch (error) {
+    // Continue without authentication if there's an error
+  }
+
   // IMPORTANT: Avoid writing any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.

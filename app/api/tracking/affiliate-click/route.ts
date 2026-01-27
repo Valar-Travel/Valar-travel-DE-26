@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields: affiliateLink and propertyName" }, { status: 400 })
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase.from("affiliate_clicks").insert({
       affiliate_link: affiliateLink,
@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Error logging affiliate click:", error)
-      // Don't fail the request if logging fails
     }
 
     return NextResponse.json({

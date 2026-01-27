@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -8,7 +7,6 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
   MapPin,
-  Star,
   Wifi,
   Waves,
   UtensilsCrossed,
@@ -19,15 +17,19 @@ import {
   Calendar,
   MessageSquare,
   Home,
+  Bed,
+  Bath,
+  Users,
+  ArrowLeft,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { VillaImageGallery } from "@/components/villa-image-gallery"
+import { PropertyJsonLd } from "@/components/seo/property-json-ld"
+import { VillaBookingButton } from "@/components/booking/villa-booking-button"
 
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: "Property Details | Valar Travel",
-  description: "Explore luxury property details, amenities, and book your Caribbean getaway.",
-}
+const SITE_URL = "https://valartravel.de"
 
 async function getPropertyData(id: string) {
   const supabase = await createClient()
@@ -40,6 +42,64 @@ async function getPropertyData(id: string) {
   }
 
   return property
+}
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const property = await getPropertyData(params.id)
+
+  if (!property) {
+    return {
+      title: "Property Not Found | Valar Travel",
+      description: "The requested luxury property could not be found. Browse our collection of handpicked Caribbean properties.",
+    }
+  }
+
+  const bedroomText = property.bedrooms ? `${property.bedrooms} bedroom` : ""
+  const locationText = property.location || "Caribbean"
+  const priceText = property.price_per_night ? `from $${property.price_per_night}/night` : ""
+  const amenitiesText = property.amenities?.slice(0, 3).join(", ") || ""
+
+  const description = `${property.name} - ${bedroomText ? `Luxurious ${bedroomText} property in ${locationText}` : `Exclusive luxury property in ${locationText}`}${priceText ? ` ${priceText}` : ""}. ${amenitiesText ? `Features: ${amenitiesText}.` : ""} Book your Caribbean dream escape with Valar Travel's personalized concierge service.`
+
+  return {
+    title: `${property.name} | Luxury Property in ${locationText} | Valar Travel`,
+    description: description.slice(0, 160),
+    keywords: [
+      property.name,
+      `${locationText} property`,
+      "luxury property rental",
+      "Caribbean vacation",
+      "private villa",
+      ...(property.amenities?.slice(0, 5) || []),
+    ],
+    openGraph: {
+      title: `${property.name} | Luxury Property in ${locationText}`,
+      description: description.slice(0, 160),
+      url: `${SITE_URL}/properties/${params.id}`,
+      siteName: "Valar Travel",
+      images: property.images?.[0]
+        ? [
+            {
+              url: property.images[0],
+              width: 1200,
+              height: 630,
+              alt: `${property.name} - Luxury property in ${locationText}`,
+            },
+          ]
+        : [],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${property.name} | Valar Travel`,
+      description: description.slice(0, 160),
+      images: property.images?.[0] ? [property.images[0]] : [],
+    },
+    alternates: {
+      canonical: `${SITE_URL}/properties/${params.id}`,
+    },
+  }
 }
 
 export default async function PropertyDetailPage({ params }: { params: { id: string } }) {
@@ -80,35 +140,109 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
           `/placeholder.svg?height=400&width=600&query=${encodeURIComponent(property.name + " outdoor")}`,
         ]
 
+  const bedrooms = property.bedrooms || null
+  const bathrooms = property.bathrooms || null
+  const maxGuests = property.max_guests || property.guests || null
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Image Gallery */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="relative aspect-[4/3] md:row-span-2">
-            <Image
-              src={propertyImages[0] || "/placeholder.svg"}
-              alt={property.name}
-              fill
-              className="object-cover rounded-lg"
-              priority
-            />
+      {/* JSON-LD Structured Data for SEO */}
+      <PropertyJsonLd
+        property={{
+          id: property.id,
+          name: property.name,
+          description: property.description,
+          location: property.location,
+          price_per_night: property.price_per_night,
+          currency: property.currency,
+          bedrooms: bedrooms,
+          bathrooms: bathrooms,
+          max_guests: maxGuests,
+          images: propertyImages,
+          amenities: property.amenities,
+          rating: property.rating,
+        }}
+        url={`${SITE_URL}/properties/${property.id}`}
+      />
+
+      <nav aria-label="Breadcrumb" className="container mx-auto px-4 py-3">
+        <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+          <li>
+            <Link href="/" className="hover:text-foreground transition-colors">
+              Home
+            </Link>
+          </li>
+          <li>/</li>
+          <li>
+            <Link href="/villas" className="hover:text-foreground transition-colors">
+              Properties
+            </Link>
+          </li>
+          <li>/</li>
+          <li className="text-foreground font-medium truncate max-w-[200px]">{property.name}</li>
+        </ol>
+      </nav>
+
+      <div className="container mx-auto px-4 pb-4">
+        <Link
+          href="/villas"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to All Properties
+        </Link>
+      </div>
+
+      <div className="container mx-auto px-4 mb-6 md:mb-8">
+        <VillaImageGallery
+          images={propertyImages}
+          villaName={property.name}
+          location={property.location || "Caribbean"}
+        />
+      </div>
+
+      {(bedrooms || bathrooms || maxGuests) && (
+        <div className="container mx-auto px-4 mb-6">
+          <div className="flex flex-wrap items-center gap-6 md:gap-8 justify-center md:justify-start p-4 bg-slate-50 rounded-lg border border-slate-200">
+            {bedrooms && (
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Bed className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{bedrooms}</p>
+                  <p className="text-sm text-muted-foreground">Bedrooms</p>
+                </div>
+              </div>
+            )}
+            {bathrooms && (
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Bath className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{bathrooms}</p>
+                  <p className="text-sm text-muted-foreground">Bathrooms</p>
+                </div>
+              </div>
+            )}
+            {maxGuests && (
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{maxGuests}</p>
+                  <p className="text-sm text-muted-foreground">Sleeps</p>
+                </div>
+              </div>
+            )}
           </div>
-          {propertyImages.slice(1, 4).map((image: string, idx: number) => (
-            <div key={idx} className="relative aspect-[4/3]">
-              <Image
-                src={image || "/placeholder.svg"}
-                alt={`${property.name} ${idx + 2}`}
-                fill
-                className="object-cover rounded-lg"
-              />
-            </div>
-          ))}
         </div>
-      </section>
+      )}
 
       {/* Property Details */}
-      <section className="container mx-auto px-4 py-8">
+      <section className="container mx-auto px-4 py-4 md:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
@@ -124,13 +258,6 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
                   <Home className="w-5 h-5 text-muted-foreground" />
                   <span>Luxury Property</span>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 mt-4">
-                <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-semibold">{property.rating}</span>
-                </div>
-                <span className="text-muted-foreground">(Verified rating)</span>
               </div>
             </div>
 
@@ -220,7 +347,24 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
                 )}
 
                 <div className="space-y-4">
-                  {property.affiliate_links?.booking ? (
+                  {property.price_per_night ? (
+                    <VillaBookingButton
+                      villa={{
+                        id: property.id,
+                        name: property.name,
+                        location: property.location || "Caribbean",
+                        pricePerNight: property.price_per_night,
+                        currency: property.currency || "USD",
+                        maxGuests: maxGuests || 10,
+                        image: propertyImages[0],
+                      }}
+                      className="w-full bg-green-700 hover:bg-green-800"
+                      size="lg"
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Book Now
+                    </VillaBookingButton>
+                  ) : property.affiliate_links?.booking ? (
                     <Button className="w-full bg-green-700 hover:bg-green-800" size="lg" asChild>
                       <Link href={property.affiliate_links.booking} target="_blank" rel="noopener noreferrer">
                         <Calendar className="w-4 h-4 mr-2" />
@@ -228,9 +372,11 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
                       </Link>
                     </Button>
                   ) : (
-                    <Button className="w-full bg-green-700 hover:bg-green-800" size="lg">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Check Availability
+                    <Button className="w-full bg-green-700 hover:bg-green-800" size="lg" asChild>
+                      <Link href="/contact">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Check Availability
+                      </Link>
                     </Button>
                   )}
                   <Button variant="outline" className="w-full bg-transparent" size="lg" asChild>

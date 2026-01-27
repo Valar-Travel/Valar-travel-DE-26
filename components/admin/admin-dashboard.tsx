@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, CreditCard, TrendingUp, DollarSign } from "lucide-react"
+import { Users, CreditCard, TrendingUp, DollarSign, BarChart3, Settings, Home, UserCheck, Mail } from "lucide-react"
+import Link from "next/link"
 
 interface AdminDashboardProps {
   user: any
@@ -42,11 +43,72 @@ export function AdminDashboard({ user, userStats, subscriptionStats }: AdminDash
     },
   ]
 
+  const adminLinks = [
+    {
+      title: "CRM Dashboard",
+      description: "Customer insights, segmentation & analytics",
+      href: "/admin/crm",
+      icon: UserCheck,
+      color: "bg-emerald-100 text-emerald-600",
+    },
+    {
+      title: "Properties",
+      description: "Manage villa listings and scraper",
+      href: "/admin/properties",
+      icon: Home,
+      color: "bg-blue-100 text-blue-600",
+    },
+    {
+      title: "Email Testing",
+      description: "Test all Resend email templates",
+      href: "/admin/email-testing",
+      icon: Mail,
+      color: "bg-cyan-100 text-cyan-600",
+    },
+    {
+      title: "Analytics",
+      description: "Traffic and conversion metrics",
+      href: "/admin/analytics",
+      icon: BarChart3,
+      color: "bg-purple-100 text-purple-600",
+    },
+    {
+      title: "Settings",
+      description: "System configuration",
+      href: "/admin/settings",
+      icon: Settings,
+      color: "bg-gray-100 text-gray-600",
+    },
+  ]
+
   return (
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         <p className="text-gray-600">Overview of your SaaS metrics and user management</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {adminLinks.map((link) => {
+          const Icon = link.icon
+          return (
+            <Link key={link.href} href={link.href}>
+              <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${link.color}`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{link.title}</h3>
+                      <p className="text-sm text-gray-500">{link.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          )
+        })}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

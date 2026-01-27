@@ -47,12 +47,12 @@ function getSmartResponse(userMessage: string): string {
 
   // Villas / Properties
   if (message.match(/villa|property|properties|accommodation|stay|rent/)) {
-    return "All our luxury villas feature private pools, ocean views, premium amenities, and personalized concierge services. Many include private chefs, spa services, and exclusive beach access. For availability and detailed information about specific properties, I recommend contacting Sarah directly at +49 160 92527436 (WhatsApp) or sarah@valartravel.de."
+    return "All our luxury villas feature private pools, ocean views, premium amenities, and personalized concierge services. Many include private chefs, spa services, and exclusive beach access. For availability and detailed information about specific properties, I recommend contacting Sarah directly at +49 160 92527436 (WhatsApp) or hello@valartravel.de."
   }
 
   // Booking / Availability
   if (message.match(/book|booking|available|availability|reserve|reservation|price|cost|rate/)) {
-    return "I'd love to help you book your Caribbean escape! For current availability, pricing, and reservations, please contact Sarah Kuhmichel directly:\n\n📱 WhatsApp: +49 160 92527436\n📧 Email: sarah@valartravel.de\n\nShe'll provide personalized recommendations and handle all booking details for you!"
+    return "I'd love to help you book your Caribbean escape! For current availability, pricing, and reservations, please contact Sarah Kuhmichel directly:\n\n📱 WhatsApp: +49 160 92527436\n📧 Email: hello@valartravel.de\n\nShe'll provide personalized recommendations and handle all booking details for you!"
   }
 
   // Beaches
@@ -77,7 +77,7 @@ function getSmartResponse(userMessage: string): string {
 
   // Contact / Sarah
   if (message.match(/contact|reach|call|email|phone|whatsapp|sarah/)) {
-    return "You can reach Sarah Kuhmichel, our Caribbean travel specialist:\n\n📱 WhatsApp: +49 160 92527436\n📧 Email: sarah@valartravel.de\n\nShe's wonderful to work with and will personally help plan your perfect Caribbean getaway!"
+    return "You can reach Sarah Kuhmichel, our Caribbean travel specialist:\n\n📱 WhatsApp: +49 160 92527436\n📧 Email: hello@valartravel.de\n\nShe's wonderful to work with and will personally help plan your perfect Caribbean getaway!"
   }
 
   // Thanks / Goodbye
@@ -86,7 +86,7 @@ function getSmartResponse(userMessage: string): string {
   }
 
   // Default response
-  return "I'd be happy to help you plan your Caribbean luxury villa experience! I can share information about:\n\n• Destinations (Barbados, St. Lucia, Jamaica, St. Barthélemy)\n• Villa features and amenities\n• Beaches and activities\n• Dining and local culture\n• Travel tips\n\nFor bookings and availability, contact Sarah at +49 160 92527436 or sarah@valartravel.de. What would you like to know?"
+  return "I'd be happy to help you plan your Caribbean luxury villa experience! I can share information about:\n\n• Destinations (Barbados, St. Lucia, Jamaica, St. Barthélemy)\n• Villa features and amenities\n• Beaches and activities\n• Dining and local culture\n• Travel tips\n\nFor bookings and availability, contact Sarah at +49 160 92527436 or hello@valartravel.de. What would you like to know?"
 }
 
 export function AiChatWidget() {

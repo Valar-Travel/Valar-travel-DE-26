@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 })
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     switch (event.type) {

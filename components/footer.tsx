@@ -35,7 +35,7 @@ export function Footer() {
         setStatus("error")
         setMessage(data.error || "Failed to subscribe")
       }
-    } catch (error) {
+    } catch {
       setStatus("error")
       setMessage("An error occurred. Please try again.")
     }
@@ -65,8 +65,8 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-300">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <a href="mailto:sarah@valartravel.de" className="hover:text-emerald-400 transition-colors break-all">
-                  sarah@valartravel.de
+                <a href="mailto:hello@valartravel.de" className="hover:text-emerald-400 transition-colors break-all">
+                  hello@valartravel.de
                 </a>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-300">
@@ -127,6 +127,12 @@ export function Footer() {
               <Link href="/villas" className="block text-gray-300 hover:text-emerald-400 transition-colors text-sm">
                 Browse Villas
               </Link>
+              <Link
+                href="/property-prom"
+                className="block text-gray-300 hover:text-emerald-400 transition-colors text-sm"
+              >
+                Property Prom
+              </Link>
               <Link href="/owners" className="block text-gray-300 hover:text-emerald-400 transition-colors text-sm">
                 For Owners
               </Link>
@@ -154,6 +160,12 @@ export function Footer() {
               </Link>
               <Link href="/affiliate" className="block text-gray-300 hover:text-emerald-400 transition-colors text-sm">
                 Affiliates
+              </Link>
+              <Link
+                href="/owner-portal"
+                className="block text-gray-300 hover:text-emerald-400 transition-colors text-sm"
+              >
+                Owner Portal
               </Link>
             </div>
           </div>

@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     if (!process.env.RESEND_API_KEY) {
       console.error("[Contact] RESEND_API_KEY not configured")
       return NextResponse.json(
-        { error: "Email service not configured. Please contact us directly at sarah@valartravel.de" },
+        { error: "Email service not configured. Please contact us directly at hello@valartravel.de" },
         { status: 500 },
       )
     }

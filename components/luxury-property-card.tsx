@@ -62,14 +62,31 @@ export function LuxuryPropertyCard({
 
   const getLuxuryAmenityIcon = (amenity: string) => {
     const amenityLower = amenity.toLowerCase()
-    if (amenityLower.includes("spa")) return "🧘‍♀️"
-    if (amenityLower.includes("michelin")) return "🍽️"
-    if (amenityLower.includes("butler")) return "🤵"
-    if (amenityLower.includes("concierge")) return "🛎️"
-    if (amenityLower.includes("pool") || amenityLower.includes("infinity")) return "🏊‍♂️"
-    if (amenityLower.includes("champagne") || amenityLower.includes("bar")) return "🥂"
-    if (amenityLower.includes("valet")) return "🚗"
+    if (amenityLower.includes("pool") || amenityLower.includes("infinity")) return "🏊"
+    if (amenityLower.includes("spa")) return "🧖"
+    if (amenityLower.includes("jacuzzi") || amenityLower.includes("hot tub")) return "🛁"
     if (amenityLower.includes("beach")) return "🏖️"
+    if (amenityLower.includes("ocean") || amenityLower.includes("sea view")) return "🌊"
+    if (amenityLower.includes("chef") || amenityLower.includes("kitchen")) return "👨‍🍳"
+    if (amenityLower.includes("bbq") || amenityLower.includes("grill")) return "🍖"
+    if (amenityLower.includes("wifi") || amenityLower.includes("internet")) return "📶"
+    if (amenityLower.includes("tv") || amenityLower.includes("theater")) return "📺"
+    if (amenityLower.includes("gym") || amenityLower.includes("fitness")) return "💪"
+    if (amenityLower.includes("tennis")) return "🎾"
+    if (amenityLower.includes("golf")) return "⛳"
+    if (amenityLower.includes("garden") || amenityLower.includes("tropical")) return "🌴"
+    if (amenityLower.includes("terrace") || amenityLower.includes("patio")) return "🏡"
+    if (amenityLower.includes("parking") || amenityLower.includes("garage")) return "🚗"
+    if (amenityLower.includes("security") || amenityLower.includes("safe")) return "🔒"
+    if (amenityLower.includes("housekeep") || amenityLower.includes("maid")) return "🧹"
+    if (amenityLower.includes("concierge")) return "🛎️"
+    if (amenityLower.includes("laundry") || amenityLower.includes("washer")) return "👕"
+    if (amenityLower.includes("air condition") || amenityLower.includes("a/c")) return "❄️"
+    if (amenityLower.includes("bedroom") || amenityLower.includes("suite")) return "🛏️"
+    if (amenityLower.includes("bathroom")) return "🚿"
+    if (amenityLower.includes("butler")) return "🤵"
+    if (amenityLower.includes("champagne") || amenityLower.includes("bar")) return "🥂"
+    if (amenityLower.includes("sun loung")) return "🌞"
     return "✨"
   }
 
@@ -196,14 +213,6 @@ export function LuxuryPropertyCard({
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-2xl font-bold text-gray-900 leading-tight">{property.name}</h3>
-                  {property.starRating >= 1 && (
-                    <div className="flex items-center gap-1">
-                      {[...Array(Math.min(property.starRating, 5))].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-amber-400 fill-amber-400 drop-shadow-sm" />
-                      ))}
-                      <span className="text-sm font-medium text-amber-600 ml-1">{property.starRating}-Star</span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex items-center text-gray-600 mb-3">
@@ -232,11 +241,6 @@ export function LuxuryPropertyCard({
 
               {/* Enhanced Rating Display */}
               <div className="ml-6 text-right">
-                <div className="flex items-center justify-end mb-1">
-                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-xl font-bold text-lg shadow-lg">
-                    {property.rating}
-                  </div>
-                </div>
                 <div className="text-xs text-gray-600">{property.reviewCount} reviews</div>
                 {property.luxuryScore && (
                   <div className="text-xs text-amber-600 font-medium mt-1">
@@ -384,12 +388,6 @@ export function LuxuryPropertyCard({
         >
           <Heart className={`w-4 h-4 ${isFavorited ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
         </button>
-
-        {/* Rating Badge */}
-        <div className="absolute bottom-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-xl font-bold text-sm z-10 flex items-center gap-1">
-          <Star className="w-4 h-4 fill-white" />
-          {property.rating}
-        </div>
       </div>
 
       {/* Content Section */}
@@ -397,13 +395,6 @@ export function LuxuryPropertyCard({
         <div className="mb-3">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-bold text-gray-900 line-clamp-1 flex-1">{property.name}</h3>
-            {property.starRating >= 1 && (
-              <div className="flex items-center gap-0.5 ml-2">
-                {[...Array(Math.min(property.starRating, 5))].map((_, i) => (
-                  <Star key={i} className="w-3 h-3 text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-            )}
           </div>
           <div className="flex items-center text-gray-600 text-sm">
             <MapPin className="w-4 h-4 mr-1" />

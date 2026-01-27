@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server"
 import * as cheerio from "cheerio"
 import { createClient } from "@/lib/supabase/server"
+import type { NextRequest } from "next/server"
 
 // Function to detect destination from source URL domain
 function getDestinationFromSourceUrl(sourceUrl: string): string {
   const url = sourceUrl.toLowerCase()
 
-  // Barbados-specific websites
+  // Barbados-specific websites (most specific first)
   if (
-    url.includes("sunnyvillaholidays.com") ||
     url.includes("villasbarbados.com") ||
     url.includes("barbadosdreamvillas.com") ||
     url.includes("barbadosluxuryvillas.com") ||
-    url.includes("realtorsbarbados.com")
+    url.includes("realtorsbarbados.com") ||
+    url.includes("alleynescarbayproperties.com")
   ) {
     return "Barbados"
   }
@@ -21,9 +22,41 @@ function getDestinationFromSourceUrl(sourceUrl: string): string {
   if (
     url.includes("jamaicavillas.com") ||
     url.includes("villasinjamaica.com") ||
-    url.includes("jamaicaluxuryvillas.com")
+    url.includes("jamaicaluxuryvillas.com") ||
+    url.includes("tryallclub.com") ||
+    url.includes("villasatthetryall.com") ||
+    url.includes("jamaicaoceanclifvilla.com") ||
+    url.includes("jamaicavillasbylindalsmith.com") ||
+    url.includes("thinkingofjamaica.com") ||
+    url.includes("islandoutpost.com")
   ) {
     return "Jamaica"
+  }
+
+  // St. Maarten-specific websites
+  if (
+    url.includes("stmaartenvillarentals.com") ||
+    url.includes("sxmvillas.com") ||
+    url.includes("stmartinvillas.com") ||
+    url.includes("islandproperties.com") ||
+    url.includes("sintmaarten")
+  ) {
+    return "St. Maarten"
+  }
+
+  // Antigua-specific websites
+  if (
+    url.includes("antiguavillas.com") ||
+    url.includes("villasofantigua.com") ||
+    url.includes("bluewaterscharter.com") ||
+    url.includes("luxuryvillasantigua.com")
+  ) {
+    return "Antigua"
+  }
+
+  // Anguilla-specific websites (NOT sunnyvillaholidays - that's multi-destination)
+  if (url.includes("anguillavillas.com") || url.includes("anguilla-beaches.com")) {
+    return "Anguilla"
   }
 
   // St. Lucia-specific websites
@@ -36,26 +69,139 @@ function getDestinationFromSourceUrl(sourceUrl: string): string {
     return "St. Barthélemy"
   }
 
+  // Turks and Caicos
+  if (url.includes("tcivillarentals.com") || url.includes("gracebayrentals.com")) {
+    return "Turks and Caicos"
+  }
+
+  // Generic keyword matching (only if no specific site matched)
+  if (url.includes("barbados")) return "Barbados"
+  if (url.includes("jamaica")) return "Jamaica"
+  if (url.includes("stmaarten") || url.includes("st-maarten") || url.includes("sintmaarten") || url.includes("sxm"))
+    return "St. Maarten"
+  if (url.includes("antigua")) return "Antigua"
+  if (url.includes("anguilla")) return "Anguilla"
+  if (url.includes("stlucia") || url.includes("st-lucia") || url.includes("saintlucia")) return "St. Lucia"
+  if (url.includes("stbarth") || url.includes("st-barth") || url.includes("stbarts")) return "St. Barthélemy"
+  if (url.includes("turksandcaicos") || url.includes("providenciales")) return "Turks and Caicos"
+
   return ""
 }
 
-export async function POST(request: Request) {
+function getDestinationFromContent(html: string): string {
+  const content = html.toLowerCase()
+
+  // Check for location mentions in content (priority order - most specific keywords first)
+  const locationKeywords = [
+    {
+      keywords: ["montego bay", "ocho rios", "negril", "port antonio", "kingston jamaica", "seven mile beach jamaica"],
+      location: "Jamaica",
+    },
+    {
+      keywords: ["meads bay", "shoal bay", "rendezvous bay anguilla", "anguilla beaches"],
+      location: "Anguilla",
+    },
+    {
+      keywords: ["bridgetown", "holetown", "speightstown", "platinum coast", "west coast barbados"],
+      location: "Barbados",
+    },
+    { keywords: ["castries", "soufriere", "rodney bay", "pitons"], location: "St. Lucia" },
+    { keywords: ["gustavia", "st. jean", "st jean beach"], location: "St. Barthélemy" },
+    { keywords: ["grace bay", "providenciales", "turks and caicos"], location: "Turks and Caicos" },
+    { keywords: ["jolly harbour", "english harbour antigua"], location: "Antigua" },
+    {
+      keywords: [
+        "philipsburg",
+        "simpson bay",
+        "maho beach",
+        "orient bay",
+        "great bay",
+        "cole bay",
+        "dutch side",
+        "french side",
+      ],
+      location: "St. Maarten",
+    },
+    {
+      keywords: ["dickenson bay", "half moon bay", "shirley heights", "nelsons dockyard", "st johns antigua"],
+      location: "Antigua",
+    },
+  ]
+
+  for (const { keywords, location } of locationKeywords) {
+    for (const keyword of keywords) {
+      if (content.includes(keyword)) {
+        return location
+      }
+    }
+  }
+
+  // Less specific - just country names (check after specific locations)
+  if (content.includes("jamaica")) return "Jamaica"
+  if (content.includes("barbados")) return "Barbados"
+  if (content.includes("anguilla")) return "Anguilla"
+  if (content.includes("st. maarten") || content.includes("st maarten") || content.includes("sint maarten"))
+    return "St. Maarten"
+  if (content.includes("antigua")) return "Antigua"
+
+  return ""
+}
+
+export async function POST(request: NextRequest) {
   try {
-    const { url, maxProperties = 50 } = await request.json()
+    const body = await request.json()
+    const { url, maxProperties = 50, destination } = body
+
+    // Destination is required
+    if (!destination) {
+      return NextResponse.json(
+        { error: "Destination is required. Please select a destination from the dropdown." },
+        { status: 400 },
+      )
+    }
 
     if (!url) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 })
     }
 
-    console.log("[v0] ========== SCRAPER STARTED ==========")
-    console.log("[v0] URL:", url)
-    console.log("[v0] Max properties:", maxProperties)
+    let cleanUrl = url.trim()
 
-    const supabase = createClient()
+    // Check for corrupted URLs with multiple http/https
+    const httpsCount = (cleanUrl.match(/https?:\/\//g) || []).length
+    if (httpsCount > 1) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid URL: The URL appears to be corrupted (contains multiple http/https). Please provide a clean URL.",
+        },
+        { status: 400 },
+      )
+    }
+
+    // Validate URL format
+    try {
+      const urlObj = new URL(cleanUrl)
+      if (!urlObj.hostname || urlObj.hostname.length < 4) {
+        throw new Error("Invalid hostname")
+      }
+      cleanUrl = urlObj.href
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid URL format. Please provide a valid URL (e.g., https://example.com/properties)" },
+        { status: 400 },
+      )
+    }
+
+    console.log("[v0] ========== SCRAPER STARTED ==========")
+    console.log("[v0] URL:", cleanUrl)
+    console.log("[v0] Max properties:", maxProperties)
+    console.log("[v0] User-specified destination:", destination)
+
+    const supabase = await createClient()
 
     // Fetch the page with better headers to avoid being blocked
     console.log("[v0] Fetching page...")
-    const response = await fetch(url, {
+    const response = await fetch(cleanUrl, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -81,15 +227,39 @@ export async function POST(request: Request) {
       // Check if blocked by Cloudflare
       const text = await response.text()
       console.log("[v0] Error response text (first 500 chars):", text.substring(0, 500))
+
       if (text.includes("Cloudflare") || text.includes("security service") || response.status === 403) {
         return NextResponse.json(
           {
-            error: `This website (${new URL(url).hostname}) is protected by Cloudflare and cannot be scraped automatically. Try these alternatives:\n\n• sunnyvillaholidays.com\n• villasbarbados.com\n• exceptionvillas.com`,
+            error: `This website (${new URL(cleanUrl).hostname}) is protected by Cloudflare and cannot be scraped automatically. Try these alternatives:\n\n• villasbarbados.com\n• jamaicavillas.com\n• exceptionvillas.com`,
             blocked: true,
           },
           { status: 403 },
         )
       }
+
+      // Handle database errors from external sites
+      if (text.includes("database connection") || text.includes("Database Error") || response.status === 500) {
+        return NextResponse.json(
+          {
+            error: `The website (${new URL(cleanUrl).hostname}) is currently experiencing server issues (their database is down). Please try again later or use a different villa listing site.`,
+            serverError: true,
+          },
+          { status: 503 },
+        )
+      }
+
+      // Handle rate limiting
+      if (response.status === 429) {
+        return NextResponse.json(
+          {
+            error: `The website (${new URL(cleanUrl).hostname}) is rate limiting requests. Please wait a few minutes before trying again.`,
+            rateLimited: true,
+          },
+          { status: 429 },
+        )
+      }
+
       return NextResponse.json({ error: `Failed to fetch: ${response.status}` }, { status: response.status })
     }
 
@@ -98,7 +268,7 @@ export async function POST(request: Request) {
     const $ = cheerio.load(html)
 
     // Determine if this is a single property page or a listing page
-    const urlPath = new URL(url).pathname
+    const urlPath = new URL(cleanUrl).pathname
     console.log("[v0] URL path:", urlPath)
 
     const isSingleProperty =
@@ -117,7 +287,7 @@ export async function POST(request: Request) {
     if (isSingleProperty) {
       // Single property page - scrape directly
       console.log("[v0] Detected single property page, scraping directly")
-      propertyLinks = [url]
+      propertyLinks = [cleanUrl]
     } else {
       // Listing page - find property links
       console.log("[v0] Detected listing page, finding property links")
@@ -135,7 +305,7 @@ export async function POST(request: Request) {
       ]
 
       const foundLinks = new Set<string>()
-      const baseUrl = new URL(url).origin
+      const baseUrl = new URL(cleanUrl).origin
 
       for (const selector of linkSelectors) {
         const count = $(selector).length
@@ -246,7 +416,7 @@ export async function POST(request: Request) {
           continue
         }
 
-        const propertyData = extractPropertyData(property$, propertyUrl)
+        const propertyData = extractPropertyData(property$, propertyUrl, destination)
         console.log(`[v0] Extracted name: "${propertyData.name}"`)
         console.log(`[v0] Extracted images: ${propertyData.images.length}`)
         console.log(`[v0] Extracted amenities: ${propertyData.amenities.length}`)
@@ -353,7 +523,9 @@ export async function POST(request: Request) {
   }
 }
 
-function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string) {
+function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDestination?: string) {
+  console.log("[v0] extractPropertyData called with userDestination:", userDestination)
+
   // Extract name
   let name = ""
   const nameSelectors = [
@@ -377,34 +549,39 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string) {
   // Clean up name
   name = name.replace(/\s*[-|].*$/, "").trim()
 
-  // Extract location
   let location = ""
-  const locationSelectors = [
-    ".property-location",
-    ".listing-location",
-    '[class*="location"]',
-    'a[href*="/city/"]',
-    'a[href*="/area/"]',
-    ".address",
-  ]
 
-  for (const selector of locationSelectors) {
-    const text = $(selector).first().text().trim()
-    if (text && text.length > 2 && text.length < 100) {
-      location = text
-      break
+  if (userDestination && userDestination.trim()) {
+    location = userDestination.trim()
+    console.log("[v0] USING USER DESTINATION:", location)
+  } else {
+    // Only try to extract location from page if no user destination
+    const locationSelectors = [
+      ".property-location",
+      ".listing-location",
+      '[class*="location"]',
+      'a[href*="/city/"]',
+      'a[href*="/area/"]',
+      ".address",
+    ]
+
+    for (const selector of locationSelectors) {
+      const text = $(selector).first().text().trim()
+      if (text && text.length > 2 && text.length < 100) {
+        location = text
+        break
+      }
+    }
+
+    if (!location || location === "Caribbean") {
+      const detectedDestinationFromUrl = getDestinationFromSourceUrl(sourceUrl)
+      const detectedDestinationFromContent = getDestinationFromContent($.html() || "")
+      location = detectedDestinationFromUrl || detectedDestinationFromContent || "Caribbean"
+      console.log("[v0] Auto-detected destination:", location)
     }
   }
 
-  // If no location found, try to detect from source URL
-  if (!location || location === "Caribbean") {
-    const detectedDestination = getDestinationFromSourceUrl(sourceUrl)
-    if (detectedDestination) {
-      location = detectedDestination
-    } else {
-      location = "Caribbean"
-    }
-  }
+  console.log("[v0] FINAL LOCATION for property:", location)
 
   // Extract price
   let price = 0

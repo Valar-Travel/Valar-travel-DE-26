@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import VillasClientPage from "./villas-client"
+import Loading from "./loading"
 
 export const metadata: Metadata = {
   title: "Luxury Caribbean Villas | Browse Our Exclusive Collection | Valar Travel",
@@ -28,5 +30,9 @@ export const metadata: Metadata = {
 }
 
 export default function VillasPage() {
-  return <VillasClientPage />
+  return (
+    <Suspense fallback={<Loading />}>
+      <VillasClientPage />
+    </Suspense>
+  )
 }

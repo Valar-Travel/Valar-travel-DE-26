@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, ChevronDown, Settings } from "lucide-react"
+import { Menu, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { CurrencySelector } from "@/components/currency-selector"
 
@@ -37,6 +38,16 @@ const navigationItems = [
         title: "St. Barthélemy",
         href: "/destinations/st-barthelemy",
         description: "French sophistication in the Caribbean",
+      },
+      {
+        title: "St. Maarten",
+        href: "/destinations/st-maarten",
+        description: "Dutch-French charm with world-class beaches",
+      },
+      {
+        title: "Antigua",
+        href: "/destinations/antigua",
+        description: "365 beaches and historic English Harbour",
       },
       {
         title: "All Destinations",
@@ -71,18 +82,15 @@ export function Header() {
   const pathname = usePathname()
   const [destinationsOpen, setDestinationsOpen] = useState(false)
   const [journalOpen, setJournalOpen] = useState(false)
-  const [adminOpen, setAdminOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const destinationsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const journalTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const adminTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     return () => {
       if (destinationsTimeoutRef.current) clearTimeout(destinationsTimeoutRef.current)
       if (journalTimeoutRef.current) clearTimeout(journalTimeoutRef.current)
-      if (adminTimeoutRef.current) clearTimeout(adminTimeoutRef.current)
     }
   }, [])
 
@@ -108,23 +116,19 @@ export function Header() {
     }, 150)
   }
 
-  const handleAdminEnter = () => {
-    if (adminTimeoutRef.current) clearTimeout(adminTimeoutRef.current)
-    setAdminOpen(true)
-  }
-
-  const handleAdminLeave = () => {
-    adminTimeoutRef.current = setTimeout(() => {
-      setAdminOpen(false)
-    }, 150)
-  }
-
   return (
     <header className="bg-white border-b border-neutral-200 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <h1 className="text-lg lg:text-xl font-serif font-medium tracking-wide text-neutral-900">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <Image
+              src="/logo.png"
+              alt="Valar Travel Logo"
+              width={56}
+              height={56}
+              className="w-12 h-12 lg:w-14 lg:h-14"
+            />
+            <h1 className="text-xl lg:text-2xl font-serif font-medium tracking-wide text-neutral-900">
               Valar <span className="font-semibold text-emerald-800">Travel</span>
             </h1>
           </Link>
@@ -216,112 +220,6 @@ export function Header() {
           {/* Auth Buttons - Desktop */}
           <div className="hidden lg:flex items-center gap-4">
             <CurrencySelector />
-            <div className="relative">
-              <button
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 text-sm font-medium tracking-wide text-neutral-900 hover:text-emerald-800 transition-colors uppercase rounded hover:bg-neutral-50",
-                  pathname.startsWith("/admin") && "text-emerald-800 font-semibold bg-neutral-50",
-                )}
-                onMouseEnter={handleAdminEnter}
-                onMouseLeave={handleAdminLeave}
-                onClick={() => setAdminOpen(!adminOpen)}
-                aria-expanded={adminOpen}
-                aria-haspopup="true"
-                aria-label="Admin menu"
-              >
-                <Settings className="w-4 h-4" />
-                Admin
-                <ChevronDown className="w-3 h-3" />
-              </button>
-
-              {adminOpen && (
-                <div
-                  className="absolute top-full right-0 mt-2 w-64 bg-white border border-neutral-200 rounded shadow-xl"
-                  onMouseEnter={handleAdminEnter}
-                  onMouseLeave={handleAdminLeave}
-                >
-                  <div className="p-2">
-                    <Link
-                      href="/admin/login"
-                      className="block p-3 hover:bg-emerald-50 transition-colors group border-b-2 border-emerald-200 bg-emerald-50/50"
-                      onClick={() => setAdminOpen(false)}
-                    >
-                      <div className="text-sm font-semibold tracking-wide text-emerald-900 uppercase">
-                        🔐 Admin Login
-                      </div>
-                      <p className="text-xs text-emerald-700 mt-1 leading-relaxed font-medium">
-                        Username & password access
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/admin"
-                      className="block p-3 hover:bg-neutral-50 transition-colors group border-b border-neutral-100"
-                      onClick={() => setAdminOpen(false)}
-                    >
-                      <div className="text-sm font-medium tracking-wide text-emerald-800 group-hover:text-emerald-900 uppercase">
-                        Dashboard
-                      </div>
-                      <p className="text-xs text-neutral-600 mt-1 leading-relaxed font-light">
-                        Admin overview and quick access
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/admin/properties"
-                      className="block p-3 hover:bg-neutral-50 transition-colors group border-b border-neutral-100"
-                      onClick={() => setAdminOpen(false)}
-                    >
-                      <div className="text-sm font-medium tracking-wide text-emerald-800 group-hover:text-emerald-900 uppercase">
-                        Properties
-                      </div>
-                      <p className="text-xs text-neutral-600 mt-1 leading-relaxed font-light">
-                        Manage villas and listings
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/admin/blog"
-                      className="block p-3 hover:bg-neutral-50 transition-colors group border-b border-neutral-100"
-                      onClick={() => setAdminOpen(false)}
-                    >
-                      <div className="text-sm font-medium tracking-wide text-emerald-800 group-hover:text-emerald-900 uppercase">
-                        Blog
-                      </div>
-                      <p className="text-xs text-neutral-600 mt-1 leading-relaxed font-light">
-                        Manage journal articles and posts
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/admin/api-status"
-                      className="block p-3 hover:bg-neutral-50 transition-colors group border-b border-neutral-100"
-                      onClick={() => setAdminOpen(false)}
-                    >
-                      <div className="text-sm font-medium tracking-wide text-emerald-800 group-hover:text-emerald-900 uppercase">
-                        API Status
-                      </div>
-                      <p className="text-xs text-neutral-600 mt-1 leading-relaxed font-light">
-                        Monitor API health and performance
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/admin/cleanup-database"
-                      className="block p-3 hover:bg-neutral-50 transition-colors group"
-                      onClick={() => setAdminOpen(false)}
-                    >
-                      <div className="text-sm font-medium tracking-wide text-emerald-800 group-hover:text-emerald-900 uppercase">
-                        Database Cleanup
-                      </div>
-                      <p className="text-xs text-neutral-600 mt-1 leading-relaxed font-light">
-                        Maintain and optimize database
-                      </p>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
             <Link href="/auth/login">
               <Button
                 variant="ghost"
@@ -352,8 +250,9 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[320px] sm:w-[380px] overflow-y-auto">
               <SheetHeader className="text-left pb-6 border-b border-neutral-200">
-                <SheetTitle className="text-xl font-serif font-medium text-neutral-900">
-                  Valar <span className="font-semibold text-emerald-800">Travel</span>
+                <SheetTitle className="flex items-center gap-3 text-xl font-serif font-medium text-neutral-900">
+                  <Image src="/logo.png" alt="Valar Travel Logo" width={44} height={44} className="w-11 h-11" />
+                  <span>Valar <span className="font-semibold text-emerald-800">Travel</span></span>
                 </SheetTitle>
                 <SheetDescription className="text-neutral-600 font-light text-sm">
                   Exclusive Caribbean luxury villa rentals
@@ -403,50 +302,6 @@ export function Header() {
                   <div className="pb-4 border-b border-neutral-200">
                     <div className="text-xs font-medium tracking-wide text-neutral-900 mb-3 uppercase">Currency</div>
                     <CurrencySelector />
-                  </div>
-
-                  <div className="pb-4 border-b border-neutral-200">
-                    <div className="text-xs font-medium tracking-wide text-neutral-900 mb-3 uppercase flex items-center gap-2">
-                      <Settings className="w-3 h-3" />
-                      Admin
-                    </div>
-                    <div className="space-y-1">
-                      <Link
-                        href="/admin"
-                        className="block px-3 py-2 text-sm font-medium text-neutral-800 hover:text-emerald-800 hover:bg-neutral-50 transition-colors"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        Dashboard
-                      </Link>
-                      <Link
-                        href="/admin/properties"
-                        className="block px-3 py-2 text-sm font-medium text-neutral-800 hover:text-emerald-800 hover:bg-neutral-50 transition-colors"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        Properties
-                      </Link>
-                      <Link
-                        href="/admin/blog"
-                        className="block px-3 py-2 text-sm font-medium text-neutral-800 hover:text-emerald-800 hover:bg-neutral-50 transition-colors"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        Blog
-                      </Link>
-                      <Link
-                        href="/admin/api-status"
-                        className="block px-3 py-2 text-sm font-medium text-neutral-800 hover:text-emerald-800 hover:bg-neutral-50 transition-colors"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        API Status
-                      </Link>
-                      <Link
-                        href="/admin/cleanup-database"
-                        className="block px-3 py-2 text-sm font-medium text-neutral-800 hover:text-emerald-800 hover:bg-neutral-50 transition-colors"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        Database Cleanup
-                      </Link>
-                    </div>
                   </div>
 
                   <div className="space-y-3">

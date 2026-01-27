@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   CheckCircle2,
   XCircle,
@@ -65,21 +66,13 @@ export function PropertiesAdmin() {
   const [selectedProperty, setSelectedProperty] = useState<ScrapedProperty | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [scraperUrl, setScraperUrl] = useState("")
+  const [scraperDestination, setScraperDestination] = useState("")
   const [isScraperRunning, setIsScraperRunning] = useState(false)
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const [scraperProgress, setScraperProgress] = useState("")
   const [scraperDialogOpen, setScraperDialogOpen] = useState(false)
   const [photoManagerOpen, setPhotoManagerOpen] = useState(false)
   const [photoManagerProperty, setPhotoManagerProperty] = useState<ScrapedProperty | null>(null)
-
-  console.log(
-    "[v0] PropertiesAdmin render - scraperUrl:",
-    scraperUrl,
-    "isScraperRunning:",
-    isScraperRunning,
-    "dialogOpen:",
-    scraperDialogOpen,
-  )
 
   const { data, error, mutate } = useSWR<ScrapedProperty[]>(
     `/api/admin/properties?filter=${filter}&search=${searchQuery}`,
@@ -91,7 +84,6 @@ export function PropertiesAdmin() {
 
   const handleApprove = async (propertyId: string) => {
     try {
-      console.log("[v0] Approving property:", propertyId)
       const response = await fetch(`/api/admin/properties/${propertyId}`, {
         method: "PATCH",
         headers: {
@@ -102,7 +94,6 @@ export function PropertiesAdmin() {
       })
 
       const result = await response.json()
-      console.log("[v0] Approve response:", result)
 
       if (!response.ok) throw new Error(result.error || "Failed to approve property")
 
@@ -116,7 +107,6 @@ export function PropertiesAdmin() {
 
   const handleReject = async (propertyId: string) => {
     try {
-      console.log("[v0] Rejecting property:", propertyId)
       const response = await fetch(`/api/admin/properties/${propertyId}`, {
         method: "PATCH",
         headers: {
@@ -127,7 +117,6 @@ export function PropertiesAdmin() {
       })
 
       const result = await response.json()
-      console.log("[v0] Reject response:", result)
 
       if (!response.ok) throw new Error(result.error || "Failed to reject property")
 
@@ -143,7 +132,6 @@ export function PropertiesAdmin() {
     if (!confirm("Are you sure you want to delete this property?")) return
 
     try {
-      console.log("[v0] Deleting property:", propertyId)
       const response = await fetch(`/api/admin/properties/${propertyId}`, {
         method: "DELETE",
         headers: {
@@ -170,15 +158,42 @@ export function PropertiesAdmin() {
   }
 
   const handleRunScraper = async () => {
-    const trimmedUrl = scraperUrl.trim()
+    let trimmedUrl = scraperUrl.trim()
 
     if (!trimmedUrl) {
       toast.error("Please enter a URL")
       return
     }
 
-    if (!trimmedUrl.startsWith("http://") && !trimmedUrl.startsWith("https://")) {
-      toast.error("Please enter a valid URL starting with http:// or https://")
+    // Check for double https:// or corrupted URLs
+    const httpsCount = (trimmedUrl.match(/https?:\/\//g) || []).length
+    if (httpsCount > 1) {
+      toast.error("Invalid URL detected", {
+        description: "The URL appears to be corrupted (contains multiple http/https). Please paste a clean URL.",
+        duration: 6000,
+      })
+      return
+    }
+
+    // Validate URL format
+    try {
+      const urlObj = new URL(trimmedUrl)
+      // Ensure the URL is properly formed
+      if (!urlObj.hostname || urlObj.hostname.length < 4) {
+        throw new Error("Invalid hostname")
+      }
+      // Use the cleaned URL
+      trimmedUrl = urlObj.href
+    } catch {
+      toast.error("Invalid URL format", {
+        description: "Please enter a valid URL (e.g., https://example.com/properties)",
+        duration: 6000,
+      })
+      return
+    }
+
+    if (!scraperDestination) {
+      toast.error("Please select a destination for these properties")
       return
     }
 
@@ -195,6 +210,7 @@ export function PropertiesAdmin() {
         body: JSON.stringify({
           url: trimmedUrl,
           maxProperties: 50,
+          destination: scraperDestination,
         }),
       })
 
@@ -223,6 +239,7 @@ export function PropertiesAdmin() {
       toast.success(`Successfully scraped ${data.count} properties!`)
       setScraperDialogOpen(false)
       setScraperUrl("")
+      setScraperDestination("")
       mutate()
     } catch (error: any) {
       toast.error("Scraper failed", {
@@ -353,6 +370,31 @@ export function PropertiesAdmin() {
                       />
                     </div>
 
+                    <div>
+                      <Label htmlFor="scraper-destination">Destination (Required)</Label>
+                      <Select
+                        value={scraperDestination}
+                        onValueChange={setScraperDestination}
+                        disabled={isScraperRunning}
+                      >
+                        <SelectTrigger className="mt-1.5">
+                          <SelectValue placeholder="Select destination..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Barbados">Barbados</SelectItem>
+                          <SelectItem value="Jamaica">Jamaica</SelectItem>
+                          <SelectItem value="St. Lucia">St. Lucia</SelectItem>
+                          <SelectItem value="St. Barthélemy">St. Barthélemy</SelectItem>
+                          <SelectItem value="St. Maarten">St. Maarten</SelectItem>
+                          <SelectItem value="Antigua">Antigua</SelectItem>
+                          <SelectItem value="Anguilla">Anguilla</SelectItem>
+                          <SelectItem value="Turks and Caicos">Turks and Caicos</SelectItem>
+                          <SelectItem value="Grenada">Grenada</SelectItem>
+                          <SelectItem value="Dominican Republic">Dominican Republic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <div className="text-xs text-muted-foreground space-y-2">
                       <p className="font-medium">Recommended websites:</p>
                       <ul className="list-disc list-inside pl-2 space-y-1">
@@ -385,7 +427,7 @@ export function PropertiesAdmin() {
                       <Button
                         type="button"
                         onClick={handleRunScraper}
-                        disabled={isScraperRunning || !scraperUrl.trim()}
+                        disabled={isScraperRunning || !scraperUrl.trim() || !scraperDestination}
                       >
                         {isScraperRunning ? (
                           <>

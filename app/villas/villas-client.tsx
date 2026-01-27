@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
-import { MapPin, Bed, Bath, Users, Wifi, Waves, ChefHat, Car, Search, Star, SlidersHorizontal, X } from "lucide-react"
+import { MapPin, Bed, Bath, Users, Search, Star, SlidersHorizontal, X } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
+import { DynamicImage } from "@/components/dynamic-image"
 
 interface Villa {
   id: string
@@ -59,9 +59,7 @@ export default function VillasClientPage() {
             bathrooms: prop.bathrooms || 0,
             guests: prop.max_guests || 0,
             price: prop.price_per_night || 0,
-            image_url:
-              prop.images?.[0] ||
-              `/placeholder.svg?height=400&width=600&query=${encodeURIComponent(prop.name || "luxury villa")}`,
+            image_url: prop.images?.[0] || "",
             images: prop.images || [],
             amenities: Array.isArray(prop.amenities) ? prop.amenities : [],
             rating: prop.rating || 0,
@@ -148,125 +146,104 @@ export default function VillasClientPage() {
   }
 
   const hasActiveFilters =
-    searchQuery || bedrooms !== "all" || destination !== "all" || priceRange[0] > 0 || priceRange[1] < 10000
-
-  const amenityIcons: Record<string, any> = {
-    wifi: Wifi,
-    "wi-fi": Wifi,
-    "high-speed wifi": Wifi,
-    pool: Waves,
-    "private pool": Waves,
-    chef: ChefHat,
-    "chef service": ChefHat,
-    parking: Car,
-    beach: Waves,
-    "beach access": Waves,
-  }
+    searchQuery !== "" || bedrooms !== "all" || destination !== "all" || priceRange[0] > 0 || priceRange[1] < 10000
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="bg-gradient-to-r from-emerald-700 to-emerald-600 text-white py-16">
+      <section className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-            {destination !== "all"
-              ? `Luxury Villas in ${destination.charAt(0).toUpperCase() + destination.slice(1).replace(/-/g, " ")}`
-              : "Luxury Caribbean Villas"}
-          </h1>
-          <p className="text-xl text-emerald-100 max-w-2xl text-pretty">
-            Discover handpicked luxury villas across the Caribbean. Each property is verified for quality and
-            authenticity.
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-balance">Luxury Caribbean Villas</h1>
+          <p className="text-emerald-100/80 text-lg max-w-2xl">
+            Discover handpicked luxury villas across the Caribbean's most exclusive destinations
           </p>
         </div>
       </section>
 
-      <section className="bg-card border-b sticky top-16 z-40 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <Input
-                  type="text"
-                  placeholder="Search by name, location, or amenities..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+      <section className="py-6 bg-card border-b sticky top-0 z-40">
+        <div className="container mx-auto px-4">
+          <div className="hidden lg:flex items-center gap-4 flex-wrap">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, location, or amenities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
 
-            <div className="hidden lg:flex items-center gap-4">
-              <Select value={destination} onValueChange={setDestination}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="Destination" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Destinations</SelectItem>
-                  <SelectItem value="barbados">Barbados</SelectItem>
-                  <SelectItem value="jamaica">Jamaica</SelectItem>
-                  <SelectItem value="st-lucia">St. Lucia</SelectItem>
-                  <SelectItem value="st-barthelemy">St. Barthélemy</SelectItem>
-                </SelectContent>
-              </Select>
+            <Select value={destination} onValueChange={setDestination}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Destination" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Destinations</SelectItem>
+                <SelectItem value="barbados">Barbados</SelectItem>
+                <SelectItem value="jamaica">Jamaica</SelectItem>
+                <SelectItem value="st-lucia">St. Lucia</SelectItem>
+                <SelectItem value="st-barthelemy">St. Barthélemy</SelectItem>
+                <SelectItem value="st-maarten">St. Maarten</SelectItem>
+                <SelectItem value="antigua">Antigua</SelectItem>
+              </SelectContent>
+            </Select>
 
-              <Select value={bedrooms} onValueChange={setBedrooms}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Bedrooms" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Beds</SelectItem>
-                  <SelectItem value="1">1+ Beds</SelectItem>
-                  <SelectItem value="2">2+ Beds</SelectItem>
-                  <SelectItem value="3">3+ Beds</SelectItem>
-                  <SelectItem value="4">4+ Beds</SelectItem>
-                  <SelectItem value="5">5+ Beds</SelectItem>
-                </SelectContent>
-              </Select>
+            <Select value={bedrooms} onValueChange={setBedrooms}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Bedrooms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any Beds</SelectItem>
+                <SelectItem value="1">1+ Beds</SelectItem>
+                <SelectItem value="2">2+ Beds</SelectItem>
+                <SelectItem value="3">3+ Beds</SelectItem>
+                <SelectItem value="4">4+ Beds</SelectItem>
+                <SelectItem value="5">5+ Beds</SelectItem>
+              </SelectContent>
+            </Select>
 
-              <div className="flex items-center gap-2 min-w-[200px]">
-                <span className="text-sm font-medium whitespace-nowrap">Price:</span>
-                <Slider value={priceRange} onValueChange={setPriceRange} max={10000} step={100} className="w-32" />
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  ${priceRange[0]}-${priceRange[1]}
-                </span>
-              </div>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="featured">Featured</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="bedrooms">Most Bedrooms</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="name">Name A-Z</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1">
-                  <X className="w-4 h-4" />
-                  Clear
-                </Button>
-              )}
+            <div className="flex items-center gap-2 min-w-[200px]">
+              <span className="text-sm font-medium whitespace-nowrap">Price:</span>
+              <Slider value={priceRange} onValueChange={setPriceRange} max={10000} step={100} className="w-32" />
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                ${priceRange[0]}-${priceRange[1]}
+              </span>
             </div>
 
-            <Button
-              variant="outline"
-              className="lg:hidden gap-2 bg-transparent"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Filters
-              {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-1">
-                  Active
-                </Badge>
-              )}
-            </Button>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="featured">Featured</SelectItem>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="bedrooms">Most Bedrooms</SelectItem>
+                <SelectItem value="rating">Highest Rated</SelectItem>
+                <SelectItem value="name">Name A-Z</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1">
+                <X className="w-4 h-4" />
+                Clear
+              </Button>
+            )}
           </div>
+
+          <Button
+            variant="outline"
+            className="lg:hidden gap-2 bg-transparent"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Filters
+            {hasActiveFilters && (
+              <Badge variant="secondary" className="ml-1">
+                Active
+              </Badge>
+            )}
+          </Button>
 
           {showFilters && (
             <div className="lg:hidden mt-4 pt-4 border-t space-y-4">
@@ -280,6 +257,8 @@ export default function VillasClientPage() {
                   <SelectItem value="jamaica">Jamaica</SelectItem>
                   <SelectItem value="st-lucia">St. Lucia</SelectItem>
                   <SelectItem value="st-barthelemy">St. Barthélemy</SelectItem>
+                  <SelectItem value="st-maarten">St. Maarten</SelectItem>
+                  <SelectItem value="antigua">Antigua</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -367,11 +346,6 @@ export default function VillasClientPage() {
                   Clear All Filters
                 </Button>
               )}
-              {villas.length === 0 && (
-                <Link href="/admin/properties">
-                  <Button className="ml-4 bg-emerald-600 hover:bg-emerald-700">Go to Admin Panel</Button>
-                </Link>
-              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -382,11 +356,14 @@ export default function VillasClientPage() {
                 >
                   <Link href={`/villas/${villa.id}`}>
                     <div className="aspect-[4/3] relative overflow-hidden">
-                      <Image
-                        src={villa.image_url || "/placeholder.svg"}
-                        alt={`${villa.name} - Luxury villa in ${villa.location} with ${villa.bedrooms} bedrooms, featuring ${villa.amenities?.slice(0, 2).join(" and ") || "premium amenities"}`}
+                      <DynamicImage
+                        src={villa.images.length > 0 ? villa.images : villa.image_url}
+                        alt={`${villa.name} - Luxury villa in ${villa.location}`}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        propertyType="villa"
+                        enableGallery={villa.images.length > 1}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       {villa.rating > 0 && (
@@ -396,72 +373,67 @@ export default function VillasClientPage() {
                         </Badge>
                       )}
                       <div className="absolute bottom-4 left-4 right-4">
-                        <h3 className="font-bold text-lg text-white mb-1 line-clamp-1">{villa.name}</h3>
-                        <p className="text-sm text-white/90 flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
+                        <h3 className="text-lg font-semibold text-white line-clamp-1 drop-shadow-lg">{villa.name}</h3>
+                        <div className="flex items-center text-white/90 text-sm mt-1">
+                          <MapPin className="w-3 h-3 mr-1" />
                           {villa.location}
-                        </p>
+                        </div>
                       </div>
                     </div>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                        {villa.bedrooms > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Bed className="w-4 h-4" />
-                            {villa.bedrooms}
-                          </span>
-                        )}
-                        {villa.bathrooms > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Bath className="w-4 h-4" />
-                            {villa.bathrooms}
-                          </span>
-                        )}
-                        {villa.guests > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            {villa.guests}
-                          </span>
-                        )}
-                      </div>
-
-                      {villa.amenities.length > 0 && (
-                        <div className="flex items-center gap-2 mb-4">
-                          {villa.amenities.slice(0, 4).map((amenity: string, idx: number) => {
-                            const Icon = amenityIcons[amenity.toLowerCase()] || Wifi
-                            return (
-                              <div
-                                key={idx}
-                                className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center"
-                                title={amenity}
-                              >
-                                <Icon className="w-4 h-4 text-emerald-600" />
-                              </div>
-                            )
-                          })}
-                          {villa.amenities.length > 4 && (
-                            <span className="text-xs text-muted-foreground">+{villa.amenities.length - 4} more</span>
-                          )}
+                  </Link>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                      {villa.bedrooms > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Bed className="w-4 h-4" />
+                          <span>{villa.bedrooms}</span>
                         </div>
                       )}
-
-                      <div className="flex items-center justify-between pt-4 border-t">
-                        <div>
-                          {villa.price > 0 ? (
-                            <>
-                              <p className="text-2xl font-bold text-emerald-700">${villa.price.toLocaleString()}</p>
-                              <p className="text-xs text-muted-foreground">per night</p>
-                            </>
-                          ) : (
-                            <p className="text-sm font-medium text-emerald-700">Contact for Price</p>
-                          )}
+                      {villa.bathrooms > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Bath className="w-4 h-4" />
+                          <span>{villa.bathrooms}</span>
                         </div>
-                        <span className="text-sm font-medium text-emerald-700 group-hover:underline">
-                          View Details →
-                        </span>
+                      )}
+                      {villa.guests > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          <span>{villa.guests}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {villa.amenities.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {villa.amenities.slice(0, 3).map((amenity, i) => (
+                          <Badge key={i} variant="secondary" className="text-xs">
+                            {amenity}
+                          </Badge>
+                        ))}
+                        {villa.amenities.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{villa.amenities.length - 3}
+                          </Badge>
+                        )}
                       </div>
-                    </CardContent>
-                  </Link>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        {villa.price > 0 ? (
+                          <>
+                            <span className="text-2xl font-bold text-emerald-600">${villa.price}</span>
+                            <span className="text-muted-foreground text-sm">/night</span>
+                          </>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Contact for pricing</span>
+                        )}
+                      </div>
+                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" asChild>
+                        <Link href={`/villas/${villa.id}`}>View Details</Link>
+                      </Button>
+                    </div>
+                  </CardContent>
                 </Card>
               ))}
             </div>

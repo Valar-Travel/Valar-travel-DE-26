@@ -33,7 +33,7 @@ export const dynamic = "force-dynamic"
 
 const CONTACT_PHONE = "+49 160 92527436"
 const WHATSAPP_LINK = "https://wa.me/4916092527436"
-const CONTACT_EMAIL = "sarah@valartravel.de"
+const CONTACT_EMAIL = "hello@valartravel.de"
 
 type Props = {
   params: { slug: string }
