@@ -111,6 +111,7 @@ export function CheckoutClient({ villa }: CheckoutClientProps) {
   const [guests, setGuests] = useState(2)
   const [paymentTier, setPaymentTier] = useState<PaymentTier>("50")
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   const nights =
     checkIn && checkOut ? Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)) : 0
@@ -527,22 +528,28 @@ export function CheckoutClient({ villa }: CheckoutClientProps) {
 
             {/* Step 4: Success */}
             {step === "success" && (
-              <Card>
+              <Card className="overflow-hidden">
+                <div className="h-2 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600" />
                 <CardContent className="py-12">
                   <div className="text-center space-y-6">
-                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-                      <Check className="w-10 h-10 text-emerald-600" />
+                    <div className="w-24 h-24 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-full flex items-center justify-center mx-auto shadow-lg animate-in zoom-in duration-500">
+                      <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center">
+                        <Check className="w-8 h-8 text-white stroke-[3]" />
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold">Booking Confirmed!</h2>
-                      <p className="text-muted-foreground mt-2 max-w-md mx-auto">
-                        Your reservation for {villa.name} has been confirmed. You will receive a confirmation email
-                        shortly with all the details.
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+                      <h2 className="text-3xl font-bold text-foreground">Booking Confirmed!</h2>
+                      <p className="text-muted-foreground mt-3 max-w-md mx-auto leading-relaxed">
+                        Your reservation for <span className="font-semibold text-foreground">{villa.name}</span> has been confirmed. 
+                        Check your email for a detailed confirmation with check-in instructions.
                       </p>
                     </div>
 
-                    <div className="p-6 bg-slate-50 rounded-xl text-left max-w-md mx-auto">
-                      <h3 className="font-semibold mb-4">Booking Details</h3>
+                    <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl text-left max-w-md mx-auto border border-slate-200/60 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <CalendarCheck className="w-4 h-4 text-emerald-600" />
+                        Booking Details
+                      </h3>
                       <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Property</span>
@@ -582,11 +589,30 @@ export function CheckoutClient({ villa }: CheckoutClientProps) {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-                      <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                    {/* What's Next */}
+                    <div className="text-left max-w-md mx-auto bg-emerald-50/50 rounded-xl p-5 border border-emerald-100 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
+                      <h4 className="font-semibold text-emerald-800 mb-3">What Happens Next?</h4>
+                      <ul className="space-y-2.5 text-sm text-emerald-700">
+                        <li className="flex items-start gap-2">
+                          <span className="w-5 h-5 bg-emerald-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-medium">1</span>
+                          <span>Confirmation email sent with your booking reference</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="w-5 h-5 bg-emerald-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-medium">2</span>
+                          <span>Our concierge will reach out within 24 hours</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="w-5 h-5 bg-emerald-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-medium">3</span>
+                          <span>Check-in details sent 48 hours before arrival</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-500">
+                      <Button asChild className="bg-emerald-600 hover:bg-emerald-700 h-11">
                         <Link href="/dashboard">View My Bookings</Link>
                       </Button>
-                      <Button variant="outline" asChild className="bg-transparent">
+                      <Button variant="outline" asChild className="bg-transparent h-11">
                         <Link href="/villas">Browse More Villas</Link>
                       </Button>
                     </div>
