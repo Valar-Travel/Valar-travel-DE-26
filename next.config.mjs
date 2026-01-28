@@ -128,6 +128,13 @@ const nextConfig = {
     if (isServer) {
       config.externals.push('p-limit', 'playwright', 'playwright-core')
     }
+    // Ignore tw-animate-css which is incompatible with Tailwind CSS v4
+    config.resolve = config.resolve || {}
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'tw-animate-css': false,
+      'tailwindcss-animate': false,
+    }
     config.plugins = config.plugins || []
     return config
   },
