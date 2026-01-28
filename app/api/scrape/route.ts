@@ -583,18 +583,115 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
 
   console.log("[v0] FINAL LOCATION for property:", location)
 
-  // Extract price
+  // Extract price - improved logic with multiple strategies
   let price = 0
-  const priceText = $("body").text()
-  const priceMatch = priceText.match(/\$[\d,]+(?:\s*[-–]\s*(?:night|Night|per night|\/night))?/)
-  if (priceMatch) {
-    price = Number.parseInt(priceMatch[0].replace(/[$,]/g, "")) || 0
+  
+  // Strategy 1: Look for price in specific price containers first (most reliable)
+  const priceSelectors = [
+    '.price',
+    '.property-price',
+    '.listing-price',
+    '[class*="price"]',
+    '.rate',
+    '.nightly-rate',
+    '[class*="rate"]',
+    '.cost',
+    '[data-price]',
+  ]
+  
+  for (const selector of priceSelectors) {
+    const priceEl = $(selector).first()
+    if (priceEl.length > 0) {
+      const priceContent = priceEl.text()
+      // Look for nightly rate pattern: $XXX /night or $XXX per night
+      const nightlyMatch = priceContent.match(/\$\s*([\d,]+)\s*(?:\/\s*night|per\s*night|nightly)/i)
+      if (nightlyMatch) {
+        const parsedPrice = Number.parseInt(nightlyMatch[1].replace(/,/g, ""))
+        if (parsedPrice >= 100 && parsedPrice <= 50000) {
+          price = parsedPrice
+          console.log("[v0] Found price in container:", price, "from selector:", selector)
+          break
+        }
+      }
+      // Look for "From $XXX" pattern
+      const fromMatch = priceContent.match(/(?:from|starting)\s*\$\s*([\d,]+)/i)
+      if (fromMatch) {
+        const parsedPrice = Number.parseInt(fromMatch[1].replace(/,/g, ""))
+        if (parsedPrice >= 100 && parsedPrice <= 50000) {
+          price = parsedPrice
+          console.log("[v0] Found 'from' price in container:", price)
+          break
+        }
+      }
+    }
   }
-  // Also try From $X pattern
-  const fromPriceMatch = priceText.match(/From\s*\$\s*([\d,]+)/i)
-  if (fromPriceMatch && !price) {
-    price = Number.parseInt(fromPriceMatch[1].replace(/,/g, "")) || 0
+  
+  // Strategy 2: Look for price tables or rate sections
+  if (!price) {
+    const rateTableText = $('table, .rates, .pricing, [class*="rate-table"]').text()
+    const rateMatches = rateTableText.match(/\$\s*([\d,]+)\s*(?:\/\s*night|per\s*night|nightly)?/gi)
+    if (rateMatches && rateMatches.length > 0) {
+      // Find the lowest reasonable price (likely the starting rate)
+      const prices = rateMatches
+        .map(m => Number.parseInt(m.replace(/[$,\s]/g, "")))
+        .filter(p => p >= 100 && p <= 50000)
+        .sort((a, b) => a - b)
+      if (prices.length > 0) {
+        price = prices[0] // Use the lowest price as the "from" price
+        console.log("[v0] Found price in rate table:", price)
+      }
+    }
   }
+  
+  // Strategy 3: Look for structured patterns in the body text
+  if (!price) {
+    const pageText = $("body").text()
+    
+    // Pattern priority: "From $X per night" > "$X / night" > "$X per night" > "From $X"
+    const patterns = [
+      /(?:from|starting\s+(?:at|from)?)\s*\$\s*([\d,]+)\s*(?:\/\s*night|per\s*night)/i,
+      /\$\s*([\d,]+)\s*(?:\/\s*night|per\s*night|nightly|\/night)/i,
+      /(?:nightly\s+rate|rate)\s*[:;]?\s*\$\s*([\d,]+)/i,
+      /(?:from|starting)\s*\$\s*([\d,]+)/i,
+    ]
+    
+    for (const pattern of patterns) {
+      const match = pageText.match(pattern)
+      if (match) {
+        const parsedPrice = Number.parseInt(match[1].replace(/,/g, ""))
+        // Validate the price is in a reasonable range for luxury villas ($100 - $50,000/night)
+        if (parsedPrice >= 100 && parsedPrice <= 50000) {
+          price = parsedPrice
+          console.log("[v0] Found price via pattern:", price, "pattern:", pattern.toString().substring(0, 50))
+          break
+        }
+      }
+    }
+  }
+  
+  // Strategy 4: If still no price, look for any dollar amounts and pick the most villa-like one
+  if (!price) {
+    const allPrices = $("body").text().match(/\$\s*([\d,]+)/g)
+    if (allPrices) {
+      const validPrices = allPrices
+        .map(p => Number.parseInt(p.replace(/[$,\s]/g, "")))
+        .filter(p => p >= 200 && p <= 25000) // Narrower range for this fallback
+        .sort((a, b) => b - a) // Sort descending
+      
+      // Pick a price in the typical luxury villa range ($500-$5000/night is most common)
+      const typicalPrice = validPrices.find(p => p >= 500 && p <= 5000)
+      if (typicalPrice) {
+        price = typicalPrice
+        console.log("[v0] Found typical range price:", price)
+      } else if (validPrices.length > 0) {
+        // Fall back to median price if no typical range found
+        price = validPrices[Math.floor(validPrices.length / 2)]
+        console.log("[v0] Using median price:", price)
+      }
+    }
+  }
+  
+  console.log("[v0] Final extracted price:", price)
 
   let description = ""
 

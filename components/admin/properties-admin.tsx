@@ -29,6 +29,9 @@ import {
   RefreshCw,
   Loader2,
   ImageIcon,
+  Pencil,
+  Save,
+  DollarSign,
 } from "lucide-react"
 import { toast } from "sonner"
 import { AddPropertyDialog } from "./add-property-dialog"
@@ -73,6 +76,9 @@ export function PropertiesAdmin() {
   const [scraperDialogOpen, setScraperDialogOpen] = useState(false)
   const [photoManagerOpen, setPhotoManagerOpen] = useState(false)
   const [photoManagerProperty, setPhotoManagerProperty] = useState<ScrapedProperty | null>(null)
+  const [editingPriceId, setEditingPriceId] = useState<string | null>(null)
+  const [editPriceValue, setEditPriceValue] = useState("")
+  const [savingPrice, setSavingPrice] = useState(false)
 
   const { data, error, mutate } = useSWR<ScrapedProperty[]>(
     `/api/admin/properties?filter=${filter}&search=${searchQuery}`,
@@ -283,6 +289,50 @@ export function PropertiesAdmin() {
   const handleManagePhotos = (property: ScrapedProperty) => {
     setPhotoManagerProperty(property)
     setPhotoManagerOpen(true)
+  }
+
+  const handleStartEditPrice = (property: ScrapedProperty) => {
+    setEditingPriceId(property.id)
+    setEditPriceValue(property.price_per_night?.toString() || "")
+  }
+
+  const handleSavePrice = async (propertyId: string) => {
+    const newPrice = Number.parseInt(editPriceValue)
+    if (isNaN(newPrice) || newPrice < 0) {
+      toast.error("Please enter a valid price")
+      return
+    }
+
+    setSavingPrice(true)
+    try {
+      const response = await fetch(`/api/admin/properties/${propertyId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
+        },
+        body: JSON.stringify({ price_per_night: newPrice }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) throw new Error(result.error || "Failed to update price")
+
+      toast.success("Price updated successfully")
+      setEditingPriceId(null)
+      setEditPriceValue("")
+      mutate()
+    } catch (error: any) {
+      console.error("[v0] Price update error:", error)
+      toast.error(error.message || "Failed to update price")
+    } finally {
+      setSavingPrice(false)
+    }
+  }
+
+  const handleCancelEditPrice = () => {
+    setEditingPriceId(null)
+    setEditPriceValue("")
   }
 
   const pendingCount = properties.filter((p) => !p.is_published).length
@@ -519,11 +569,61 @@ export function PropertiesAdmin() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
-                      {property.price_per_night && (
-                        <span className="font-semibold text-foreground">
-                          ${property.price_per_night}/{property.currency || "USD"} per night
-                        </span>
+                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3 items-center">
+                      {editingPriceId === property.id ? (
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          <Input
+                            type="number"
+                            value={editPriceValue}
+                            onChange={(e) => setEditPriceValue(e.target.value)}
+                            className="w-24 h-7 text-sm"
+                            placeholder="Price"
+                            min="0"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSavePrice(property.id)
+                              if (e.key === "Escape") handleCancelEditPrice()
+                            }}
+                          />
+                          <span className="text-xs">/night</span>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleSavePrice(property.id)}
+                            disabled={savingPrice}
+                          >
+                            {savingPrice ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 w-7 p-0"
+                            onClick={handleCancelEditPrice}
+                            disabled={savingPrice}
+                          >
+                            <XCircle className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => handleStartEditPrice(property)}
+                          className="font-semibold text-foreground hover:text-green-700 flex items-center gap-1 transition-colors"
+                          title="Click to edit price"
+                        >
+                          {property.price_per_night ? (
+                            <>
+                              ${property.price_per_night}/{property.currency || "USD"} per night
+                              <Pencil className="h-3 w-3 opacity-50" />
+                            </>
+                          ) : (
+                            <span className="text-orange-600 flex items-center gap-1">
+                              No price set
+                              <Pencil className="h-3 w-3" />
+                            </span>
+                          )}
+                        </button>
                       )}
                       {property.images && <span>{property.images.length} images</span>}
                       {property.amenities && <span>{property.amenities.length} amenities</span>}
@@ -622,7 +722,53 @@ export function PropertiesAdmin() {
                   </div>
                   <div>
                     <Label>Price per Night</Label>
-                    <p>{selectedProperty.price_per_night ? `$${selectedProperty.price_per_night}` : "N/A"}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {editingPriceId === selectedProperty.id ? (
+                        <>
+                          <DollarSign className="h-4 w-4" />
+                          <Input
+                            type="number"
+                            value={editPriceValue}
+                            onChange={(e) => setEditPriceValue(e.target.value)}
+                            className="w-28 h-8"
+                            placeholder="Price"
+                            min="0"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSavePrice(selectedProperty.id)
+                              if (e.key === "Escape") handleCancelEditPrice()
+                            }}
+                          />
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="h-8"
+                            onClick={() => handleSavePrice(selectedProperty.id)}
+                            disabled={savingPrice}
+                          >
+                            {savingPrice ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+                            Save
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            className="h-8"
+                            onClick={handleCancelEditPrice}
+                            disabled={savingPrice}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <button 
+                          onClick={() => handleStartEditPrice(selectedProperty)}
+                          className="flex items-center gap-2 hover:text-green-700 transition-colors"
+                        >
+                          {selectedProperty.price_per_night ? `$${selectedProperty.price_per_night}` : <span className="text-orange-600">Not set</span>}
+                          <Pencil className="h-3 w-3 opacity-50" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <Label>Status</Label>
