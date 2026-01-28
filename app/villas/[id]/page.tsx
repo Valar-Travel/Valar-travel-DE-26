@@ -515,6 +515,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
               <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4 md:mb-5 tracking-tight">
                 About This Property
               </h2>
+
               <div className="prose prose-sm md:prose-lg max-w-none">
                 <div className="text-muted-foreground leading-relaxed space-y-3 md:space-y-4">
                   {(villa.description || "Experience luxury Caribbean living at this stunning property.")
