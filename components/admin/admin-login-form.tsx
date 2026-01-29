@@ -7,14 +7,40 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Mail, Lock, Loader2, AlertCircle } from "lucide-react"
+import { Mail, Lock, Loader2, AlertCircle, RefreshCw } from "lucide-react"
 
 export function AdminLoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [resetting, setResetting] = useState(false)
+  const [resetMessage, setResetMessage] = useState("")
   const router = useRouter()
+
+  const handleResetAdmin = async () => {
+    setResetting(true)
+    setResetMessage("")
+    setError("")
+    try {
+      const res = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secretKey: "RESET_ADMIN_2024" }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setResetMessage(`Admin reset! Use: ${data.users?.map((u: {email: string}) => u.email).join(" or ")} with password: ${data.password}`)
+        setEmail("admin@valartravel.de")
+        setPassword("ValarAdmin2024!")
+      } else {
+        setError(data.error || "Reset failed")
+      }
+    } catch {
+      setError("Reset failed")
+    }
+    setResetting(false)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -106,6 +132,37 @@ export function AdminLoginForm() {
           "Sign In"
         )}
       </Button>
+
+      {resetMessage && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded text-sm">
+          {resetMessage}
+        </div>
+      )}
+
+      <div className="pt-4 border-t border-neutral-200">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleResetAdmin}
+          disabled={resetting}
+          className="w-full text-sm"
+        >
+          {resetting ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Resetting...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reset Admin Password (One-time Setup)
+            </>
+          )}
+        </Button>
+        <p className="text-xs text-neutral-500 mt-2 text-center">
+          Click this button to create/reset admin accounts
+        </p>
+      </div>
     </form>
   )
 }
