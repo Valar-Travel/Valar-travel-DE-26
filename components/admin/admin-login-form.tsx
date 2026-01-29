@@ -2,12 +2,18 @@
 
 import React from "react"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Mail, Lock, Loader2, AlertCircle, RefreshCw } from "lucide-react"
+
+// Authorized admin emails that can log in without password
+const AUTHORIZED_ADMIN_EMAILS = [
+  "sarahkuhmichel5@gmail.com",
+  "admin@valartravel.de",
+]
 
 export function AdminLoginForm() {
   const [email, setEmail] = useState("")
@@ -17,6 +23,12 @@ export function AdminLoginForm() {
   const [resetting, setResetting] = useState(false)
   const [resetMessage, setResetMessage] = useState("")
   const router = useRouter()
+
+  // Check if the current email is an authorized admin email
+  const isAuthorizedEmail = useMemo(() => {
+    const normalizedEmail = email.toLowerCase().trim()
+    return AUTHORIZED_ADMIN_EMAILS.some(e => e.toLowerCase() === normalizedEmail)
+  }, [email])
 
   const handleResetAdmin = async () => {
     setResetting(true)
@@ -92,24 +104,32 @@ export function AdminLoginForm() {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium text-neutral-700">
-          Password
-        </Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="pl-10 w-full border-neutral-300 focus:border-emerald-600 focus:ring-emerald-600"
-            placeholder="Enter your password"
-            required
-            autoComplete="current-password"
-          />
+      {!isAuthorizedEmail && (
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-sm font-medium text-neutral-700">
+            Password
+          </Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-10 w-full border-neutral-300 focus:border-emerald-600 focus:ring-emerald-600"
+              placeholder="Enter your password"
+              required
+              autoComplete="current-password"
+            />
+          </div>
         </div>
-      </div>
+      )}
+
+      {isAuthorizedEmail && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded text-sm">
+          Authorized admin email detected. Click Sign In to continue.
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
