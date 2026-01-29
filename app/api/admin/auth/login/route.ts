@@ -6,6 +6,12 @@ import bcrypt from "bcryptjs"
 const SESSION_COOKIE_NAME = "valar_admin_session"
 const SESSION_DURATION_HOURS = 24
 
+// Authorized admin emails that can log in without password
+const AUTHORIZED_ADMIN_EMAILS = [
+  "sarahkuhmichel5@gmail.com",
+  "admin@valartravel.de",
+]
+
 function generateToken(): string {
   const array = new Uint8Array(32)
   crypto.getRandomValues(array)
@@ -18,7 +24,15 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Admin login attempt for:", email)
 
-    if (!email || !password) {
+    if (!email) {
+      return NextResponse.json({ success: false, error: "Email is required" }, { status: 400 })
+    }
+
+    const normalizedEmail = email.toLowerCase().trim()
+    const isAuthorizedEmail = AUTHORIZED_ADMIN_EMAILS.some(e => e.toLowerCase() === normalizedEmail)
+
+    // Only require password if not an authorized admin email
+    if (!isAuthorizedEmail && !password) {
       return NextResponse.json({ success: false, error: "Email and password required" }, { status: 400 })
     }
 
@@ -44,12 +58,17 @@ export async function POST(request: NextRequest) {
       }, { status: 401 })
     }
 
-    // Verify password
-    console.log("[v0] Verifying password for user:", user.email)
-    const isValid = await bcrypt.compare(password, user.password_hash)
-    console.log("[v0] Password valid:", isValid)
-    if (!isValid) {
-      return NextResponse.json({ success: false, error: "Invalid email or password" }, { status: 401 })
+    // For authorized emails, skip password verification
+    if (!isAuthorizedEmail) {
+      // Verify password
+      console.log("[v0] Verifying password for user:", user.email)
+      const isValid = await bcrypt.compare(password, user.password_hash)
+      console.log("[v0] Password valid:", isValid)
+      if (!isValid) {
+        return NextResponse.json({ success: false, error: "Invalid email or password" }, { status: 401 })
+      }
+    } else {
+      console.log("[v0] Authorized email - skipping password verification for:", normalizedEmail)
     }
 
     // Create session token
