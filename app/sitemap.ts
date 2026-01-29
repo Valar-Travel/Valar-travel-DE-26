@@ -69,7 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { data: properties, error } = await supabase
       .from("scraped_luxury_properties")
-      .select("id, name, updated_at, created_at, location, images")
+      .select("id, updated_at, created_at")
       .order("created_at", { ascending: false })
 
     if (!error && properties) {
@@ -78,8 +78,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(property.updated_at || property.created_at),
         changeFrequency: "weekly" as const,
         priority: 0.8,
-        // Image sitemap for better image SEO
-        images: property.images?.slice(0, 5).map((img: string) => img) || [],
       }))
     }
   } catch (e) {

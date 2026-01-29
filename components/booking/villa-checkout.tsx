@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CalendarIcon, Users, MapPin, CreditCard, Check } from "lucide-react"
+import { CalendarIcon, Users, MapPin, CreditCard, Check, ShieldCheck, Clock, X } from "lucide-react"
 import { format } from "date-fns"
 
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
@@ -92,6 +92,37 @@ export function VillaCheckout({ isOpen, onClose, villa }: VillaCheckoutProps) {
             {step === "checkout" && "Complete Payment"}
             {step === "success" && "Booking Confirmed!"}
           </DialogTitle>
+          {/* Progress Steps - Progressive Disclosure */}
+          {step !== "success" && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              {[
+                { id: "dates", label: "Dates" },
+                { id: "checkout", label: "Payment" },
+              ].map((s, idx) => (
+                <div key={s.id} className="flex items-center">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
+                      step === s.id
+                        ? "bg-emerald-600 text-white"
+                        : step === "checkout" && s.id === "dates"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
+                    {step === "checkout" && s.id === "dates" ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      idx + 1
+                    )}
+                  </div>
+                  <span className={`text-xs ml-1 ${step === s.id ? "text-emerald-700 font-medium" : "text-muted-foreground"}`}>
+                    {s.label}
+                  </span>
+                  {idx < 1 && <div className="w-8 h-0.5 bg-slate-200 mx-2" />}
+                </div>
+              ))}
+            </div>
+          )}
         </DialogHeader>
 
         {step === "dates" && (
@@ -206,6 +237,22 @@ export function VillaCheckout({ isOpen, onClose, villa }: VillaCheckoutProps) {
               <CreditCard className="w-4 h-4 mr-2" />
               Proceed to Payment
             </Button>
+
+            {/* Trust Signals */}
+            <div className="flex flex-col gap-2 pt-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Secure booking via Stripe</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <X className="w-4 h-4 text-emerald-600" />
+                <span>Free cancellation up to 48 hours before check-in</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-emerald-600" />
+                <span>Instant confirmation</span>
+              </div>
+            </div>
           </div>
         )}
 
