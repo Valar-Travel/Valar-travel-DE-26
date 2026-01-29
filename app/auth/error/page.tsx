@@ -22,8 +22,14 @@ export default function AuthError() {
             <ul className="mt-2 text-sm text-amber-900 list-disc list-inside space-y-1">
               <li>The confirmation link may have expired</li>
               <li>The link may have already been used</li>
+              <li>Email confirmation may be enabled but emails aren't being delivered</li>
               <li>There might be a connection issue</li>
             </ul>
+          </div>
+          <div className="rounded-lg bg-blue-50 p-4">
+            <p className="text-sm text-blue-900">
+              <strong>Tip:</strong> If emails aren't arriving, you can disable email confirmation in Supabase Dashboard under Authentication &gt; Providers &gt; Email.
+            </p>
           </div>
           <div className="flex flex-col gap-2">
             <Link href="/auth/sign-up" className="w-full">
