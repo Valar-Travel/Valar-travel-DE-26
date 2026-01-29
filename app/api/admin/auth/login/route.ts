@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
+    console.log("[v0] Admin login attempt for:", email)
+
     if (!email || !password) {
       return NextResponse.json({ success: false, error: "Email and password required" }, { status: 400 })
     }
@@ -30,17 +32,22 @@ export async function POST(request: NextRequest) {
       .eq("is_active", true)
       .single()
 
+    console.log("[v0] User query result:", { user: user ? { id: user.id, email: user.email } : null, error: userError })
+
     if (userError || !user) {
+      console.log("[v0] User not found or error:", userError?.message, userError?.code)
       return NextResponse.json({ 
         success: false, 
         error: userError?.message === "JSON object requested, multiple (or no) rows returned" 
           ? "Admin user not found. Please run the SQL setup scripts." 
-          : "Invalid email or password" 
+          : `Invalid email or password (${userError?.code || 'user_not_found'})` 
       }, { status: 401 })
     }
 
     // Verify password
+    console.log("[v0] Verifying password for user:", user.email)
     const isValid = await bcrypt.compare(password, user.password_hash)
+    console.log("[v0] Password valid:", isValid)
     if (!isValid) {
       return NextResponse.json({ success: false, error: "Invalid email or password" }, { status: 401 })
     }
@@ -56,6 +63,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"
     const userAgent = request.headers.get("user-agent") || "unknown"
 
+    console.log("[v0] Creating session with token for user:", user.id)
     const { error: sessionError } = await supabase.from("admin_sessions").insert({
       admin_user_id: user.id,
       token,
@@ -65,9 +73,10 @@ export async function POST(request: NextRequest) {
     })
 
     if (sessionError) {
-      console.error("Session creation error:", sessionError)
-      return NextResponse.json({ success: false, error: "Failed to create session" }, { status: 500 })
+      console.error("[v0] Session creation error:", sessionError)
+      return NextResponse.json({ success: false, error: `Failed to create session: ${sessionError.message}` }, { status: 500 })
     }
+    console.log("[v0] Session created successfully")
 
     // Update last login
     await supabase.from("admin_users").update({ last_login: new Date().toISOString() }).eq("id", user.id)
