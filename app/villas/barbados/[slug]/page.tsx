@@ -26,8 +26,10 @@ import {
   Shield,
   Award,
   Clock,
+  Info,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { parsePropertyDescription } from "@/lib/parse-property-description"
 
 export const dynamic = "force-dynamic"
 
@@ -100,10 +102,13 @@ export default async function BarbadosVillaPage({ params }: Props) {
     label: amenity,
   }))
 
-  const propertyImages =
+const propertyImages =
     property.images && property.images.length > 0
       ? property.images
       : [`/placeholder.svg?height=600&width=800&query=${encodeURIComponent(property.name + " luxury villa barbados")}`]
+
+  // Parse description to extract clean sections and remove duplicates
+  const parsedDescription = parsePropertyDescription(property.description)
 
   return (
     <div className="min-h-screen bg-background">
@@ -187,21 +192,79 @@ export default async function BarbadosVillaPage({ params }: Props) {
 
             <Separator className="bg-border/40" />
 
-            {/* Description - Better typography */}
+{/* Description - Better typography */}
             <div>
               <h2 className="text-xl md:text-2xl font-semibold mb-5 tracking-tight">About This Villa</h2>
               <div className="prose prose-lg max-w-none">
                 <div className="text-muted-foreground leading-relaxed space-y-4">
-                  {(property.description || "")
-                    .split(/\n\n|\n/)
-                    .filter((p: string) => p.trim())
-                    .map((paragraph: string, idx: number) => (
+                  {parsedDescription.description.length > 0 ? (
+                    parsedDescription.description.map((paragraph: string, idx: number) => (
                       <p key={idx} className="text-base md:text-lg leading-7 md:leading-8 text-pretty">
-                        {paragraph.trim()}
+                        {paragraph}
                       </p>
-                    ))}
+                    ))
+                  ) : (
+                    <p className="text-base md:text-lg leading-7 md:leading-8 text-pretty">
+                      Experience luxury Caribbean living at this stunning villa.
+                    </p>
+                  )}
                 </div>
               </div>
+
+              {/* Bedroom Details */}
+              {parsedDescription.bedroomDetails.length > 0 && (
+                <div className="mt-6 md:mt-8">
+                  <h3 className="text-base md:text-lg font-semibold mb-3 tracking-tight flex items-center gap-2">
+                    <Bed className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                    Bedroom Configuration
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {parsedDescription.bedroomDetails.map((detail: string, idx: number) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 text-sm"
+                      >
+                        <span className="text-muted-foreground">{detail}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Staff Included */}
+              {parsedDescription.staff.length > 0 && (
+                <div className="mt-6 md:mt-8">
+                  <h3 className="text-base md:text-lg font-semibold mb-3 tracking-tight flex items-center gap-2">
+                    <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                    Staff Included
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {parsedDescription.staff.map((role: string, idx: number) => (
+                      <Badge key={idx} variant="secondary" className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border-emerald-200">
+                        {role}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* House Policies */}
+              {parsedDescription.policies.length > 0 && (
+                <div className="mt-6 md:mt-8">
+                  <h3 className="text-base md:text-lg font-semibold mb-3 tracking-tight flex items-center gap-2">
+                    <Info className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                    House Policies
+                  </h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {parsedDescription.policies.slice(0, 8).map((policy: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-emerald-600 mt-1">•</span>
+                        <span>{policy}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             <Separator className="bg-border/40" />
