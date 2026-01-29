@@ -63,13 +63,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  // Fetch all properties from database
+  // Fetch all properties from database with images for image sitemap
   let propertyPages: MetadataRoute.Sitemap = []
 
   try {
     const { data: properties, error } = await supabase
       .from("scraped_luxury_properties")
-      .select("id, name, updated_at, created_at, location")
+      .select("id, name, updated_at, created_at, location, images")
       .order("created_at", { ascending: false })
 
     if (!error && properties) {
@@ -77,7 +77,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${SITE_URL}/villas/${property.id}`,
         lastModified: new Date(property.updated_at || property.created_at),
         changeFrequency: "weekly" as const,
-        priority: 0.7,
+        priority: 0.8,
+        // Image sitemap for better image SEO
+        images: property.images?.slice(0, 5).map((img: string) => img) || [],
       }))
     }
   } catch (e) {
