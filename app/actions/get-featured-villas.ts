@@ -31,6 +31,7 @@ async function fetchWithRetry<T>(
 
 export async function getFeaturedVillas(): Promise<FeaturedVilla[]> {
   try {
+    console.log("[v0] getFeaturedVillas: Starting to fetch featured villas")
     const supabase = await createClient()
 
     const now = new Date()
@@ -38,6 +39,7 @@ export async function getFeaturedVillas(): Promise<FeaturedVilla[]> {
     const diff = now.getTime() - startOfYear.getTime()
     const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24))
 
+    console.log("[v0] getFeaturedVillas: Querying database...")
     const { data: properties, error } = await fetchWithRetry(() =>
       supabase
         .from("scraped_luxury_properties")
@@ -47,7 +49,15 @@ export async function getFeaturedVillas(): Promise<FeaturedVilla[]> {
         .limit(100),
     )
 
-    if (error || !properties || properties.length === 0) {
+    console.log("[v0] getFeaturedVillas: Query result - error:", error, "properties count:", properties?.length || 0)
+
+    if (error) {
+      console.error("[v0] getFeaturedVillas: Database error:", error)
+      return []
+    }
+    
+    if (!properties || properties.length === 0) {
+      console.log("[v0] getFeaturedVillas: No properties found in database")
       return []
     }
 
@@ -55,7 +65,10 @@ export async function getFeaturedVillas(): Promise<FeaturedVilla[]> {
       (p) => p.images && Array.isArray(p.images) && p.images.length > 0 && p.images[0],
     )
 
+    console.log("[v0] getFeaturedVillas: Valid properties with images:", validProperties.length)
+
     if (validProperties.length === 0) {
+      console.log("[v0] getFeaturedVillas: No properties with valid images found")
       return []
     }
 
@@ -79,8 +92,10 @@ export async function getFeaturedVillas(): Promise<FeaturedVilla[]> {
       })
     }
 
+    console.log("[v0] getFeaturedVillas: Returning", selectedVillas.length, "villas")
     return selectedVillas
-  } catch {
+  } catch (err) {
+    console.error("[v0] getFeaturedVillas: Caught error:", err)
     return []
   }
 }
