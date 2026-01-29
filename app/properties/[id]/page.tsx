@@ -49,6 +49,7 @@ import { VillaImageGallery } from "@/components/villa-image-gallery"
 import { InternalLinks, destinationLinks } from "@/components/internal-links"
 import { VillaBookingButton } from "@/components/booking/villa-booking-button"
 import { PropertyJsonLd } from "@/components/seo/property-json-ld"
+import { parsePropertyDescription } from "@/lib/parse-property-description"
 
 const CONTACT_PHONE = "+49 160 92527436"
 const WHATSAPP_LINK = "https://wa.me/4916092527436"
@@ -371,6 +372,9 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
   const bathrooms = property.bathrooms || null
   const maxGuests = property.max_guests || property.guests || null
 
+  // Parse description to extract clean sections and remove duplicates
+  const parsedDescription = parsePropertyDescription(property.description)
+
   return (
     <div className="min-h-screen bg-background">
       {/* JSON-LD Structured Data for SEO */}
@@ -510,26 +514,85 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
             <Separator className="bg-border/40" />
 
-            {/* Description - Improved readability with better typography */}
+{/* Description - Improved readability with better typography */}
             <div>
               <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4 md:mb-5 tracking-tight">
                 About This Property
               </h2>
+
               <div className="prose prose-sm md:prose-lg max-w-none">
                 <div className="text-muted-foreground leading-relaxed space-y-3 md:space-y-4">
-                  {(property.description || "Experience luxury Caribbean living at this stunning property.")
-                    .split(/\n\n|\n/)
-                    .filter((p: string) => p.trim())
-                    .map((paragraph: string, idx: number) => (
+                  {parsedDescription.description.length > 0 ? (
+                    parsedDescription.description.map((paragraph: string, idx: number) => (
                       <p
                         key={idx}
                         className="text-sm md:text-base lg:text-lg leading-6 md:leading-7 lg:leading-8 text-pretty"
                       >
-                        {paragraph.trim()}
+                        {paragraph}
                       </p>
-                    ))}
+                    ))
+                  ) : (
+                    <p className="text-sm md:text-base lg:text-lg leading-6 md:leading-7 lg:leading-8 text-pretty">
+                      Experience luxury Caribbean living at this stunning property.
+                    </p>
+                  )}
                 </div>
               </div>
+
+              {/* Bedroom Details */}
+              {parsedDescription.bedroomDetails.length > 0 && (
+                <div className="mt-6 md:mt-8">
+                  <h3 className="text-base md:text-lg font-semibold mb-3 tracking-tight flex items-center gap-2">
+                    <Bed className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                    Bedroom Configuration
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {parsedDescription.bedroomDetails.map((detail: string, idx: number) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 text-sm"
+                      >
+                        <span className="text-muted-foreground">{detail}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Staff Included */}
+              {parsedDescription.staff.length > 0 && (
+                <div className="mt-6 md:mt-8">
+                  <h3 className="text-base md:text-lg font-semibold mb-3 tracking-tight flex items-center gap-2">
+                    <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                    Staff Included
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {parsedDescription.staff.map((role: string, idx: number) => (
+                      <Badge key={idx} variant="secondary" className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border-emerald-200">
+                        {role}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* House Policies */}
+              {parsedDescription.policies.length > 0 && (
+                <div className="mt-6 md:mt-8">
+                  <h3 className="text-base md:text-lg font-semibold mb-3 tracking-tight flex items-center gap-2">
+                    <Info className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                    House Policies
+                  </h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {parsedDescription.policies.slice(0, 8).map((policy: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-emerald-600 mt-1">•</span>
+                        <span>{policy}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Amenities - Cleaner grid with better spacing */}
