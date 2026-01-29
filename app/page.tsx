@@ -1,7 +1,17 @@
-// v0 deployment fix - 2026-01-27
+// v0 deployment fix - 2026-01-28
 import type { Metadata } from "next"
-import PageClient from "@/components/home-page-client"
+import dynamic from "next/dynamic"
 import { getFeaturedVillas } from "@/app/actions/get-featured-villas"
+
+// Dynamic import to fix chunk loading issues
+const HomePageClient = dynamic(() => import("@/components/home-page-client"), {
+  ssr: true,
+  loading: () => (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="animate-pulse text-muted-foreground">Loading...</div>
+    </div>
+  ),
+})
 
 export const metadata: Metadata = {
   title: "Luxury Caribbean Villa Rentals - Barbados, St. Lucia, Jamaica & St. Barthélemy",
@@ -32,5 +42,5 @@ export default async function HomePage() {
     // Continue with empty array - homepage will still render
   }
   
-  return <PageClient featuredVillas={featuredVillas} />
+  return <HomePageClient featuredVillas={featuredVillas} />
 }

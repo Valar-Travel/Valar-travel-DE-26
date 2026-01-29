@@ -389,6 +389,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
           images: villaImages,
           amenities: amenities,
           rating: villa.rating,
+          review_count: villa.review_count,
         }}
         url={`${SITE_URL}/villas/${villa.id}`}
       />

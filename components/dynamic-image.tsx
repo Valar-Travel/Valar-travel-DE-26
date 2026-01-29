@@ -161,7 +161,7 @@ export function DynamicImage({
           priority={priority}
           onError={handleError}
           onLoad={handleLoad}
-          unoptimized
+          quality={85}
         />
 
         {/* Gallery navigation */}
@@ -222,7 +222,7 @@ export function DynamicImage({
         priority={priority}
         onError={handleError}
         onLoad={handleLoad}
-        unoptimized
+        quality={85}
       />
 
       {/* Gallery navigation for non-fill mode */}

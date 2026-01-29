@@ -1,4 +1,4 @@
-/* v0 deployment fix - 2026-01-19 */
+/* v0 deployment fix - 2026-01-28 - removed tw-animate-css */
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
@@ -115,8 +115,6 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -126,7 +124,7 @@
   }
 }
 
-/* Animation keyframes (replacing tw-animate-css) */
+/* Animation keyframes */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -152,6 +150,16 @@
   to { transform: scale(1); opacity: 1; }
 }
 
+@keyframes zoomIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes zoomOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.95); opacity: 0; }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
@@ -170,6 +178,14 @@
 
 .animate-scaleIn {
   animation: scaleIn 0.2s ease-out;
+}
+
+.animate-zoomIn {
+  animation: zoomIn 0.2s ease-out;
+}
+
+.animate-zoomOut {
+  animation: zoomOut 0.2s ease-out;
 }
 
 * {

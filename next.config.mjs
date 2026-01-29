@@ -13,6 +13,13 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    // Modern formats for 30-50% smaller files
+    formats: ['image/avif', 'image/webp'],
+    // Responsive breakpoints for luxury visual quality
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // 1 year cache for optimized images
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       {
         protocol: 'https',
@@ -111,16 +118,22 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: true,
   },
   serverExternalPackages: ['playwright', 'playwright-core', 'cheerio', 'cloudinary', 'openai', 'p-limit'],
   experimental: {
-    // ppr: true, // Partial Prerendering - enable after deployment testing
+    ppr: true, // Partial Prerendering - static shell + dynamic data
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'date-fns', 'recharts'],
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals.push('p-limit', 'playwright', 'playwright-core')
+    }
+    // Ignore tw-animate-css which is incompatible with Tailwind CSS v4
+    config.resolve = config.resolve || {}
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'tw-animate-css': false,
+      'tailwindcss-animate': false,
     }
     config.plugins = config.plugins || []
     return config

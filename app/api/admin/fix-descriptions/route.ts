@@ -5,17 +5,40 @@ export async function POST() {
   try {
     const supabase = await createClient()
 
-    // Find all properties with missing descriptions
+    // Find all properties with missing, empty, or very short descriptions
     const { data: propertiesWithoutDescription, error: fetchError } = await supabase
       .from("scraped_luxury_properties")
-      .select("id, name, location, bedrooms, bathrooms, sleeps")
+      .select("id, name, location, bedrooms, bathrooms, sleeps, description")
       .or("description.is.null,description.eq.")
+    
+    // Also fetch properties with very short descriptions (less than 50 chars)
+    const { data: shortDescProperties, error: shortError } = await supabase
+      .from("scraped_luxury_properties")
+      .select("id, name, location, bedrooms, bathrooms, sleeps, description")
+      .not("description", "is", null)
+      .neq("description", "")
+    
+    // Filter for short descriptions on the client side
+    const shortDescFiltered = shortDescProperties?.filter(p => 
+      p.description && p.description.length < 50
+    ) || []
+    
+    // Combine both sets
+    const allPropertiesToFix = [
+      ...(propertiesWithoutDescription || []),
+      ...shortDescFiltered
+    ]
+    
+    // Remove duplicates by id
+    const uniqueProperties = Array.from(
+      new Map(allPropertiesToFix.map(p => [p.id, p])).values()
+    )
 
     if (fetchError) {
       return NextResponse.json({ error: fetchError.message }, { status: 500 })
     }
 
-    if (!propertiesWithoutDescription || propertiesWithoutDescription.length === 0) {
+    if (uniqueProperties.length === 0) {
       return NextResponse.json({ 
         message: "All properties already have descriptions",
         updated: 0 
@@ -26,7 +49,7 @@ export async function POST() {
     let updatedCount = 0
     const errors: string[] = []
 
-    for (const property of propertiesWithoutDescription) {
+    for (const property of uniqueProperties) {
       const description = generateDescription(property)
       
       const { error: updateError } = await supabase
@@ -44,7 +67,9 @@ export async function POST() {
     return NextResponse.json({
       message: `Updated ${updatedCount} properties with descriptions`,
       updated: updatedCount,
-      total: propertiesWithoutDescription.length,
+      total: uniqueProperties.length,
+      nullOrEmpty: propertiesWithoutDescription?.length || 0,
+      shortDescriptions: shortDescFiltered.length,
       errors: errors.length > 0 ? errors : undefined
     })
 

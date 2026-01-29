@@ -79,6 +79,7 @@ export function PropertiesAdmin() {
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null)
   const [editPriceValue, setEditPriceValue] = useState("")
   const [savingPrice, setSavingPrice] = useState(false)
+  const [isFixingDescriptions, setIsFixingDescriptions] = useState(false)
 
   const { data, error, mutate } = useSWR<ScrapedProperty[]>(
     `/api/admin/properties?filter=${filter}&search=${searchQuery}`,
@@ -335,6 +336,34 @@ export function PropertiesAdmin() {
     setEditPriceValue("")
   }
 
+  const handleFixDescriptions = async () => {
+    setIsFixingDescriptions(true)
+    try {
+      const response = await fetch("/api/admin/fix-descriptions", {
+        method: "POST",
+        headers: {
+          "x-admin-auth": localStorage.getItem("valar_admin_auth") || "",
+        },
+      })
+      
+      const result = await response.json()
+      
+      if (!response.ok) throw new Error(result.error || "Failed to fix descriptions")
+      
+      toast.success(`Fixed ${result.updated} property descriptions`, {
+        description: result.nullOrEmpty 
+          ? `${result.nullOrEmpty} empty, ${result.shortDescriptions} short`
+          : undefined
+      })
+      mutate()
+    } catch (error: any) {
+      console.error("[v0] Fix descriptions error:", error)
+      toast.error(error.message || "Failed to fix descriptions")
+    } finally {
+      setIsFixingDescriptions(false)
+    }
+  }
+
   const pendingCount = properties.filter((p) => !p.is_published).length
   const publishedCount = properties.filter((p) => p.is_published).length
 
@@ -382,6 +411,24 @@ export function PropertiesAdmin() {
               <Button variant="outline" onClick={() => mutate()} size="sm">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleFixDescriptions} 
+                disabled={isFixingDescriptions}
+                size="sm"
+              >
+                {isFixingDescriptions ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Fixing...
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Fix Descriptions
+                  </>
+                )}
               </Button>
               {properties.length > 0 && (
                 <Button variant="destructive" onClick={handleDeleteAll} disabled={isDeletingAll} size="sm">
