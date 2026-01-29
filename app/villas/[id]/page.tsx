@@ -50,6 +50,7 @@ import { VillaImageGallery } from "@/components/villa-image-gallery"
 import { InternalLinks, destinationLinks } from "@/components/internal-links"
 import { VillaBookingButton } from "@/components/booking/villa-booking-button"
 import { PropertyJsonLd } from "@/components/seo/property-json-ld"
+import { SimilarVillas } from "@/components/similar-villas"
 
 const CONTACT_PHONE = "+49 160 92527436"
 const WHATSAPP_LINK = "https://wa.me/4916092527436"
@@ -822,6 +823,9 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
           </div>
         </div>
       </section>
+
+      {/* Similar Villas - Internal Linking for SEO */}
+      <SimilarVillas currentVillaId={villa.id} location={villa.location} limit={3} />
 
       {/* Related Destinations - Internal Linking for SEO */}
       <section className="container mx-auto px-4 py-12 border-t">
