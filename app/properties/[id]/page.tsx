@@ -388,6 +388,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           images: propertyImages,
           amenities: amenities,
           rating: property.rating,
+          review_count: property.review_count,
         }}
         url={`${SITE_URL}/properties/${property.id}`}
       />
