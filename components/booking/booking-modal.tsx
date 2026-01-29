@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, Users, MapPin } from "lucide-react"
+import { CalendarIcon, Users, MapPin, ShieldCheck, X, Clock } from "lucide-react"
 import { format } from "@/lib/date-utils"
 
 interface BookingModalProps {
@@ -188,6 +188,22 @@ export function BookingModal({ isOpen, onClose, deal }: BookingModalProps) {
           <Button onClick={handleBooking} disabled={!checkIn || !checkOut || loading} className="w-full">
             {loading ? "Saving Booking..." : "Save Booking"}
           </Button>
+
+          {/* Trust Signals */}
+          <div className="flex flex-col gap-2 pt-2 text-xs text-gray-600 border-t mt-4">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Secure booking</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <X className="w-4 h-4 text-emerald-600" />
+              <span>Free cancellation available</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-emerald-600" />
+              <span>Instant confirmation</span>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
