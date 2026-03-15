@@ -88,7 +88,7 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
       {/* Hero Section */}
       <section className="relative min-h-[500px] sm:min-h-[550px] md:min-h-[600px] lg:min-h-[650px] flex items-center justify-center overflow-hidden">
         {/* Background Image - absolute positioning to cover full section */}
-        <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 w-full h-full bg-emerald-900">
           <DynamicImage
             src="/images/destinations/st-lucia-pitons.jpg"
             alt="St. Lucia Pitons - Caribbean luxury villas backdrop"
@@ -96,12 +96,12 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
             sizes="100vw"
             className="object-cover object-center"
             priority
-            fallbackSrc="/st-lucia-pitons-luxury-resort.jpg"
+            fallbackSrc="/luxury-caribbean-villa.jpg"
           />
         </div>
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-900/85 via-emerald-800/70 to-emerald-950/85" />
+        {/* Gradient overlay - lighter to show background image */}
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-900/60 via-emerald-800/40 to-emerald-950/60" />
 
         {/* Content - centered with proper padding for mobile */}
         <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
