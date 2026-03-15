@@ -19,7 +19,14 @@ export function YouTubeEmbed({ videoId, title = "Video", className = "" }: YouTu
   return (
     <div className={`relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden ${className}`}>
       {!isLoaded ? (
-        <div className="absolute inset-0 flex items-center justify-center cursor-pointer group" onClick={handleLoad}>
+        <div 
+          className="absolute inset-0 flex items-center justify-center cursor-pointer group" 
+          onClick={handleLoad}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleLoad() }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Play video: ${title}`}
+        >
           <img
             src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
             alt={title}
