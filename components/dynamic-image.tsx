@@ -151,6 +151,16 @@ export function DynamicImage({
   // Ensure we always have a valid image source
   const displaySrc = (hasError || imageArray.length === 0 || !currentImage) ? fallback : currentImage
 
+  // Debug: Log image source information
+  console.log("[v0] DynamicImage:", { 
+    src: typeof src === 'string' ? src.substring(0, 50) : `array[${Array.isArray(src) ? src.length : 0}]`,
+    imageArrayLength: imageArray.length,
+    currentImage: currentImage?.substring(0, 50),
+    displaySrc: displaySrc?.substring(0, 50),
+    hasError,
+    fallback: fallback?.substring(0, 50)
+  })
+
   if (fill) {
     return (
       <div className="absolute inset-0 w-full h-full">
