@@ -66,9 +66,6 @@ export async function getFeaturedVillas(): Promise<FeaturedVilla[]> {
       const index = (offset + i) % validProperties.length
       const property = validProperties[index]
 
-      // Debug: Log full image URL
-      console.log("[v0] getFeaturedVillas - Villa:", property.name, "Full image URL:", property.images[0])
-      
       selectedVillas.push({
         id: property.id,
         name: property.name || "Luxury Villa",

@@ -160,7 +160,7 @@ export default async function AntiguaPage() {
               {villas.map((villa) => (
                 <Card key={villa.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-[4/3] relative">
-                    <Image src={villa.image || "/placeholder.svg"} alt={villa.name} fill className="object-cover" loading="lazy" />
+                    <Image src={villa.image || "/placeholder.svg"} alt={villa.name} fill className="object-cover" loading="lazy" unoptimized />
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">

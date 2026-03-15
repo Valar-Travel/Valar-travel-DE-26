@@ -151,9 +151,6 @@ export function DynamicImage({
   // Ensure we always have a valid image source
   const displaySrc = (hasError || imageArray.length === 0 || !currentImage) ? fallback : currentImage
 
-  // Debug: Log FULL image URL without truncation
-  console.log("[v0] DynamicImage FULL:", { displaySrc, hasError, imageArrayLength: imageArray.length })
-
   if (fill) {
     return (
       <div className="absolute inset-0 w-full h-full">

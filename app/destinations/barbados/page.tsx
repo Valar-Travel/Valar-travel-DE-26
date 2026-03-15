@@ -166,6 +166,7 @@ export default async function BarbadosPage() {
                         alt={villa.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        unoptimized
                       />
                     </div>
                     <CardContent className="p-4">
