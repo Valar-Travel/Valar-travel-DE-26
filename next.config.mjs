@@ -143,6 +143,7 @@ const nextConfig = {
     return config
   },
   generateBuildId: async () => {
+    // Force fresh build - timestamp: 2026-03-15T12:30
     return `build-${Date.now()}`
   },
   async headers() {
