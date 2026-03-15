@@ -153,7 +153,7 @@ export function DynamicImage({
 
   if (fill) {
     return (
-      <div className="relative w-full h-full" style={{ minHeight: '100%' }}>
+      <div className="absolute inset-0 w-full h-full">
         <Image
           src={displaySrc || "/placeholder.svg"}
           alt={alt}
@@ -165,7 +165,6 @@ export function DynamicImage({
           onError={handleError}
           onLoad={handleLoad}
           quality={85}
-          unoptimized={displaySrc?.startsWith('/') ? false : undefined}
         />
 
         {/* Gallery navigation */}
