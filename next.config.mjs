@@ -6,7 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 /** 
  * @type {import('next').NextConfig} 
  * Build fix: Disabled experimental.ppr (requires Next.js canary)
- * Last updated: 2026-03-15
+ * Last updated: 2026-03-15 12:15
  */
 const nextConfig = {
   outputFileTracingRoot: __dirname,
