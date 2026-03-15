@@ -121,7 +121,7 @@ const nextConfig = {
   },
   serverExternalPackages: ['playwright', 'playwright-core', 'cheerio', 'cloudinary', 'openai', 'p-limit'],
   experimental: {
-    ppr: true, // Partial Prerendering - static shell + dynamic data
+    // ppr: true, // Partial Prerendering requires Next.js canary - disabled for stable builds
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'date-fns', 'recharts'],
   },
   webpack: (config, { isServer }) => {

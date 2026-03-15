@@ -10,7 +10,10 @@
     "lint": "next lint",
     "scrape:properties": "tsx scripts/scrape-sunny-villa-properties.ts",
     "start": "next start",
-    "test:scraper": "tsx scripts/test-scraper.ts"
+    "test:scraper": "tsx scripts/test-scraper.ts",
+    "test": "tsx scripts/run-tests.ts",
+    "test:types": "tsc --noEmit",
+    "test:lint": "next lint"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.1",
