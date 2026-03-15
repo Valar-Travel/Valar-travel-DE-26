@@ -36,11 +36,8 @@ export default async function HomePage() {
   let featuredVillas: any[] = []
   
   try {
-    console.log("[v0] HomePage: Calling getFeaturedVillas...")
     featuredVillas = await getFeaturedVillas()
-    console.log("[v0] HomePage: Got", featuredVillas.length, "featured villas")
   } catch (error) {
-    console.error("[v0] HomePage: Error fetching featured villas:", error)
     // Continue with empty array - homepage will still render
   }
   
