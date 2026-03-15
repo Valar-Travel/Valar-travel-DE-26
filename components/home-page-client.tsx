@@ -90,17 +90,13 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
         {/* Background Image - absolute positioning to cover full section */}
         <div className="absolute inset-0 w-full h-full">
           <DynamicImage
-            src={[
-              "/images/destinations/st-lucia-pitons.jpg",
-              "/st-lucia-pitons-luxury-resort.jpg",
-              "/luxury-caribbean-villa.jpg"
-            ]}
-            alt="Caribbean luxury villas"
+            src="/images/destinations/st-lucia-pitons.jpg"
+            alt="St. Lucia Pitons - Caribbean luxury villas backdrop"
             fill
             sizes="100vw"
             className="object-cover object-center"
             priority
-            fallbackSrc="/luxury-caribbean-villa.jpg"
+            fallbackSrc="/st-lucia-pitons-luxury-resort.jpg"
           />
         </div>
 
