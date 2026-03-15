@@ -98,6 +98,7 @@ export default async function StBarthelemyPage() {
           fill
           className="object-cover"
           priority
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/85 via-emerald-800/70 to-emerald-950/85" />
         <div className="absolute inset-0 flex items-center justify-center text-center text-white">

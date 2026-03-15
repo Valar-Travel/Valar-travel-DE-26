@@ -20,6 +20,11 @@ const navigationItems = [
     href: "/destinations",
     items: [
       {
+        title: "Browse All Villas",
+        href: "/villas",
+        description: "View all luxury villas across the Caribbean",
+      },
+      {
         title: "Barbados",
         href: "/destinations/barbados",
         description: "Pristine beaches and British colonial charm",

@@ -91,11 +91,12 @@ export default async function BarbadosPage() {
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[500px]">
         <Image
-          src={getImageUrl(UNSPLASH_IMAGES.barbados.hero, 1920) || "/placeholder.svg"}
-          alt={UNSPLASH_IMAGES.barbados.hero.alt}
+          src="/images/destinations/barbados-beach.jpg"
+          alt="Pristine beaches of Barbados with turquoise waters"
           fill
           className="object-cover"
           priority
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
         <div className="absolute inset-0 flex items-center justify-center text-center text-white">
