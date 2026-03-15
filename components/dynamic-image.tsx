@@ -153,7 +153,7 @@ export function DynamicImage({
 
   if (fill) {
     return (
-      <>
+      <div className="absolute inset-0 w-full h-full">
         <Image
           src={displaySrc || "/placeholder.svg"}
           alt={alt}
@@ -209,7 +209,7 @@ export function DynamicImage({
             </div>
           </>
         )}
-      </>
+      </div>
     )
   }
 
