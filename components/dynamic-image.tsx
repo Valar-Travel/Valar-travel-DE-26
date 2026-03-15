@@ -151,6 +151,9 @@ export function DynamicImage({
   // Ensure we always have a valid image source
   const displaySrc = (hasError || imageArray.length === 0 || !currentImage) ? fallback : currentImage
 
+  // Check if source is a local path (starts with /)
+  const isLocalImage = displaySrc?.startsWith('/') && !displaySrc?.startsWith('//')
+
   if (fill) {
     return (
       <div className="absolute inset-0 w-full h-full">
@@ -165,6 +168,7 @@ export function DynamicImage({
           onError={handleError}
           onLoad={handleLoad}
           quality={85}
+          unoptimized={isLocalImage}
         />
 
         {/* Gallery navigation */}
@@ -226,6 +230,7 @@ export function DynamicImage({
         onError={handleError}
         onLoad={handleLoad}
         quality={85}
+        unoptimized={isLocalImage}
       />
 
       {/* Gallery navigation for non-fill mode */}
