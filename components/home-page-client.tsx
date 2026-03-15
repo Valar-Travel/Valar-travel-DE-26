@@ -10,7 +10,6 @@ import { MapPin, Search, Users, Bed, Bath } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { DynamicImage } from "@/components/dynamic-image"
-import Image from "next/image"
 
 interface FeaturedVilla {
   id: string
@@ -88,18 +87,13 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative min-h-[500px] sm:min-h-[550px] md:min-h-[600px] lg:min-h-[650px] flex items-center justify-center overflow-hidden">
-        {/* Background Image - absolute positioning to cover full section */}
-        <div className="absolute inset-0 w-full h-full">
-          <Image
-            src="/images/destinations/st-lucia-pitons.jpg"
-            alt="St. Lucia Pitons - Caribbean luxury villas backdrop"
-            fill
-            sizes="100vw"
-            className="object-cover object-center"
-            priority
-            quality={85}
-          />
-        </div>
+        {/* Background Image using CSS background-image for reliability */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/images/destinations/st-lucia-pitons.jpg')" }}
+          role="img"
+          aria-label="St. Lucia Pitons - Caribbean luxury villas backdrop"
+        />
 
         {/* Gradient overlay - lighter to show background image */}
         <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-900/60 via-emerald-800/40 to-emerald-950/60" />
