@@ -194,8 +194,14 @@ export default async function AntiguaPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-2xl font-bold text-emerald-700">${villa.price}</span>
-                        <span className="text-sm text-muted-foreground">/night</span>
+                        {villa.price >= 100 ? (
+                          <>
+                            <span className="text-2xl font-bold text-emerald-700">${villa.price}</span>
+                            <span className="text-sm text-muted-foreground">/night</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-medium text-emerald-700">Contact Us</span>
+                        )}
                       </div>
                       <Button asChild className="bg-emerald-700 hover:bg-emerald-800">
                         <Link href={`/villas/${villa.id}`}>View Details</Link>

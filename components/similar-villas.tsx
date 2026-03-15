@@ -120,15 +120,19 @@ export async function SimilarVillas({ currentVillaId, location, limit = 3 }: Sim
                     )}
                   </div>
 
-                  {villa.price_per_night > 0 && (
-                    <div className="mt-3 pt-3 border-t">
-                      <span className="text-lg font-bold text-emerald-700">
-                        {currency}
-                        {villa.price_per_night.toLocaleString()}
-                      </span>
-                      <span className="text-sm text-muted-foreground"> /night</span>
-                    </div>
-                  )}
+                  <div className="mt-3 pt-3 border-t">
+                    {villa.price_per_night >= 100 ? (
+                      <>
+                        <span className="text-lg font-bold text-emerald-700">
+                          {currency}
+                          {villa.price_per_night.toLocaleString()}
+                        </span>
+                        <span className="text-sm text-muted-foreground"> /night</span>
+                      </>
+                    ) : (
+                      <span className="text-base font-medium text-emerald-700">Contact Us</span>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </Link>

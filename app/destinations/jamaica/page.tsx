@@ -193,8 +193,14 @@ export default async function JamaicaPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-2xl font-bold text-green-700">${villa.price}</span>
-                        <span className="text-sm text-muted-foreground">/night</span>
+                        {villa.price >= 100 ? (
+                          <>
+                            <span className="text-2xl font-bold text-green-700">${villa.price}</span>
+                            <span className="text-sm text-muted-foreground">/night</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-medium text-green-700">Contact Us</span>
+                        )}
                       </div>
                       <Button asChild className="bg-green-700 hover:bg-green-800">
                         <Link href={`/villas/${villa.id}`}>View Details</Link>

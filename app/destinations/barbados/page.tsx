@@ -200,8 +200,14 @@ export default async function BarbadosPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-2xl font-bold text-emerald-700">${villa.price}</span>
-                          <span className="text-sm text-muted-foreground">/night</span>
+                          {villa.price >= 100 ? (
+                            <>
+                              <span className="text-2xl font-bold text-emerald-700">${villa.price}</span>
+                              <span className="text-sm text-muted-foreground">/night</span>
+                            </>
+                          ) : (
+                            <span className="text-base font-medium text-emerald-700">Contact Us</span>
+                          )}
                         </div>
                         <span className="text-sm font-medium text-emerald-700 group-hover:underline">
                           View Details →

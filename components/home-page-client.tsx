@@ -315,11 +315,17 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
                     </div>
                     <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-border/50">
                       <div>
-                        <span className="text-xs sm:text-sm text-muted-foreground">From </span>
-                        <span className="text-lg sm:text-xl md:text-2xl font-light text-emerald-700">
-                          ${villa.price}
-                        </span>
-                        <span className="text-xs sm:text-sm text-muted-foreground"> /night</span>
+                        {villa.price >= 100 ? (
+                          <>
+                            <span className="text-xs sm:text-sm text-muted-foreground">From </span>
+                            <span className="text-lg sm:text-xl md:text-2xl font-light text-emerald-700">
+                              ${villa.price}
+                            </span>
+                            <span className="text-xs sm:text-sm text-muted-foreground"> /night</span>
+                          </>
+                        ) : (
+                          <span className="text-base sm:text-lg font-medium text-emerald-700">Contact Us</span>
+                        )}
                       </div>
                       <Button
                         asChild

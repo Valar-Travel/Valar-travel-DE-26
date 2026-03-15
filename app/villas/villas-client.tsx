@@ -434,13 +434,13 @@ export default function VillasClientPage() {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        {villa.price > 0 ? (
+                        {villa.price >= 100 ? (
                           <>
                             <span className="text-2xl font-bold text-emerald-600">${villa.price}</span>
                             <span className="text-muted-foreground text-sm">/night</span>
                           </>
                         ) : (
-                          <span className="text-sm text-muted-foreground">Contact for pricing</span>
+                          <span className="text-base font-medium text-emerald-600">Contact Us</span>
                         )}
                       </div>
                       <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" asChild>
