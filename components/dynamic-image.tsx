@@ -44,8 +44,8 @@ function getFallbackImage(propertyType?: string): string {
 function normalizeImageUrl(url: string): string {
   if (!url || url === "undefined" || url === "null") return ""
 
-  // Handle relative URLs
-  if (url.startsWith("/") && !url.startsWith("//")) {
+  // Handle relative URLs - return as-is
+  if (url.startsWith("/")) {
     return url
   }
 
@@ -55,7 +55,7 @@ function normalizeImageUrl(url: string): string {
   }
 
   // Handle URLs without protocol
-  if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("/")) {
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
     return `https://${url}`
   }
 
@@ -65,12 +65,14 @@ function normalizeImageUrl(url: string): string {
 function isValidImageUrl(url: string): boolean {
   if (!url || url.trim() === "") return false
   if (url === "undefined" || url === "null") return false
-  if (url.includes("favicon.ico")) return false
-  if (url.includes("spinner") && url.includes(".gif")) return false
-
-  // Accept any URL that starts with http, https, or / (relative)
-  const normalized = normalizeImageUrl(url)
-  return normalized.startsWith("http://") || normalized.startsWith("https://") || normalized.startsWith("/")
+  
+  // Accept local paths starting with /
+  if (url.startsWith("/")) return true
+  
+  // Accept http/https URLs
+  if (url.startsWith("http://") || url.startsWith("https://")) return true
+  
+  return false
 }
 
 export function DynamicImage({
@@ -146,11 +148,12 @@ export function DynamicImage({
     }
   }
 
-  const displaySrc = hasError || imageArray.length === 0 ? fallback : currentImage
+  // Ensure we always have a valid image source
+  const displaySrc = (hasError || imageArray.length === 0 || !currentImage) ? fallback : currentImage
 
   if (fill) {
     return (
-      <div className="relative w-full h-full">
+      <div className="relative w-full h-full" style={{ minHeight: '100%' }}>
         <Image
           src={displaySrc || "/placeholder.svg"}
           alt={alt}
@@ -162,6 +165,7 @@ export function DynamicImage({
           onError={handleError}
           onLoad={handleLoad}
           quality={85}
+          unoptimized={displaySrc?.startsWith('/') ? false : undefined}
         />
 
         {/* Gallery navigation */}

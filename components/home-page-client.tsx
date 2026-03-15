@@ -10,7 +10,6 @@ import { MapPin, Search, Users, Bed, Bath } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { DynamicImage } from "@/components/dynamic-image"
-import Image from "next/image"
 
 interface FeaturedVilla {
   id: string
@@ -88,18 +87,13 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative min-h-[500px] sm:min-h-[550px] md:min-h-[600px] lg:min-h-[650px] flex items-center justify-center overflow-hidden">
-        {/* Background Image - absolute positioning to cover full section */}
-        <div className="absolute inset-0 w-full h-full">
-          <Image
-            src="/images/destinations/st-lucia-pitons.jpg"
-            alt="St. Lucia Pitons - Caribbean luxury villas backdrop"
-            fill
-            sizes="100vw"
-            className="object-cover object-center"
-            priority
-            quality={85}
-          />
-        </div>
+        {/* Background Image using CSS background-image for reliability */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/images/destinations/st-lucia-pitons.jpg')" }}
+          role="img"
+          aria-label="St. Lucia Pitons - Caribbean luxury villas backdrop"
+        />
 
         {/* Gradient overlay - lighter to show background image */}
         <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-900/60 via-emerald-800/40 to-emerald-950/60" />
@@ -206,10 +200,12 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
                   <div className="aspect-[3/4] relative overflow-hidden">
                     <DynamicImage
                       src={destination.image}
-                      alt={destination.name}
+                      alt={`${destination.name} - Caribbean destination`}
                       fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                       fallbackSrc="/luxury-caribbean-villa.jpg"
+                      priority
                     />
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
@@ -301,8 +297,9 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
                   <div className="aspect-[4/3] relative overflow-hidden">
                     <DynamicImage
                       src={villa.image}
-                      alt={villa.name}
+                      alt={`${villa.name} - ${villa.location}`}
                       fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                       fallbackSrc="/images/fallback-luxury-villa.jpg"
                       propertyType="villa"
