@@ -60,20 +60,6 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
       image: "/images/destinations/st-barts-nightlife.webp",
       villaCount: 31,
     },
-    {
-      name: "St. Maarten",
-      slug: "st-maarten",
-      description: "Dutch-French charm with world-class beaches",
-      image: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80",
-      villaCount: 24,
-    },
-    {
-      name: "Antigua",
-      slug: "antigua",
-      description: "365 beaches and historic English Harbour",
-      image: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&q=80",
-      villaCount: 18,
-    },
   ]
 
   const handleSearch = (e: React.FormEvent) => {
@@ -193,7 +179,7 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
             {featuredDestinations.map((destination) => (
               <Link key={destination.slug} href={`/destinations/${destination.slug}`} className="group">
                 <Card className="overflow-hidden border-0 shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer h-full bg-card">
