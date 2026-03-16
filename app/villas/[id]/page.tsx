@@ -626,7 +626,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
             )}
 
             {/* Seasonal Pricing - Cleaner table-like design */}
-            {pricePerNight > 0 && (
+            {pricePerNight >= 100 && (
               <>
                 <Separator className="bg-border/40" />
                 <div>
@@ -730,7 +730,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
                 <CardContent className="p-5 space-y-5">
                   {/* Price Display */}
                   <div className="text-center py-2">
-                    {pricePerNight > 0 ? (
+                    {pricePerNight >= 100 ? (
                       <>
                         <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">From</p>
                         <p className="text-4xl font-bold text-emerald-700">
@@ -740,7 +740,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
                         <p className="text-sm text-muted-foreground">per night</p>
                       </>
                     ) : (
-                      <p className="text-xl font-semibold text-emerald-700">Contact for Pricing</p>
+                      <p className="text-xl font-semibold text-emerald-700">Contact Us</p>
                     )}
                   </div>
 
@@ -837,7 +837,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
             <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4 z-50 safe-area-inset-bottom">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  {pricePerNight > 0 ? (
+                  {pricePerNight >= 100 ? (
                     <>
                       <p className="text-xl font-bold text-emerald-700">
                         {currency === "USD" ? "$" : currency === "EUR" ? "€" : "£"}
@@ -846,7 +846,7 @@ export default async function VillaDetailPage({ params }: { params: Promise<{ id
                       <p className="text-xs text-muted-foreground">per night</p>
                     </>
                   ) : (
-                    <p className="font-semibold text-emerald-700">Contact for Price</p>
+                    <p className="font-semibold text-emerald-700">Contact Us</p>
                   )}
                 </div>
                 <div className="flex gap-2">

@@ -53,7 +53,6 @@ export async function GET() {
     })
 
     if (error) {
-      console.error("[v0] Resend test error:", error)
       return NextResponse.json(
         {
           success: false,
@@ -64,7 +63,6 @@ export async function GET() {
       )
     }
 
-    console.log("[v0] Resend test successful:", data)
     return NextResponse.json({
       success: true,
       message: "Test email sent successfully! Check hello@valartravel.de inbox.",
@@ -72,7 +70,6 @@ export async function GET() {
       data,
     })
   } catch (error) {
-    console.error("[v0] Resend test exception:", error)
     return NextResponse.json(
       {
         success: false,

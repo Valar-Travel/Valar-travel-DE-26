@@ -15,8 +15,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Query is required" }, { status: 400 })
     }
 
-    console.log("[v0] AI Search query:", query)
-
     // Use OpenAI to extract search intent and parameters
     const { default: OpenAI } = await import("openai")
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -50,7 +48,6 @@ Common destinations: Barbados, St. Lucia, Jamaica, St. Barthélemy, Turks and Ca
     })
 
     const intent = JSON.parse(completion.choices[0]?.message?.content || "{}")
-    console.log("[v0] Extracted search intent:", intent)
 
     // Build SQL query based on AI-extracted parameters
     let sqlQuery = `
@@ -133,11 +130,7 @@ Common destinations: Barbados, St. Lucia, Jamaica, St. Barthélemy, Turks and Ca
 
     sqlQuery += ` ORDER BY price_per_night ASC LIMIT 50`
 
-    console.log("[v0] Executing AI search with params:", params)
-
     const results = await sql(sqlQuery, params)
-
-    console.log("[v0] AI search results count:", results.length)
 
     return NextResponse.json({
       success: true,
@@ -147,7 +140,6 @@ Common destinations: Barbados, St. Lucia, Jamaica, St. Barthélemy, Turks and Ca
       total: results.length,
     })
   } catch (error) {
-    console.error("[v0] AI Search API error:", error)
     return NextResponse.json(
       {
         success: false,

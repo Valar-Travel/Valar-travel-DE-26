@@ -17,9 +17,6 @@ export async function GET(request: NextRequest) {
     const includeAmenities = include.includes("amenities")
     const includeRates = include.includes("rates")
 
-    console.log("[v0] Properties API called with include parameters:", include)
-    console.log("[v0] Include flags - Images:", includeImages, "Amenities:", includeAmenities, "Rates:", includeRates)
-
     const supabase = await createClient()
     const { data: properties, error } = await supabase
       .from("scraped_luxury_properties")
@@ -29,7 +26,6 @@ export async function GET(request: NextRequest) {
       .limit(20)
 
     if (error) {
-      console.error("[v0] Properties API error:", error)
       return NextResponse.json({
         success: true,
         destination,
@@ -87,30 +83,6 @@ export async function GET(request: NextRequest) {
         timestamp: new Date().toISOString(),
       },
     }
-
-    console.log("[v0] Properties API JSON Response Structure:")
-    console.log("[v0] Response keys:", Object.keys(response))
-    console.log(
-      "[v0] Properties sample:",
-      response.properties[0] ? JSON.stringify(response.properties[0], null, 2) : "No properties found",
-    )
-    console.log(
-      "[v0] Image URLs present:",
-      response.properties.map((p) => ({ id: p.id, image: p.image, imageCount: p.images?.length || 0 })),
-    )
-
-    console.log("[v0] Detailed image URL debugging:")
-    response.properties.forEach((property, index) => {
-      console.log(`[v0] Property ${index + 1} (${property.id}):`)
-      console.log(`[v0]   - Name: ${property.name}`)
-      console.log(`[v0]   - Main image: ${property.image}`)
-      console.log(`[v0]   - Images array length: ${property.images?.length || 0}`)
-      if (property.images && property.images.length > 0) {
-        property.images.forEach((img, imgIndex) => {
-          console.log(`[v0]   - Image ${imgIndex + 1}: ${img.url}`)
-        })
-      }
-    })
 
     return NextResponse.json(response)
   } catch (error) {

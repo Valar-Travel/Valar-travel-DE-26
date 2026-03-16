@@ -5,7 +5,6 @@ export async function updateSession(request: NextRequest) {
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin")
 
   if (isAdminRoute) {
-    console.log("[v0] Admin route detected, bypassing Supabase:", request.nextUrl.pathname)
     return NextResponse.next({ request })
   }
 

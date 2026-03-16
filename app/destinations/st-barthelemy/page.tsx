@@ -98,6 +98,7 @@ export default async function StBarthelemyPage() {
           fill
           className="object-cover"
           priority
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/85 via-emerald-800/70 to-emerald-950/85" />
         <div className="absolute inset-0 flex items-center justify-center text-center text-white">
@@ -165,7 +166,7 @@ export default async function StBarthelemyPage() {
               {villas.map((villa) => (
                 <Card key={villa.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-[4/3] relative">
-                    <Image src={villa.image || "/placeholder.svg"} alt={villa.name} fill className="object-cover" />
+                    <Image src={villa.image || "/placeholder.svg"} alt={villa.name} fill className="object-cover" unoptimized />
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -199,8 +200,14 @@ export default async function StBarthelemyPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-2xl font-bold text-emerald-700">${villa.price}</span>
-                        <span className="text-sm text-muted-foreground">/night</span>
+                        {villa.price >= 100 ? (
+                          <>
+                            <span className="text-2xl font-bold text-emerald-700">${villa.price}</span>
+                            <span className="text-sm text-muted-foreground">/night</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-medium text-emerald-700">Contact Us</span>
+                        )}
                       </div>
                       <Button asChild className="bg-emerald-700 hover:bg-emerald-800">
                         <Link href={`/villas/${villa.id}`}>View Details</Link>

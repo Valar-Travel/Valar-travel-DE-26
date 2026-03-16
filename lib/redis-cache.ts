@@ -11,12 +11,8 @@ try {
       token: process.env.KV_REST_API_TOKEN,
     })
     redisAvailable = true
-    console.log("[v0] Redis client initialized successfully")
-  } else {
-    console.warn("[v0] Redis environment variables not available, running without cache")
   }
-} catch (error) {
-  console.error("[v0] Failed to initialize Redis client:", error)
+} catch {
   redisAvailable = false
 }
 
@@ -41,7 +37,6 @@ export class RedisCache {
    */
   async get<T>(key: string, options: CacheOptions = {}): Promise<T | null> {
     if (!this.isRedisAvailable()) {
-      console.log("[v0] Redis not available, skipping cache get")
       return null
     }
 
@@ -50,43 +45,26 @@ export class RedisCache {
       const data = await redis!.get(fullKey)
 
       if (data === null || data === undefined) {
-        console.log(`[v0] Cache miss for key: ${fullKey}`)
         return null
       }
 
       if (typeof data === "string") {
         const trimmedData = data.trim()
         if (trimmedData.startsWith("<!DOCTYPE") || trimmedData.startsWith("<html")) {
-          console.error(`[v0] Redis returned HTML error page for key: ${fullKey}`, {
-            preview: trimmedData.substring(0, 100),
-            url: process.env.KV_REST_API_URL?.substring(0, 50) + "...",
-            tokenLength: process.env.KV_REST_API_TOKEN?.length || 0,
-          })
           return null
         }
 
         if (trimmedData.startsWith("{") || trimmedData.startsWith("[")) {
           try {
             return JSON.parse(trimmedData) as T
-          } catch (parseError) {
-            console.error(`[v0] Failed to parse JSON from Redis for key: ${fullKey}`, parseError)
+          } catch {
             return null
           }
         }
       }
 
-      console.log(`[v0] Cache hit for key: ${fullKey}`)
       return data as T
-    } catch (error: any) {
-      console.error("[v0] Redis get error:", {
-        message: error.message,
-        stack: error.stack?.split("\n")[0], // First line of stack trace
-        key: `${options.prefix || this.keyPrefix}${key}`,
-        url: process.env.KV_REST_API_URL ? `${process.env.KV_REST_API_URL.substring(0, 30)}...` : "missing",
-        token: process.env.KV_REST_API_TOKEN ? `${process.env.KV_REST_API_TOKEN.length} chars` : "missing",
-        errorType: error.constructor.name,
-        redisClientStatus: "unknown",
-      })
+    } catch {
       return null
     }
   }
@@ -96,7 +74,6 @@ export class RedisCache {
    */
   async set<T>(key: string, value: T, options: CacheOptions = {}): Promise<boolean> {
     if (!this.isRedisAvailable()) {
-      console.log("[v0] Redis not available, skipping cache set")
       return false
     }
 
@@ -105,18 +82,12 @@ export class RedisCache {
       const ttl = options.ttl || this.defaultTTL
 
       if (value === null || value === undefined) {
-        console.warn(`[v0] Attempted to cache null/undefined value for key: ${fullKey}`)
         return false
       }
 
       await redis!.setex(fullKey, ttl, value)
-      console.log(`[v0] Cached data for key: ${fullKey} (TTL: ${ttl}s)`)
       return true
-    } catch (error: any) {
-      console.error("[v0] Redis set error:", {
-        message: error.message,
-        key: `${options.prefix || this.keyPrefix}${key}`,
-      })
+    } catch {
       return false
     }
   }
@@ -132,10 +103,8 @@ export class RedisCache {
     try {
       const fullKey = `${options.prefix || this.keyPrefix}${key}`
       await redis!.del(fullKey)
-      console.log(`[v0] Deleted cache for key: ${fullKey}`)
       return true
-    } catch (error) {
-      console.error("[v0] Redis delete error:", error)
+    } catch {
       return false
     }
   }
@@ -154,28 +123,18 @@ export class RedisCache {
   async getCachedCSVProperties(city: string): Promise<any[] | null> {
     try {
       if (!this.isRedisAvailable()) {
-        console.log(`[v0] Redis not available, skipping cache check for ${city} properties`)
         return null
       }
 
       const key = `csv_properties:${city.toLowerCase()}`
-      console.log(`[v0] Attempting to get cached CSV properties for ${city}`)
-
       const result = await this.get<any[]>(key)
 
       if (result && Array.isArray(result)) {
-        console.log(`[v0] Found ${result.length} cached properties for ${city}`)
         return result
       }
 
-      console.log(`[v0] No valid cached properties found for ${city}`)
       return null
-    } catch (error: any) {
-      console.error(`[v0] Error getting cached CSV properties for ${city}:`, {
-        message: error.message,
-        city: city,
-        redisAvailable: this.isRedisAvailable(),
-      })
+    } catch {
       return null
     }
   }
@@ -221,10 +180,8 @@ export class RedisCache {
       if (keys.length === 0) return 0
 
       await redis!.del(...keys)
-      console.log(`[v0] Cleared ${keys.length} cache entries`)
       return keys.length
-    } catch (error) {
-      console.error("[v0] Redis clear cache error:", error)
+    } catch {
       return 0
     }
   }
@@ -234,7 +191,6 @@ export class RedisCache {
    */
   async testConnection(): Promise<boolean> {
     if (!this.isRedisAvailable()) {
-      console.log("[v0] Redis not available for health check")
       return false
     }
 
@@ -252,14 +208,8 @@ export class RedisCache {
       await redis!.del(testKey)
 
       const isHealthy = result && typeof result === "object" && result.test === true
-      console.log(`[v0] Redis health check: ${isHealthy ? "PASSED" : "FAILED"}`)
-
       return isHealthy
-    } catch (error: any) {
-      console.error("[v0] Redis health check failed:", {
-        message: error.message,
-        redisAvailable: this.isRedisAvailable(),
-      })
+    } catch {
       return false
     }
   }

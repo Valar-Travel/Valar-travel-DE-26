@@ -81,18 +81,7 @@ export function HotelVillaComparison({ cityName }: HotelVillaComparisonProps) {
 
         const data = await response.json()
 
-        console.log("[v0] Hotel Villa Comparison API response:", data)
-
         if (data.success && Array.isArray(data.properties)) {
-          console.log("[v0] Properties received for comparison:", data.properties.length)
-
-          // Log image URLs for each property
-          data.properties.forEach((property: any, index: number) => {
-            console.log(`[v0] Comparison Property ${index + 1} - ${property.name}:`)
-            console.log(`[v0] Raw image URL:`, property.image)
-            console.log(`[v0] Image URL before transformation:`, property.image)
-          })
-
           const transformedProperties = data.properties.map((property: any) => ({
             ...property,
             propertyType:
@@ -106,11 +95,6 @@ export function HotelVillaComparison({ cityName }: HotelVillaComparisonProps) {
               lng: 2.3522 + (Math.random() - 0.5) * 0.02,
             },
           }))
-
-          console.log("[v0] Transformed properties image URLs:")
-          transformedProperties.forEach((property: Property, index: number) => {
-            console.log(`[v0] Transformed ${index + 1} - ${property.name}: ${property.image}`)
-          })
 
           const filteredProperties = transformedProperties.filter((property: Property) => {
             if (property.price < filters.priceRange[0] || property.price > filters.priceRange[1]) return false

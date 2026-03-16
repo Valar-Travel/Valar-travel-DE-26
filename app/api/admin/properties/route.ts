@@ -16,9 +16,6 @@ export async function GET(request: NextRequest) {
     const filter = searchParams.get("filter") || "all"
     const search = searchParams.get("search") || ""
 
-    console.log("[v0] Properties GET - filter:", filter)
-    console.log("[v0] Properties GET - search:", search)
-
     let query = supabase.from("scraped_luxury_properties").select("*").order("created_at", { ascending: false })
 
     if (filter === "pending") {
@@ -35,24 +32,11 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error("[v0] Error fetching properties:", error)
       return NextResponse.json({ error: "Failed to fetch properties", details: error.message }, { status: 500 })
     }
 
-    console.log("[v0] Properties GET - returned count:", data?.length || 0)
-
-    if (data && data.length > 0) {
-      console.log("[v0] Properties GET - first property:", {
-        id: data[0].id,
-        name: data[0].name,
-        images: data[0].images?.length || 0,
-        location: data[0].location,
-      })
-    }
-
     return NextResponse.json(data || [])
-  } catch (error) {
-    console.error("[v0] Error in properties API:", error)
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -90,14 +74,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error("[v0] Error creating property:", error)
       return NextResponse.json({ error: "Failed to create property", details: error.message }, { status: 500 })
     }
 
-    console.log("[v0] Successfully created property:", data.name)
     return NextResponse.json(data, { status: 201 })
-  } catch (error) {
-    console.error("[v0] Error in property creation:", error)
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -118,14 +99,11 @@ export async function DELETE(request: NextRequest) {
       .neq("id", "00000000-0000-0000-0000-000000000000") // This trick deletes all rows
 
     if (error) {
-      console.error("[v0] Error deleting all properties:", error)
       return NextResponse.json({ error: "Failed to delete properties", details: error.message }, { status: 500 })
     }
 
-    console.log("[v0] Successfully deleted all properties")
     return NextResponse.json({ message: "All properties deleted successfully" })
-  } catch (error) {
-    console.error("[v0] Error in delete all:", error)
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

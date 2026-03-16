@@ -157,6 +157,7 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
               fill
               className="object-cover"
               priority
+              unoptimized
               onError={() => handleImageError(heroImages[0])}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
@@ -198,6 +199,7 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               priority
+              unoptimized
               onError={() => handleImageError(0)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -224,6 +226,7 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 loading="lazy"
+                unoptimized
                 onError={() => handleImageError(idx + 1)}
               />
               {idx === 3 && hasMoreImages ? (
@@ -358,6 +361,7 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
                             className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
                             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1024px"
                             loading="lazy"
+                            unoptimized
                             onError={() => handleImageError(group.images[0].index)}
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
@@ -376,6 +380,7 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
                               className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
                               sizes="(max-width: 768px) 100vw, 50vw"
                               loading="lazy"
+                              unoptimized
                               onError={() => handleImageError(img.index)}
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
@@ -445,6 +450,7 @@ export function VillaImageGallery({ images, villaName, location = "Caribbean" }:
                   fill
                   className="object-contain"
                   priority
+                  unoptimized
                   onError={() => handleImageError(selectedImage)}
                 />
               </div>

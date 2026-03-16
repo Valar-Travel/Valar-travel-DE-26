@@ -26,16 +26,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get("sortOrder") || "desc"
     const search = searchParams.get("search") || ""
 
-    console.log("[v0] Fetching luxury properties with filters:", {
-      location,
-      minRating,
-      maxPrice,
-      minPrice,
-      limit,
-      offset,
-      sortBy,
-      search,
-    })
+
 
     try {
       const supabase = await createClient()
@@ -58,19 +49,10 @@ export async function GET(request: NextRequest) {
       }
 
       if (location && location !== "all") {
-        const normalizedLocation = location.toLowerCase().replace(/[^a-z]/g, "")
-        const sourceUrls = DESTINATION_SOURCE_URLS[normalizedLocation] || []
-
-        if (sourceUrls.length > 0) {
-          // Build OR filter for location and source_url
-          const locationFilters = [
-            `location.ilike.%${location}%`,
-            ...sourceUrls.map((url) => `source_url.ilike.%${url}%`),
-          ]
-          query = query.or(locationFilters.join(","))
-        } else {
-          query = query.ilike("location", `%${location}%`)
-        }
+        // Simply filter by location field containing the destination name
+        // This handles locations like "Jamaica", "Barbados", "St. Lucia", etc.
+        const searchLocation = location.replace(/-/g, " ").replace(/st /i, "St. ")
+        query = query.ilike("location", `%${searchLocation}%`)
       }
 
       if (search) {
@@ -90,12 +72,10 @@ export async function GET(request: NextRequest) {
       const { data: dbProperties, error, count } = await query
 
       if (error) {
-        console.error("[v0] Database query error:", error)
         return NextResponse.json([])
       }
 
       if (dbProperties && dbProperties.length > 0) {
-        console.log("[v0] Found properties in database:", dbProperties.length)
         return NextResponse.json({
           data: dbProperties,
           count: dbProperties.length,
@@ -103,12 +83,11 @@ export async function GET(request: NextRequest) {
         })
       }
     } catch (dbError) {
-      console.error("[v0] Database query failed:", dbError)
+      // Database query failed, return empty array
     }
 
     return NextResponse.json({ data: [], count: 0, total: 0 })
-  } catch (error) {
-    console.error("[v0] API error:", error)
+  } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
@@ -142,8 +121,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: "Missing required parameters" }, { status: 400 })
-  } catch (error) {
-    console.error("[v0] Delete API error:", error)
+  } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }

@@ -18,8 +18,6 @@ export async function GET(request: NextRequest) {
       return new NextResponse("Invalid image URL", { status: 400 })
     }
 
-    console.log("[v0] Proxying original image without CDN optimization")
-
     // Fetch the original image
     const response = await fetch(decodedUrl, {
       headers: {

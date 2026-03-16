@@ -20,7 +20,6 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}${next}`)
       }
     }
-    console.log("[v0] Auth callback error:", error)
   }
 
   // return the user to an error page with instructions

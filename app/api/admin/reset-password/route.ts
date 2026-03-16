@@ -19,15 +19,10 @@ export async function POST(request: Request) {
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(password, saltRounds)
     
-    console.log("[v0] Generated password hash:", passwordHash)
-
-    // First, check if admin_users table exists and what's in it
-    const { data: existingUsers, error: checkError } = await supabase
+    // First, check if admin_users table exists
+    const { error: checkError } = await supabase
       .from("admin_users")
       .select("*")
-    
-    console.log("[v0] Existing admin users:", existingUsers)
-    console.log("[v0] Check error:", checkError)
 
     // Delete existing admin users
     const { error: deleteError } = await supabase
@@ -35,9 +30,7 @@ export async function POST(request: Request) {
       .delete()
       .neq("id", "00000000-0000-0000-0000-000000000000") // Delete all
 
-    if (deleteError) {
-      console.log("[v0] Delete error:", deleteError)
-    }
+    // Continue even if delete fails (table might be empty)
 
     // Insert fresh admin users
     const { data: insertData, error: insertError } = await supabase
@@ -61,14 +54,11 @@ export async function POST(request: Request) {
       .select()
 
     if (insertError) {
-      console.log("[v0] Insert error:", insertError)
       return NextResponse.json({ 
         error: "Failed to create admin users", 
         details: insertError.message 
       }, { status: 500 })
     }
-
-    console.log("[v0] Created admin users:", insertData)
 
     return NextResponse.json({ 
       success: true, 
@@ -78,7 +68,6 @@ export async function POST(request: Request) {
     })
 
   } catch (error) {
-    console.error("[v0] Reset password error:", error)
     return NextResponse.json({ 
       error: "Internal server error", 
       details: error instanceof Error ? error.message : "Unknown error" 

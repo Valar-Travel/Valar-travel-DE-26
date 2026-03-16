@@ -164,10 +164,14 @@ export default function VillasClientPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 py-16">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-balance">Luxury Caribbean Villas</h1>
-          <p className="text-emerald-100/80 text-lg max-w-2xl">
+      <section 
+        className="relative py-20 md:py-28 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/images/destinations/st-lucia-pitons.jpg')" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/80 via-emerald-900/70 to-emerald-800/60" />
+        <div className="container mx-auto px-4 relative z-10">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 text-balance">Luxury Caribbean Villas</h1>
+          <p className="text-white/90 text-lg md:text-xl max-w-2xl">
             Discover handpicked luxury villas across the Caribbean's most exclusive destinations
           </p>
         </div>
@@ -434,13 +438,13 @@ export default function VillasClientPage() {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        {villa.price > 0 ? (
+                        {villa.price >= 100 ? (
                           <>
                             <span className="text-2xl font-bold text-emerald-600">${villa.price}</span>
                             <span className="text-muted-foreground text-sm">/night</span>
                           </>
                         ) : (
-                          <span className="text-sm text-muted-foreground">Contact for pricing</span>
+                          <span className="text-base font-medium text-emerald-600">Contact Us</span>
                         )}
                       </div>
                       <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" asChild>

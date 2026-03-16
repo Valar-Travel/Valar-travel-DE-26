@@ -91,11 +91,12 @@ export default async function BarbadosPage() {
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[500px]">
         <Image
-          src={getImageUrl(UNSPLASH_IMAGES.barbados.hero, 1920) || "/placeholder.svg"}
-          alt={UNSPLASH_IMAGES.barbados.hero.alt}
+          src="/images/destinations/barbados-beach.jpg"
+          alt="Pristine beaches of Barbados with turquoise waters"
           fill
           className="object-cover"
           priority
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
         <div className="absolute inset-0 flex items-center justify-center text-center text-white">
@@ -166,6 +167,7 @@ export default async function BarbadosPage() {
                         alt={villa.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        unoptimized
                       />
                     </div>
                     <CardContent className="p-4">
@@ -199,8 +201,14 @@ export default async function BarbadosPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-2xl font-bold text-emerald-700">${villa.price}</span>
-                          <span className="text-sm text-muted-foreground">/night</span>
+                          {villa.price >= 100 ? (
+                            <>
+                              <span className="text-2xl font-bold text-emerald-700">${villa.price}</span>
+                              <span className="text-sm text-muted-foreground">/night</span>
+                            </>
+                          ) : (
+                            <span className="text-base font-medium text-emerald-700">Contact Us</span>
+                          )}
                         </div>
                         <span className="text-sm font-medium text-emerald-700 group-hover:underline">
                           View Details →
