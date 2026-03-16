@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Build Error Test and Accessibility Test Script
- * Runs comprehensive tests on the Valar Travel codebase
+ * Comprehensive Test Suite for Valar Travel
+ * Includes: Unit Tests, Integration Tests, TypeScript, ESLint, Accessibility, Build Validation, Security
  */
 
 import { execSync } from "child_process"
@@ -10,7 +10,20 @@ import { join, relative } from "path"
 
 const ROOT_DIR = process.cwd()
 
-const results = []
+interface TestSuiteResult {
+  name: string
+  passed: boolean
+  errors: string[]
+  warnings: string[]
+  duration: number
+  details?: {
+    totalTests?: number
+    passedTests?: number
+    failedTests?: number
+  }
+}
+
+const results: TestSuiteResult[] = []
 
 function log(message, type = "info") {
   const colors = {
@@ -41,9 +54,126 @@ function runCommand(command, description) {
 }
 
 // =============================================================================
+// TEST 0: Unit Tests (Utility Functions)
+// =============================================================================
+async function runUnitTests(): Promise<TestSuiteResult> {
+  const start = Date.now()
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  log("\n========================================", "info")
+  log("TEST 0: Unit Tests", "info")
+  log("========================================", "info")
+
+  try {
+    // Dynamically import and run unit tests
+    const { runUnitTests: executeUnitTests } = await import("./tests/unit-tests")
+    const results = await executeUnitTests()
+
+    results.suites.forEach(suite => {
+      log(`\n  ${suite.name}:`, "info")
+      suite.tests.forEach(test => {
+        if (test.passed) {
+          log(`    ✓ ${test.name}`, "success")
+        } else {
+          log(`    ✗ ${test.name}: ${test.error}`, "error")
+          errors.push(`${suite.name} > ${test.name}: ${test.error}`)
+        }
+      })
+    })
+
+    const passed = results.totalFailed === 0
+    log(`\nUnit Tests: ${results.totalPassed} passed, ${results.totalFailed} failed`, passed ? "success" : "error")
+
+    return {
+      name: "Unit Tests",
+      passed,
+      errors,
+      warnings,
+      duration: Date.now() - start,
+      details: {
+        totalTests: results.totalPassed + results.totalFailed,
+        passedTests: results.totalPassed,
+        failedTests: results.totalFailed,
+      },
+    }
+  } catch (e) {
+    const errorMsg = e instanceof Error ? e.message : String(e)
+    log(`Unit tests failed to run: ${errorMsg}`, "error")
+    errors.push(`Failed to run unit tests: ${errorMsg}`)
+    
+    return {
+      name: "Unit Tests",
+      passed: false,
+      errors,
+      warnings,
+      duration: Date.now() - start,
+    }
+  }
+}
+
+// =============================================================================
+// TEST 0.5: Integration Tests (API Routes)
+// =============================================================================
+async function runIntegrationTests(): Promise<TestSuiteResult> {
+  const start = Date.now()
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  log("\n========================================", "info")
+  log("TEST 0.5: Integration Tests", "info")
+  log("========================================", "info")
+
+  try {
+    const { runIntegrationTests: executeIntegrationTests } = await import("./tests/integration-tests")
+    const results = await executeIntegrationTests()
+
+    results.suites.forEach(suite => {
+      log(`\n  ${suite.name}:`, "info")
+      suite.tests.forEach(test => {
+        if (test.passed) {
+          log(`    ✓ ${test.name}`, "success")
+        } else {
+          log(`    ✗ ${test.name}: ${test.error}`, "error")
+          errors.push(`${suite.name} > ${test.name}: ${test.error}`)
+        }
+      })
+    })
+
+    const passed = results.totalFailed === 0
+    log(`\nIntegration Tests: ${results.totalPassed} passed, ${results.totalFailed} failed`, passed ? "success" : "error")
+
+    return {
+      name: "Integration Tests",
+      passed,
+      errors,
+      warnings,
+      duration: Date.now() - start,
+      details: {
+        totalTests: results.totalPassed + results.totalFailed,
+        passedTests: results.totalPassed,
+        failedTests: results.totalFailed,
+      },
+    }
+  } catch (e) {
+    const errorMsg = e instanceof Error ? e.message : String(e)
+    log(`Integration tests failed to run: ${errorMsg}`, "error")
+    errors.push(`Failed to run integration tests: ${errorMsg}`)
+    
+    return {
+      name: "Integration Tests",
+      passed: false,
+      errors,
+      warnings,
+      duration: Date.now() - start,
+    }
+  }
+}
+
+// =============================================================================
 // TEST 1: TypeScript Type Checking
 // =============================================================================
-async function runTypeCheck() {
+async function runTypeCheck(): Promise<TestSuiteResult> {
   const start = Date.now()
   const errors = []
   const warnings = []
@@ -88,7 +218,7 @@ async function runTypeCheck() {
 // =============================================================================
 // TEST 2: ESLint Check
 // =============================================================================
-async function runLintCheck() {
+async function runLintCheck(): Promise<TestSuiteResult> {
   const start = Date.now()
   const errors = []
   const warnings = []
@@ -134,7 +264,7 @@ async function runLintCheck() {
 // =============================================================================
 // TEST 3: Accessibility Static Analysis
 // =============================================================================
-async function runAccessibilityCheck() {
+async function runAccessibilityCheck(): Promise<TestSuiteResult> {
   const start = Date.now()
   const errors = []
   const warnings = []
@@ -289,7 +419,7 @@ async function runAccessibilityCheck() {
 // =============================================================================
 // TEST 4: Build Validation (without full build due to experimental.ppr)
 // =============================================================================
-async function runBuildValidation() {
+async function runBuildValidation(): Promise<TestSuiteResult> {
   const start = Date.now()
   const errors = []
   const warnings = []
@@ -382,7 +512,7 @@ async function runBuildValidation() {
 // =============================================================================
 // TEST 5: Security Check
 // =============================================================================
-async function runSecurityCheck() {
+async function runSecurityCheck(): Promise<TestSuiteResult> {
   const start = Date.now()
   const errors = []
   const warnings = []
@@ -476,12 +606,14 @@ async function runSecurityCheck() {
 async function main() {
   console.log("\n")
   log("╔════════════════════════════════════════════════════════════╗", "info")
-  log("║     VALAR TRAVEL - BUILD & ACCESSIBILITY TEST SUITE        ║", "info")
+  log("║        VALAR TRAVEL - COMPREHENSIVE TEST SUITE             ║", "info")
   log("╚════════════════════════════════════════════════════════════╝", "info")
 
   const startTime = Date.now()
 
   // Run all tests
+  results.push(await runUnitTests())
+  results.push(await runIntegrationTests())
   results.push(await runTypeCheck())
   results.push(await runLintCheck())
   results.push(await runAccessibilityCheck())
@@ -501,6 +633,10 @@ async function main() {
     const status = result.passed ? "PASS" : "FAIL"
     const statusColor = result.passed ? "success" : "error"
     log(`${status} - ${result.name} (${result.duration}ms)`, statusColor)
+    
+    if (result.details) {
+      console.log(`     Tests: ${result.details.passedTests}/${result.details.totalTests} passed`)
+    }
     console.log(`     Errors: ${result.errors.length}, Warnings: ${result.warnings.length}`)
     
     totalErrors += result.errors.length
