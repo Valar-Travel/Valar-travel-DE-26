@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const bedrooms = searchParams.get("bedrooms")
     const amenities = searchParams.get("amenities")?.split(",").filter(Boolean)
 
-    console.log("[v0] Search API called with query:", query)
+
 
     // Build comprehensive search query using PostgreSQL full-text search
     let sqlQuery = `
@@ -104,11 +104,7 @@ export async function GET(request: NextRequest) {
       ? ` ORDER BY relevance DESC, price_per_night ASC LIMIT 50`
       : ` ORDER BY price_per_night ASC LIMIT 50`
 
-    console.log("[v0] Executing search query with params:", params)
-
     const results = await sql(sqlQuery, params)
-
-    console.log("[v0] Search results count:", results.length)
 
     return NextResponse.json({
       success: true,
@@ -124,7 +120,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("[v0] Search API error:", error)
     return NextResponse.json(
       {
         success: false,

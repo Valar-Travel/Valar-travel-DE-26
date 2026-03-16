@@ -179,14 +179,11 @@ async function detectUserCurrency(): Promise<string> {
       if (data.country_code && COUNTRY_CURRENCY_MAP[data.country_code]) {
         return COUNTRY_CURRENCY_MAP[data.country_code]
       }
-    } catch (apiError) {
-      console.log(
-        "[v0] IP-based currency detection failed:",
-        apiError instanceof Error ? apiError.message : "Unknown error",
-      )
+    } catch {
+      // IP-based detection failed, will use fallback
     }
-  } catch (error) {
-    console.log("[v0] Currency detection failed:", error instanceof Error ? error.message : "Unknown error")
+  } catch {
+    // Currency detection failed, will use USD default
   }
 
   // Default to USD if all detection methods fail
@@ -213,15 +210,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
               const detectedCurrency = await detectUserCurrency()
               setCurrency(detectedCurrency)
               localStorage.setItem("preferred-currency", detectedCurrency)
-            } catch (detectionError) {
-              console.log("[v0] Currency auto-detection failed, using USD:", detectionError)
+            } catch {
               setCurrency("USD")
               localStorage.setItem("preferred-currency", "USD")
             }
           }
         }
-      } catch (error) {
-        console.log("[v0] Currency initialization failed:", error instanceof Error ? error.message : "Unknown error")
+      } catch {
         setCurrency("USD")
       } finally {
         setIsLoading(false)

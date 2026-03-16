@@ -192,15 +192,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("[v0] ========== SCRAPER STARTED ==========")
-    console.log("[v0] URL:", cleanUrl)
-    console.log("[v0] Max properties:", maxProperties)
-    console.log("[v0] User-specified destination:", destination)
-
     const supabase = await createClient()
 
     // Fetch the page with better headers to avoid being blocked
-    console.log("[v0] Fetching page...")
     const response = await fetch(cleanUrl, {
       headers: {
         "User-Agent":
@@ -221,12 +215,9 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log("[v0] Fetch response status:", response.status)
-
     if (!response.ok) {
       // Check if blocked by Cloudflare
       const text = await response.text()
-      console.log("[v0] Error response text (first 500 chars):", text.substring(0, 500))
 
       if (text.includes("Cloudflare") || text.includes("security service") || response.status === 403) {
         return NextResponse.json(
@@ -264,12 +255,10 @@ export async function POST(request: NextRequest) {
     }
 
     const html = await response.text()
-    console.log("[v0] HTML length:", html.length)
     const $ = cheerio.load(html)
 
     // Determine if this is a single property page or a listing page
     const urlPath = new URL(cleanUrl).pathname
-    console.log("[v0] URL path:", urlPath)
 
     const isSingleProperty =
       urlPath.includes("/properties/") ||
@@ -280,17 +269,13 @@ export async function POST(request: NextRequest) {
       $("#listing_description").length > 0 ||
       $(".property-detail").length > 0
 
-    console.log("[v0] Is single property:", isSingleProperty)
-
     let propertyLinks: string[] = []
 
     if (isSingleProperty) {
       // Single property page - scrape directly
-      console.log("[v0] Detected single property page, scraping directly")
       propertyLinks = [cleanUrl]
     } else {
       // Listing page - find property links
-      console.log("[v0] Detected listing page, finding property links")
 
       const linkSelectors = [
         'a[href*="/properties/"]',
@@ -308,10 +293,6 @@ export async function POST(request: NextRequest) {
       const baseUrl = new URL(cleanUrl).origin
 
       for (const selector of linkSelectors) {
-        const count = $(selector).length
-        if (count > 0) {
-          console.log(`[v0] Selector "${selector}" found ${count} elements`)
-        }
         $(selector).each((_, el) => {
           let href = $(el).attr("href")
           if (href) {
@@ -347,12 +328,9 @@ export async function POST(request: NextRequest) {
       }
 
       propertyLinks = Array.from(foundLinks).slice(0, maxProperties)
-      console.log("[v0] Found", propertyLinks.length, "unique property links")
-      console.log("[v0] Property links:", propertyLinks.slice(0, 5))
     }
 
     if (propertyLinks.length === 0) {
-      console.log("[v0] No property links found!")
       return NextResponse.json({
         error: "No properties found on this page. Try a direct property URL or a listing page.",
         properties: [],
@@ -365,8 +343,6 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < propertyLinks.length; i++) {
       const propertyUrl = propertyLinks[i]
-      console.log(`[v0] ---- Scraping property ${i + 1}/${propertyLinks.length} ----`)
-      console.log(`[v0] URL: ${propertyUrl}`)
 
       try {
         const propertyResponse = await fetch(propertyUrl, {
@@ -378,14 +354,11 @@ export async function POST(request: NextRequest) {
           },
         })
 
-        console.log(`[v0] Property fetch status: ${propertyResponse.status}`)
         if (!propertyResponse.ok) {
-          console.log(`[v0] Failed to fetch property, skipping`)
           continue
         }
 
         const propertyHtml = await propertyResponse.text()
-        console.log(`[v0] Property HTML length: ${propertyHtml.length}`)
         const property$ = cheerio.load(propertyHtml)
 
         // Look for property-specific elements that indicate this is a real property page
@@ -402,8 +375,6 @@ export async function POST(request: NextRequest) {
           propertyUrl.includes("/property/") ||
           propertyUrl.includes("/villa/")
 
-        console.log(`[v0] Has property signals: ${hasPropertySignals}`)
-
         // Only skip if this is clearly a blog post AND doesn't have property signals
         const isBlogPost =
           (property$('article[class*="blog"]').length > 0 ||
@@ -412,32 +383,21 @@ export async function POST(request: NextRequest) {
           !hasPropertySignals
 
         if (isBlogPost) {
-          console.log("[v0] Skipping blog post page")
           continue
         }
 
         const propertyData = extractPropertyData(property$, propertyUrl, destination)
-        console.log(`[v0] Extracted name: "${propertyData.name}"`)
-        console.log(`[v0] Extracted images: ${propertyData.images.length}`)
-        console.log(`[v0] Extracted amenities: ${propertyData.amenities.length}`)
-        console.log(`[v0] Extracted description length: ${propertyData.description.length}`)
 
         if (propertyData.name && propertyData.name.length > 2) {
           properties.push(propertyData)
-          console.log(`[v0] SUCCESS: Added "${propertyData.name}" to results`)
-        } else {
-          console.log("[v0] Skipping - no valid name found")
         }
 
         // Small delay to be polite
         await new Promise((resolve) => setTimeout(resolve, 500))
-      } catch (err) {
-        console.error(`[v0] Error scraping ${propertyUrl}:`, err)
+      } catch {
+        // Skip failed properties
       }
     }
-
-    console.log("[v0] ========== SCRAPING COMPLETE ==========")
-    console.log("[v0] Total properties scraped:", properties.length)
 
     // Save to database
     const savedProperties = []
@@ -466,10 +426,7 @@ export async function POST(request: NextRequest) {
             .select()
             .single()
 
-          if (error) {
-            console.error("[v0] Error updating property:", error.message)
-          } else {
-            console.log("[v0] Updated property:", data?.name)
+          if (!error && data) {
             savedProperties.push({
               ...data,
               bedrooms: property.bedrooms,
@@ -495,10 +452,7 @@ export async function POST(request: NextRequest) {
             .select()
             .single()
 
-          if (error) {
-            console.error("[v0] Error inserting property:", error.message)
-          } else {
-            console.log("[v0] Inserted property:", data?.name, "- ID:", data?.id)
+          if (!error && data) {
             savedProperties.push({
               ...data,
               bedrooms: property.bedrooms,
@@ -507,8 +461,8 @@ export async function POST(request: NextRequest) {
             })
           }
         }
-      } catch (err) {
-        console.error("[v0] Error saving property:", err)
+      } catch {
+        // Skip failed saves
       }
     }
 
@@ -517,14 +471,12 @@ export async function POST(request: NextRequest) {
       count: savedProperties.length,
       properties: savedProperties,
     })
-  } catch (error) {
-    console.error("[v0] Scraper error:", error)
+  } catch {
     return NextResponse.json({ error: "Failed to scrape properties" }, { status: 500 })
   }
 }
 
 function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDestination?: string) {
-  console.log("[v0] extractPropertyData called with userDestination:", userDestination)
 
   // Extract name
   let name = ""
@@ -553,7 +505,6 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
 
   if (userDestination && userDestination.trim()) {
     location = userDestination.trim()
-    console.log("[v0] USING USER DESTINATION:", location)
   } else {
     // Only try to extract location from page if no user destination
     const locationSelectors = [
@@ -577,11 +528,11 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
       const detectedDestinationFromUrl = getDestinationFromSourceUrl(sourceUrl)
       const detectedDestinationFromContent = getDestinationFromContent($.html() || "")
       location = detectedDestinationFromUrl || detectedDestinationFromContent || "Caribbean"
-      console.log("[v0] Auto-detected destination:", location)
+      // Auto-detected destination from content
     }
   }
 
-  console.log("[v0] FINAL LOCATION for property:", location)
+  
 
   // Extract price - improved logic with multiple strategies
   let price = 0
@@ -609,7 +560,7 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
         const parsedPrice = Number.parseInt(nightlyMatch[1].replace(/,/g, ""))
         if (parsedPrice >= 100 && parsedPrice <= 50000) {
           price = parsedPrice
-          console.log("[v0] Found price in container:", price, "from selector:", selector)
+          
           break
         }
       }
@@ -619,7 +570,7 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
         const parsedPrice = Number.parseInt(fromMatch[1].replace(/,/g, ""))
         if (parsedPrice >= 100 && parsedPrice <= 50000) {
           price = parsedPrice
-          console.log("[v0] Found 'from' price in container:", price)
+          
           break
         }
       }
@@ -638,7 +589,7 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
         .sort((a, b) => a - b)
       if (prices.length > 0) {
         price = prices[0] // Use the lowest price as the "from" price
-        console.log("[v0] Found price in rate table:", price)
+        
       }
     }
   }
@@ -662,7 +613,7 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
         // Validate the price is in a reasonable range for luxury villas ($100 - $50,000/night)
         if (parsedPrice >= 100 && parsedPrice <= 50000) {
           price = parsedPrice
-          console.log("[v0] Found price via pattern:", price, "pattern:", pattern.toString().substring(0, 50))
+          
           break
         }
       }
@@ -682,16 +633,16 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
       const typicalPrice = validPrices.find(p => p >= 500 && p <= 5000)
       if (typicalPrice) {
         price = typicalPrice
-        console.log("[v0] Found typical range price:", price)
+        
       } else if (validPrices.length > 0) {
         // Fall back to median price if no typical range found
         price = validPrices[Math.floor(validPrices.length / 2)]
-        console.log("[v0] Using median price:", price)
+        
       }
     }
   }
   
-  console.log("[v0] Final extracted price:", price)
+  
 
   let description = ""
 
@@ -725,7 +676,7 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
     description = $('meta[name="description"]').attr("content") || ""
   }
 
-  console.log("[v0] Extracted description length:", description.length)
+  
 
   const amenities: string[] = []
 
@@ -828,7 +779,7 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
     }
   }
 
-  console.log("[v0] Found amenities:", amenities.length, amenities.slice(0, 5).join(", "))
+  
 
   let bedrooms = 0
   let bathrooms = 0
@@ -894,7 +845,7 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
     maxGuests = bedrooms * 2
   }
 
-  console.log("[v0] Property details - Beds:", bedrooms, "Baths:", bathrooms, "Guests:", maxGuests)
+  
 
   // Extract images
   const images: string[] = []
@@ -971,7 +922,7 @@ function extractPropertyData($: cheerio.CheerioAPI, sourceUrl: string, userDesti
     }
   }
 
-  console.log("[v0] Found", images.length, "images for:", name)
+  
 
   return {
     name: name.slice(0, 500),

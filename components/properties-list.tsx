@@ -62,7 +62,6 @@ export default function PropertiesList({
       if (checkIn) params.append("checkIn", checkIn)
       if (checkOut) params.append("checkOut", checkOut)
 
-      console.log("[v0] Fetching properties with include parameters:", params.get("include"))
       const response = await fetch(`/api/properties?${params}`)
 
       if (!response.ok) {
@@ -70,25 +69,9 @@ export default function PropertiesList({
       }
 
       const data = await response.json()
-
-      console.log("[v0] Properties API Response JSON:")
-      console.log("[v0] Response structure:", Object.keys(data))
-      console.log("[v0] Debug info:", data.debug)
-      console.log(
-        "[v0] Image URLs verification:",
-        data.properties?.map((p) => ({
-          id: p.id,
-          name: p.name,
-          image: p.image,
-          imageCount: p.images?.length || 0,
-          hasRates: !!p.rates,
-        })),
-      )
-
       setProperties(data.properties || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
-      console.error("[v0] Error fetching properties:", err)
     } finally {
       setLoading(false)
     }
