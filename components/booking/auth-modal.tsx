@@ -17,6 +17,7 @@ import {
   ArrowRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { SocialAuthButtons, SocialAuthDivider } from "@/components/auth/social-auth-buttons"
 
 interface AuthModalProps {
   isOpen: boolean
@@ -139,16 +140,25 @@ export function AuthModal({ isOpen, onClose, onSuccess, villaName }: AuthModalPr
                 <Loader2 className="w-5 h-5 animate-spin mx-auto text-emerald-600" />
               </motion.div>
             ) : (
-              <motion.form
+              <motion.div
                 key={mode}
                 variants={slideVariants}
                 initial="enter"
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.2 }}
-                onSubmit={handleSubmit}
                 className="space-y-4"
               >
+                {/* Social Auth Buttons */}
+                <SocialAuthButtons
+                  redirectTo={window.location.pathname}
+                  onError={(err) => setError(err)}
+                />
+
+                <SocialAuthDivider />
+
+                {/* Email Form */}
+                <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === "signup" && (
                   <div>
                     <Label className="text-xs uppercase tracking-wide text-neutral-500 mb-2 block">
@@ -224,20 +234,12 @@ export function AuthModal({ isOpen, onClose, onSuccess, villaName }: AuthModalPr
                     </>
                   )}
                 </Button>
-
-                <div className="relative py-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-neutral-200" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-neutral-400 tracking-wider">or</span>
-                  </div>
-                </div>
+                </form>
 
                 <Button
                   type="button"
-                  variant="outline"
-                  className="w-full h-12 font-medium"
+                  variant="ghost"
+                  className="w-full h-10 text-sm text-neutral-500"
                   onClick={() => setMode(mode === "signup" ? "login" : "signup")}
                 >
                   {mode === "signup" 
@@ -246,11 +248,11 @@ export function AuthModal({ isOpen, onClose, onSuccess, villaName }: AuthModalPr
                 </Button>
 
                 {mode === "signup" && (
-                  <p className="text-xs text-neutral-400 text-center pt-2">
+                  <p className="text-xs text-neutral-400 text-center">
                     By creating an account, you agree to our Terms of Service and Privacy Policy
                   </p>
                 )}
-              </motion.form>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
