@@ -1,30 +1,61 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Loader2 } from "lucide-react"
+
+interface AdminUser {
+  id: string
+  email: string
+  name: string
+  role: string
+}
 
 export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isChecking, setIsChecking] = useState(true)
+  const [user, setUser] = useState<AdminUser | null>(null)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
-    const adminLoggedIn = localStorage.getItem("adminLoggedIn")
-    const valarAdminAuth = localStorage.getItem("valar_admin_auth")
+    const checkAuth = async () => {
+      // Skip auth check on login page
+      if (pathname === "/admin/login") {
+        setIsChecking(false)
+        setIsAuthenticated(true)
+        return
+      }
 
-    if (adminLoggedIn === "true" || valarAdminAuth === "valar-admin-logged-in") {
-      setIsAuthenticated(true)
-      setIsChecking(false)
-    } else {
-      // Redirect to login page
-      router.push("/admin/login")
+      try {
+        const res = await fetch("/api/admin/auth/verify", {
+          method: "GET",
+          credentials: "include",
+        })
+
+        if (res.ok) {
+          const data = await res.json()
+          if (data.authenticated && data.user) {
+            setUser(data.user)
+            setIsAuthenticated(true)
+          } else {
+            router.push("/admin/login")
+          }
+        } else {
+          router.push("/admin/login")
+        }
+      } catch {
+        router.push("/admin/login")
+      } finally {
+        setIsChecking(false)
+      }
     }
-  }, [router])
 
-  if (isChecking || !isAuthenticated) {
+    checkAuth()
+  }, [router, pathname])
+
+  if (isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50">
         <div className="text-center">
@@ -33,6 +64,10 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     )
+  }
+
+  if (!isAuthenticated && pathname !== "/admin/login") {
+    return null
   }
 
   return <>{children}</>

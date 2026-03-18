@@ -46,8 +46,8 @@ export function AdminDashboardClient({ userName }: { userName: string }) {
         const data = await response.json()
         setStats(data)
       }
-    } catch (error) {
-      console.error("Failed to fetch stats:", error)
+    } catch {
+      // Stats fetch failed - dashboard will show default values
     } finally {
       setLoading(false)
     }
