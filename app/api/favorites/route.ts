@@ -44,7 +44,6 @@ export async function GET() {
       .order("created_at", { ascending: false })
 
     if (error) {
-      console.error("[v0] Error fetching favorites:", error)
       return NextResponse.json({ favorites: [] }, { status: 200 })
     }
 
@@ -52,8 +51,7 @@ export async function GET() {
       favorites: favorites || [],
       userId: user.id,
     })
-  } catch (error) {
-    console.error("[v0] Favorites GET error:", error)
+  } catch {
     return NextResponse.json({ error: "Failed to fetch favorites" }, { status: 500 })
   }
 }
@@ -102,13 +100,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error("[v0] Error adding favorite:", error)
       return NextResponse.json({ error: "Failed to add favorite" }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, favorite })
-  } catch (error) {
-    console.error("[v0] Favorites POST error:", error)
+  } catch {
     return NextResponse.json({ error: "Failed to add favorite" }, { status: 500 })
   }
 }
@@ -142,13 +138,11 @@ export async function DELETE(request: NextRequest) {
       .eq("property_id", propertyId)
 
     if (error) {
-      console.error("[v0] Error removing favorite:", error)
       return NextResponse.json({ error: "Failed to remove favorite" }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("[v0] Favorites DELETE error:", error)
+  } catch {
     return NextResponse.json({ error: "Failed to remove favorite" }, { status: 500 })
   }
 }

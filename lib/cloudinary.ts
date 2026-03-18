@@ -29,7 +29,6 @@ export async function uploadImageFromUrl(imageUrl: string, propertySlug: string)
 
     return result.secure_url
   } catch (error) {
-    console.error("[v0] Cloudinary upload error:", error)
     throw error
   }
 }

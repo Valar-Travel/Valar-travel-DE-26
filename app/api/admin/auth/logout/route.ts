@@ -17,8 +17,10 @@ export async function POST() {
     cookieStore.delete(SESSION_COOKIE_NAME)
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("Logout error:", error)
-    return NextResponse.json({ success: false, error: "An error occurred" }, { status: 500 })
+  } catch {
+    // Still clear the cookie even if db delete fails
+    const cookieStore = await cookies()
+    cookieStore.delete(SESSION_COOKIE_NAME)
+    return NextResponse.json({ success: true })
   }
 }

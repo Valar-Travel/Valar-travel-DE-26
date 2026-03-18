@@ -107,7 +107,6 @@ export function PropertiesAdmin() {
       toast.success("Property approved and published")
       mutate()
     } catch (error: any) {
-      console.error("[v0] Approve error:", error)
       toast.error(error.message || "Failed to approve property")
     }
   }
@@ -130,7 +129,6 @@ export function PropertiesAdmin() {
       toast.success("Property rejected")
       mutate()
     } catch (error: any) {
-      console.error("[v0] Reject error:", error)
       toast.error(error.message || "Failed to reject property")
     }
   }
@@ -154,7 +152,6 @@ export function PropertiesAdmin() {
       toast.success("Property deleted")
       mutate()
     } catch (error: any) {
-      console.error("[v0] Delete error:", error)
       toast.error(error.message || "Failed to delete property")
     }
   }
@@ -280,7 +277,6 @@ export function PropertiesAdmin() {
       toast.success("All properties deleted successfully")
       mutate()
     } catch (error: any) {
-      console.error("[v0] Delete all error:", error)
       toast.error(error.message || "Failed to delete all properties")
     } finally {
       setIsDeletingAll(false)
@@ -324,7 +320,6 @@ export function PropertiesAdmin() {
       setEditPriceValue("")
       mutate()
     } catch (error: any) {
-      console.error("[v0] Price update error:", error)
       toast.error(error.message || "Failed to update price")
     } finally {
       setSavingPrice(false)
@@ -357,7 +352,6 @@ export function PropertiesAdmin() {
       })
       mutate()
     } catch (error: any) {
-      console.error("[v0] Fix descriptions error:", error)
       toast.error(error.message || "Failed to fix descriptions")
     } finally {
       setIsFixingDescriptions(false)

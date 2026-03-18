@@ -63,8 +63,7 @@ export async function rateLimitByIP(ip: string, endpoint: string): Promise<RateL
       remaining: remaining - 1,
       resetTime,
     }
-  } catch (error) {
-    console.error("[v0] Rate limiter error:", error)
+  } catch {
     // Fail open - allow request if rate limiter fails
     return {
       success: true,
