@@ -73,8 +73,7 @@ export function useFavorites() {
       mutate()
 
       return true
-    } catch (error) {
-      console.error("[v0] Error adding favorite:", error)
+    } catch {
       // Revert optimistic update
       mutate()
       return false
@@ -106,8 +105,7 @@ export function useFavorites() {
       }
 
       return true
-    } catch (error) {
-      console.error("[v0] Error removing favorite:", error)
+    } catch {
       // Revert optimistic update
       mutate()
       return false

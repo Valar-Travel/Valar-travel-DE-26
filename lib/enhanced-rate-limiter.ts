@@ -99,8 +99,7 @@ export class EnhancedRateLimiter {
         resetTime,
         retryAfter: success ? undefined : Math.ceil(config.windowMs / 1000),
       }
-    } catch (error) {
-      console.error("[v0] Rate limiter error:", error)
+    } catch {
       // Fail open - allow request if rate limiter fails
       return {
         success: true,

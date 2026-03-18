@@ -20,7 +20,6 @@ export async function GET() {
       .order("created_at", { ascending: false })
 
     if (error) {
-      console.error("[v0] Error fetching villas from database:", error)
       return NextResponse.json([])
     }
 
@@ -59,8 +58,7 @@ export async function GET() {
     }))
 
     return NextResponse.json(villas)
-  } catch (error) {
-    console.error("[v0] Error in villas API route:", error)
+  } catch {
     return NextResponse.json([])
   }
 }

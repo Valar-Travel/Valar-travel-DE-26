@@ -45,8 +45,7 @@ Original: ${originalText}`,
     })
 
     return completion.choices[0]?.message?.content?.trim() || originalText
-  } catch (error) {
-    console.error("[v0] OpenAI rewrite error:", error)
+  } catch {
     return originalText
   }
 }

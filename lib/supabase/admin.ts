@@ -13,7 +13,6 @@ export function createAdminClient() {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.error("[v0] Missing Supabase admin credentials")
     throw new Error("Missing Supabase admin credentials")
   }
 

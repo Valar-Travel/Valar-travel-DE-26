@@ -50,8 +50,7 @@ export class ImageCacheManager {
         fallbackImage: this.imageStandardizer.getFallbackImage(apiSource),
         metadata: data.image_metadata || {},
       }
-    } catch (error) {
-      console.error("[v0] Error getting cached images:", error)
+    } catch {
       return null
     }
   }
@@ -97,7 +96,6 @@ export class ImageCacheManager {
         .single()
 
       if (error) {
-        console.error("[v0] Error caching images:", error)
         // Return standardized images without caching
         return {
           primaryImage: standardizedImages.primaryImage,
@@ -114,8 +112,7 @@ export class ImageCacheManager {
         fallbackImage: standardizedImages.fallbackImage,
         metadata: data.image_metadata,
       }
-    } catch (error) {
-      console.error("[v0] Error in cacheImages:", error)
+    } catch {
       // Fallback to standardized images without caching
       const standardizedImages = this.imageStandardizer.standardizeImages(rawImageData, apiSource)
       return {
@@ -183,13 +180,11 @@ export class ImageCacheManager {
       const { data, error } = await supabase.rpc("cleanup_expired_image_cache")
 
       if (error) {
-        console.error("[v0] Error cleaning up expired cache:", error)
         return 0
       }
 
       return data || 0
-    } catch (error) {
-      console.error("[v0] Error in cleanupExpiredCache:", error)
+    } catch {
       return 0
     }
   }
@@ -210,13 +205,11 @@ export class ImageCacheManager {
       const { error } = await query
 
       if (error) {
-        console.error("[v0] Error invalidating cache:", error)
         return false
       }
 
       return true
-    } catch (error) {
-      console.error("[v0] Error in invalidateCache:", error)
+    } catch {
       return false
     }
   }
