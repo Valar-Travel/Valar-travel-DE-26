@@ -10,6 +10,7 @@ import { MapPin, Search, Star, Users, Bed, Bath } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { UNSPLASH_IMAGES, getImageUrl } from "@/lib/unsplash-images"
+import { PersonalizedRecommendations } from "@/components/recommendations/personalized-recommendations"
 
 export default function PageClient() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -149,6 +150,9 @@ export default function PageClient() {
           </div>
         </div>
       </section>
+
+      {/* AI Personalized Recommendations */}
+      <PersonalizedRecommendations />
 
       {/* Featured Destinations */}
       <section className="py-16">
