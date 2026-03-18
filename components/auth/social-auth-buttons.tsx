@@ -18,20 +18,37 @@ export function SocialAuthButtons({ redirectTo = "/dashboard", className, onErro
   const handleOAuthSignIn = async (provider: "google" | "apple") => {
     setLoadingProvider(provider)
     
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
-        queryParams: provider === "google" ? {
-          access_type: "offline",
-          prompt: "consent",
-        } : undefined,
-      },
-    })
+    try {
+      const supabase = createClient()
+      
+      // Build the callback URL
+      const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: callbackUrl,
+          queryParams: provider === "google" ? {
+            access_type: "offline",
+            prompt: "consent",
+          } : undefined,
+        },
+      })
 
-    if (error) {
-      onError?.(error.message)
+      if (error) {
+        console.error(`[v0] OAuth ${provider} error:`, error.message)
+        onError?.(error.message)
+        setLoadingProvider(null)
+        return
+      }
+
+      // If data.url exists but no redirect happened, manually redirect
+      if (data?.url) {
+        window.location.href = data.url
+      }
+    } catch (err) {
+      console.error(`[v0] OAuth ${provider} exception:`, err)
+      onError?.(err instanceof Error ? err.message : "Authentication failed")
       setLoadingProvider(null)
     }
     // If successful, the page will redirect to the OAuth provider

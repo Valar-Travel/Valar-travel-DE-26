@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useCallback, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -29,6 +29,7 @@ interface HomePageClientProps {
 
 export default function HomePageClient({ featuredVillas }: HomePageClientProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
   const featuredDestinations = [
@@ -62,12 +63,14 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
     },
   ]
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      router.push(`/villas?search=${encodeURIComponent(searchQuery.trim())}`)
+      startTransition(() => {
+        router.push(`/villas?search=${encodeURIComponent(searchQuery.trim())}`)
+      })
     }
-  }
+  }, [searchQuery, router])
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,9 +124,10 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
                 />
                 <Button
                   type="submit"
-                  className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 bg-amber-500 hover:bg-amber-400 text-emerald-950 rounded-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 text-sm sm:text-base font-semibold transition-all shadow-lg hover:shadow-xl"
+                  disabled={isPending}
+                  className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 bg-amber-500 hover:bg-amber-400 text-emerald-950 rounded-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 text-sm sm:text-base font-semibold transition-all shadow-lg hover:shadow-xl disabled:opacity-70"
                 >
-                  Search
+                  {isPending ? "..." : "Search"}
                 </Button>
               </div>
             </form>
