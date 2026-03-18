@@ -1,58 +1,103 @@
-# Caribbean Villa Scraper Setup Guide
+# Property Scraper Setup Guide
 
-## Pre-Deployment Checklist
+## Overview
 
-### 1. Push to VS Code/GitHub
-- Click the GitHub icon in the top-right of v0
-- Commit all changes with message: "Setup Caribbean villa scraper"
-- Push to your repository
+The Valar Travel property scraper imports luxury villa listings from external sources into the Supabase database.
 
-### 2. Verify Database Tables
+## How It Works
 
-Before running the scraper, ensure these tables exist:
-- `scraped_properties` - Stores scraped villa data
-- `cities` - Caribbean destination cities
-- `deals` - Travel deals
-- `reviews` - Location reviews
+1. **API Endpoint:** `/api/scrape` accepts a URL and destination
+2. **Parser:** Uses Cheerio to extract property data
+3. **Storage:** Saves to `scraped_luxury_properties` table
+4. **Review:** Properties are unpublished by default for admin review
 
-**Check Status:** Visit `/api/check-scraper-ready` after deployment
+## Running the Scraper
 
-### 3. Run Database Setup (if needed)
+### Via Admin Dashboard
 
-If tables are missing, run this script:
-- `scripts/000-master-setup-all-tables.ts`
+1. Log in to `/admin`
+2. Navigate to Properties section
+3. Use the "Import Properties" feature
+4. Enter the source URL and destination
 
-### 4. Run the Scraper
+### Via API
 
-**Option A: Via API Endpoint**
-Visit: `/api/run-scraper`
+```bash
+POST /api/scrape
+Content-Type: application/json
 
-**Option B: Via Script**
-Run: `scripts/run-caribbean-scraper.ts`
+{
+  "url": "https://source-website.com/villas",
+  "destination": "Barbados",
+  "maxProperties": 50
+}
+```
 
-### 5. Verify Results
+## Supported Sources
 
-Check the scraped data:
-\`\`\`sql
-SELECT COUNT(*) FROM scraped_properties;
-SELECT * FROM scraped_properties LIMIT 5;
-\`\`\`
+The scraper is optimized for:
+- sunnyvillaholidays.com
+- Similar villa listing websites
 
-## Scraper Features
+## Data Extracted
 
-- Scrapes Barbados villas from sunnyvillaholidays.com
-- Extracts: property name, URL, basic details
-- Stores in `scraped_properties` table
-- Prevents duplicates via `source_url` unique constraint
-- Marks properties as unpublished (requires admin review)
+For each property:
+- **Name** - Villa title
+- **Location** - Full address/region
+- **Description** - Property description
+- **Bedrooms/Bathrooms** - Room counts
+- **Max Guests** - Capacity
+- **Price** - Nightly rate
+- **Images** - Photo gallery URLs
+- **Amenities** - Feature list
+- **Source URL** - Original listing
+
+## Post-Import Steps
+
+1. **Review in Admin:** Check imported properties at `/admin`
+2. **Edit Details:** Update any incorrect information
+3. **Add Images:** Supplement with additional photos if needed
+4. **Publish:** Mark properties as published to make live
+
+## Database Table
+
+Properties are stored in `scraped_luxury_properties`:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| name | TEXT | Villa name |
+| slug | TEXT | URL-friendly identifier |
+| location | TEXT | Location string |
+| description | TEXT | Full description |
+| bedrooms | INTEGER | Number of bedrooms |
+| bathrooms | DECIMAL | Number of bathrooms |
+| max_guests | INTEGER | Maximum capacity |
+| price_per_night | DECIMAL | Nightly rate |
+| images | TEXT[] | Array of image URLs |
+| amenities | TEXT[] | Array of amenities |
+| source_url | TEXT | Original listing URL |
+| published | BOOLEAN | Visibility flag |
+| created_at | TIMESTAMP | Import date |
 
 ## Troubleshooting
 
-### SSL Connection Error
-Use TypeScript scripts (`.ts`) instead of SQL (`.sql`) files
+### No Properties Found
 
-### Missing Tables
-Run `000-master-setup-all-tables.ts` script first
+- Check the source URL is accessible
+- Verify the website structure hasn't changed
+- Check server logs for parsing errors
 
-### No Data Scraped
-Check console logs in `/api/run-scraper` response
+### Duplicate Properties
+
+- Properties are matched by `source_url`
+- Existing properties are updated, not duplicated
+
+### Images Not Loading
+
+- External images use `unoptimized` flag
+- Check image URLs are valid and accessible
+
+---
+
+**Last Updated:** March 2026

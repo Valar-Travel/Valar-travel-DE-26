@@ -1,43 +1,99 @@
-# Database Scripts
+# Scripts Directory
 
-## Important Notes
+## Test Suite
 
-### SSL Connection Required
+### Running Tests
 
-All scripts now use a centralized database connection utility that automatically adds SSL mode to database connections. You should no longer see "SSL connection is required" errors.
+```bash
+pnpm test
+```
 
-### Script Execution in v0
+Or run directly:
+```bash
+npx tsx scripts/run-tests.ts
+```
 
-v0 may prompt you to run scripts when it detects:
-- New migration scripts that haven't been executed
-- Database schema updates needed
-- Initial setup scripts for new integrations
+### Test Structure
 
-**This is normal behavior** and only happens when scripts are added or modified. Once executed, you won't be prompted again unless the script changes.
+| File | Description |
+|------|-------------|
+| `run-tests.ts` | Main test orchestrator |
+| `tests/unit-tests.ts` | Unit tests for utility functions |
+| `tests/integration-tests.ts` | Integration tests for API routes |
 
-### Preventing Repeated Script Prompts
+### Test Categories
 
-If you're being asked to run the same script repeatedly:
-1. The script completed successfully - v0 is just being cautious
-2. Clear your browser cache and reload
-3. The script might have a check that's always returning false
+1. **Unit Tests** - Test utility functions in isolation
+   - Input validation (email, phone, URL, HTML sanitization)
+   - Property description parsing
+   - Subscription plan features
+   - Currency formatting
+   - Date utilities
 
-### Scripts That Should Only Run Once
+2. **Integration Tests** - Test API route behavior
+   - Properties API validation
+   - Search API validation
+   - Contact form validation
+   - Booking validation
+   - Newsletter subscription
 
-- `000-master-setup-all-tables.ts` - Initial database setup
-- `015-create-scraped-properties-schema.ts` - Property schema creation
-- `016-seed-caribbean-cities-only.ts` - Initial city data
-- `017-seed-caribbean-deals-only.ts` - Initial deals data
-- `018-seed-caribbean-reviews-only.ts` - Initial review data
+3. **TypeScript Check** - Compiler validation
 
-Once these complete successfully, you can safely ignore prompts to run them again.
+4. **ESLint Check** - Code quality analysis
 
-### Scripts You Can Run Anytime
+5. **Accessibility Check** - A11y static analysis
 
-- `999-verify-and-run-scraper.ts` - Run the property scraper
-- `cleanup-now.ts` - Clean up database records
-- `run-caribbean-scraper.ts` - Scrape new properties
+6. **Build Validation** - Build integrity checks
 
-## Troubleshooting
+7. **Security Check** - Vulnerability scanning
 
-If you encounter SSL errors despite these updates, check that your `POSTGRES_URL` environment variable is properly set in your Vercel project settings.
+## Test Output
+
+Tests produce a summary showing:
+- Pass/fail status for each category
+- Error count and details
+- Warning count
+- Total execution time
+
+Example output:
+```
+╔════════════════════════════════════════════════════════════╗
+║        VALAR TRAVEL - COMPREHENSIVE TEST SUITE             ║
+╚════════════════════════════════════════════════════════════╝
+
+PASS - Unit Tests (245ms)
+     Tests: 25/25 passed
+PASS - Integration Tests (180ms)
+     Tests: 20/20 passed
+PASS - TypeScript Check (3200ms)
+PASS - ESLint Check (1500ms)
+...
+
+========================================
+Overall: 7/7 test suites passed
+========================================
+```
+
+---
+
+## Database Scripts
+
+### SSL Connection
+
+All database scripts use Supabase client which handles SSL automatically.
+
+### Script Types
+
+**Setup Scripts** (run once):
+- Database table creation
+- Initial data seeding
+- Schema migrations
+
+**Utility Scripts** (run as needed):
+- Property scraping
+- Data cleanup
+- Cache clearing
+
+---
+
+**Last Updated:** March 2026

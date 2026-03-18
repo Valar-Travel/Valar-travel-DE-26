@@ -1,42 +1,121 @@
 # Valar Travel Setup Guide
 
-## Current Status
-- **Version**: 0.1.2
-- **Database**: Neon (Postgres 17)
-- **Region**: AWS US East 1 (Virginia)
-- **Project**: neon-green-lamp
+## Quick Start
 
-## Issues Fixed
-1. ✅ SSL connection configuration added to all database connections
-2. ✅ Cache control headers added for development
-3. ✅ Centralized database connection utility created
-4. ✅ Health check endpoint added
+### 1. Clone and Install
 
-## Next Steps to Complete Setup
+```bash
+git clone https://github.com/your-repo/valar-travel.git
+cd valar-travel
+pnpm install
+```
 
-### 1. Run Database Initialization Script
-The database tables need to be created. Run this script from the v0 Scripts panel:
+### 2. Environment Variables
 
-\`\`\`bash
-packages/backend/src/scripts/000-initialize-neon-database.ts
-\`\`\`
+Create `.env.local` with the following variables:
 
-This will create:
-- `scraped_luxury_properties` - For vacation properties
-- `cities` - Caribbean destinations
-- `deals` - Travel deals and discounts
-- `blog_posts` - Blog content
-- Indexes and RLS policies
+```bash
+# Supabase (Required)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-### 2. Verify Connection
-After running the initialization script, check the health endpoint:
+# Site URL
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-\`\`\`
-http://localhost:3000/api/health
-\`\`\`
+# Stripe (Optional - for payments)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
+STRIPE_SECRET_KEY=your_stripe_secret
 
-You should see:
-\`\`\`json
+# Resend (Optional - for emails)
+RESEND_API_KEY=your_resend_key
+```
+
+### 3. Database Setup
+
+The database is managed through Supabase. Tables are created automatically via migrations.
+
+**Required Tables:**
+- `scraped_luxury_properties` - Villa listings
+- `admin_users` - Admin authentication
+- `admin_sessions` - Admin sessions
+- `contact_messages` - Customer inquiries
+- `newsletter_subscriptions` - Newsletter signups
+
+### 4. Run Development Server
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## Detailed Setup
+
+### Supabase Configuration
+
+1. **Create a Supabase Project**
+   - Go to [supabase.com](https://supabase.com)
+   - Create a new project
+   - Note your project URL and keys
+
+2. **Enable Row Level Security**
+   - All tables have RLS enabled by default
+   - Public tables allow anonymous read access
+   - Admin tables require authentication
+
+3. **Configure Authentication**
+   - Go to Authentication → URL Configuration
+   - Add redirect URL: `https://yourdomain.com/auth/callback`
+   - For local dev: `http://localhost:3000/auth/callback`
+
+### Stripe Configuration (Optional)
+
+1. Create a Stripe account at [stripe.com](https://stripe.com)
+2. Get your API keys from the Dashboard
+3. Add to environment variables
+4. Configure webhook endpoints (if needed)
+
+### Resend Configuration (Optional)
+
+1. Create a Resend account at [resend.com](https://resend.com)
+2. Verify your domain
+3. Get your API key
+4. Add to environment variables
+
+---
+
+## Admin Setup
+
+### Create Admin User
+
+Run the password reset endpoint to create an admin user:
+
+```bash
+curl -X POST https://yourdomain.com/api/admin/reset-password
+```
+
+**Default Credentials:**
+- Email: `admin@valartravel.de`
+- Password: `ValarAdmin2024!`
+
+Change these immediately after first login.
+
+### Access Admin Dashboard
+
+Navigate to `/admin` and log in with your credentials.
+
+---
+
+## Verification
+
+### Health Check
+
+Visit `/api/health` to verify the setup:
+
+```json
 {
   "status": "healthy",
   "database": {
@@ -44,98 +123,76 @@ You should see:
     "ssl": true
   }
 }
-\`\`\`
+```
 
-### 3. Clear Browser Cache
-To fix the "old version showing" issue:
+### Verify Environment
 
-**Chrome/Edge:**
-1. Open DevTools (F12)
-2. Right-click the refresh button
-3. Select "Empty Cache and Hard Reload"
+Visit `/api/verify-setup` to check all configurations:
 
-**Or use keyboard shortcuts:**
-- Mac: `Cmd + Shift + R`
-- Windows/Linux: `Ctrl + Shift + R`
+```json
+{
+  "checks": {
+    "siteUrl": { "configured": true },
+    "supabase": { "configured": true },
+    "stripe": { "configured": true }
+  }
+}
+```
 
-**Or clear application data:**
-1. Open DevTools (F12)
-2. Go to Application tab
-3. Click "Clear storage"
-4. Check all boxes and click "Clear site data"
-
-### 4. Verify Setup is Working
-
-After completing steps 1-3, verify:
-
-1. **Database Tables Created**
-   - Go to your Neon console → Tables
-   - You should see: scraped_luxury_properties, cities, deals, blog_posts
-
-2. **Website Loads**
-   - Visit `http://localhost:3000`
-   - Should show Caribbean destinations
-   - No SSL errors in console
-
-3. **Health Check Passes**
-   - Status should be "healthy"   - Visit `http://localhost:3000/api/health`
-
+---
 
 ## Troubleshooting
 
-### SSL Connection Error
-If you still see "SSL connection is required":
-1. Check that `POSTGRES_URL` environment variable is set
-2. Verify it includes `?sslmode=require` at the end
-3. Restart your development server
+### Database Connection Issues
 
-### Old Version Showing
-If the site still shows old content:
-1. Clear all browser cache (see step 3 above)
-2. Close all browser tabs with localhost:3000
-3. Restart Next.js dev server (`npm run dev`)
-4. Open in incognito/private window
+1. Verify `NEXT_PUBLIC_SUPABASE_URL` is correct
+2. Check that `SUPABASE_SERVICE_ROLE_KEY` has proper permissions
+3. Ensure RLS policies allow the required operations
 
-### Script Won't Run
-If the initialization script fails:
-1. Check Neon console that database is running
-2. Verify environment variables are set in v0
-3. Check the error message - it will show specific SSL or connection issues
+### Authentication Issues
 
-## Environment Variables Needed
+1. Check redirect URLs in Supabase Dashboard
+2. Verify `NEXT_PUBLIC_SITE_URL` matches your domain
+3. Clear browser cookies and try again
 
-These should already be set from Neon integration:
-- `POSTGRES_URL` - Primary connection string
-- `DATABASE_URL` - Fallback connection string  
-- `NEON_PROJECT_ID` - Project identifier
+### Build Errors
 
-## Database Schema
+1. Run `pnpm type-check` to catch TypeScript errors
+2. Run `pnpm lint` to fix code style issues
+3. Check for missing environment variables
 
-### scraped_luxury_properties
-\`\`\`sql
-- id: UUID (primary key)
-- name: TEXT
-- location: TEXT
-- rating: DECIMAL(3,2) >= 4.0
-- price_per_night: DECIMAL(10,2)
-- description: TEXT
-- amenities: TEXT[]
-- images: TEXT[]
-- source_url: TEXT
-\`\`\`
+---
 
-### cities
-\`\`\`sql
-- id: SERIAL (primary key)
-- name: TEXT
-- country: TEXT
-- region: TEXT
-- is_featured: BOOLEAN
-\`\`\`
+## Production Deployment
+
+### Vercel Deployment
+
+1. Connect your GitHub repository to Vercel
+2. Add all environment variables in Vercel dashboard
+3. Deploy
+
+### Environment Variables in Vercel
+
+Go to Settings → Environment Variables and add:
+- All Supabase variables
+- `NEXT_PUBLIC_SITE_URL` = `https://yourdomain.com`
+- Any optional service keys
+
+### Custom Domain
+
+1. Add your domain in Vercel dashboard
+2. Configure DNS records as instructed
+3. Enable SSL (automatic)
+
+---
 
 ## Support
 
-If issues persist after following this guide:
-1. Check the `/api/health` endpoint response
-2. Look for error messages in browser console (F12)
-3. Check Neon console for database connectivity
+For issues:
+1. Check the [README.md](./README.md) for documentation links
+2. Review error logs in Vercel dashboard
+3. Check Supabase logs for database issues
+
+---
+
+**Last Updated:** March 2026
