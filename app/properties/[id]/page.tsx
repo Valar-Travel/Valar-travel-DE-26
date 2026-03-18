@@ -47,7 +47,7 @@ import {
 import { createClient } from "@/lib/supabase/server"
 import { VillaImageGallery } from "@/components/villa-image-gallery"
 import { InternalLinks, destinationLinks } from "@/components/internal-links"
-import { VillaBookingButton } from "@/components/booking/villa-booking-button"
+import { LuxuryBookingButton } from "@/components/booking/luxury-booking-button"
 import { PropertyJsonLd } from "@/components/seo/property-json-ld"
 import { parsePropertyDescription } from "@/lib/parse-property-description"
 
@@ -770,7 +770,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
                   {/* CTA Buttons */}
                   <div className="space-y-2.5">
-                    <VillaBookingButton
+                    <LuxuryBookingButton
                       villa={{
                         id: property.id,
                         name: property.name,
@@ -782,8 +782,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                       }}
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-12 font-semibold"
                     >
-                      Book Now
-                    </VillaBookingButton>
+                      Book with Concierge
+                    </LuxuryBookingButton>
                     <Button
                       variant="outline"
                       className="w-full h-11 bg-transparent"
@@ -857,7 +857,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                       <Phone className="w-4 h-4" />
                     </a>
                   </Button>
-                  <VillaBookingButton
+                  <LuxuryBookingButton
                     villa={{
                       id: property.id,
                       name: property.name,
@@ -871,7 +871,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                     className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
                   >
                     Book Now
-                  </VillaBookingButton>
+                  </LuxuryBookingButton>
                 </div>
               </div>
             </div>
