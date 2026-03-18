@@ -3,6 +3,18 @@
 import { stripe } from "@/lib/stripe"
 import { createClient } from "@/lib/supabase/server"
 
+interface ConciergeMetadata {
+  arrivalAssistance?: string
+  diningReservations?: boolean
+  diningPreferences?: string
+  privateAviation?: boolean
+  tailNumber?: string
+  chauffeurService?: string
+  islandHopping?: string
+  mustHaves?: string
+  contactMethod?: string
+}
+
 interface BookingDetails {
   villaId: string
   villaName: string
@@ -12,6 +24,7 @@ interface BookingDetails {
   guests: number
   pricePerNight: number
   currency: string
+  metadata?: ConciergeMetadata
 }
 
 export async function createVillaBookingSession(booking: BookingDetails) {
@@ -32,6 +45,17 @@ export async function createVillaBookingSession(booking: BookingDetails) {
   // Calculate total price in cents
   const totalPriceCents = Math.round(booking.pricePerNight * nights * 100)
   
+  // Build concierge notes from metadata
+  const conciergeNotes = booking.metadata ? [
+    booking.metadata.arrivalAssistance !== "none" && `Arrival: ${booking.metadata.arrivalAssistance}`,
+    booking.metadata.diningReservations && `Dining reservations requested${booking.metadata.diningPreferences ? `: ${booking.metadata.diningPreferences}` : ""}`,
+    booking.metadata.privateAviation && `Private aviation${booking.metadata.tailNumber ? ` - Tail: ${booking.metadata.tailNumber}` : ""}`,
+    booking.metadata.chauffeurService !== "none" && `Chauffeur: ${booking.metadata.chauffeurService}`,
+    booking.metadata.islandHopping !== "none" && `Island hopping: ${booking.metadata.islandHopping}`,
+    booking.metadata.mustHaves && `Must-haves: ${booking.metadata.mustHaves}`,
+    booking.metadata.contactMethod && `Contact via: ${booking.metadata.contactMethod}`,
+  ].filter(Boolean).join("\n") : ""
+
   // Create a booking record in the database
   const { data: bookingRecord, error: bookingError } = await supabase
     .from("bookings")
@@ -50,7 +74,8 @@ export async function createVillaBookingSession(booking: BookingDetails) {
       total_amount: totalPriceCents,
       currency: booking.currency,
       booking_status: "pending",
-      payment_status: "pending"
+      payment_status: "pending",
+      notes: conciergeNotes || null
     })
     .select()
     .single()
