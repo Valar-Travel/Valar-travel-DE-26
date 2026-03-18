@@ -73,7 +73,7 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
   }, [searchQuery, router])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full">
       {/* Hero Section */}
       <section className="relative min-h-[500px] sm:min-h-[550px] md:min-h-[600px] lg:min-h-[650px] flex items-center justify-center overflow-hidden">
         {/* Background Image using CSS background-image for reliability */}
@@ -262,8 +262,8 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-background">
-        <div className="container mx-auto px-4">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-background w-full">
+        <div className="container mx-auto px-4 w-full">
           <div className="text-center mb-8 sm:mb-12 md:mb-16 max-w-3xl mx-auto">
             <p className="text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] text-emerald-600 font-medium mb-3 sm:mb-4">
               Featured Collection
@@ -278,13 +278,13 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
           </div>
 
           {featuredVillas && featuredVillas.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
               {featuredVillas.map((villa) => (
                 <Card
                   key={villa.id}
-                  className="overflow-hidden hover:shadow-xl transition-all duration-500 border-0 shadow-md group"
+                  className="overflow-hidden hover:shadow-xl transition-all duration-500 border-0 shadow-md group w-full"
                 >
-                  <div className="aspect-[4/3] relative overflow-hidden">
+                  <div className="aspect-[4/3] relative overflow-hidden w-full min-h-[200px]">
                     <DynamicImage
                       src={villa.image}
                       alt={`${villa.name} - ${villa.location}`}
