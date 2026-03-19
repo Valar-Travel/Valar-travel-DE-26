@@ -69,16 +69,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { data: properties, error } = await supabase
       .from("scraped_luxury_properties")
-      .select("id, updated_at, created_at")
+      .select("id, name, updated_at, created_at, location, images")
       .order("created_at", { ascending: false })
 
     if (!error && properties) {
-      propertyPages = properties.map((property) => ({
-        url: `${SITE_URL}/villas/${property.id}`,
-        lastModified: new Date(property.updated_at || property.created_at),
-        changeFrequency: "weekly" as const,
-        priority: 0.8,
-      }))
+      propertyPages = properties.map((property) => {
+        const images = property.images || []
+        return {
+          url: `${SITE_URL}/villas/${property.id}`,
+          lastModified: new Date(property.updated_at || property.created_at),
+          changeFrequency: "weekly" as const,
+          priority: 0.8,
+          // Image sitemap data for better SEO
+          images: images.slice(0, 5).map((img: string) => ({
+            url: img.startsWith("http") ? img : `${SITE_URL}${img}`,
+            title: `${property.name} - Luxury Villa in ${property.location}`,
+            caption: `Luxury vacation rental ${property.name} in ${property.location}`,
+          })),
+        }
+      })
     }
   } catch (e) {
     console.error("[Sitemap] Error fetching properties:", e)
