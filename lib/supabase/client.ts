@@ -35,16 +35,22 @@ export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  // Debug logging
+  console.log("[v0] Supabase client init - URL exists:", !!supabaseUrl, "Key exists:", !!supabaseAnonKey)
+
   if (!supabaseUrl || !supabaseAnonKey || !supabaseUrl.startsWith("http")) {
+    console.error("[v0] Supabase env vars missing or invalid - using mock client")
     return mockClient
   }
 
   // Only create client in browser environment
   if (typeof window !== "undefined") {
+    console.log("[v0] Creating real Supabase browser client")
     globalForSupabase.supabaseBrowserClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
     return globalForSupabase.supabaseBrowserClient
   }
 
   // Return mock for SSR (should use server client instead)
+  console.log("[v0] SSR environment - returning mock")
   return mockClient
 }
