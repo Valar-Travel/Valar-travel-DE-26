@@ -92,7 +92,7 @@ export async function GET() {
       const location = property.location || "Caribbean"
       const destination = getDestinationFromLocation(location)
       const price = property.price_per_night || 1000
-      const currency = property.currency || "USD"
+      const currency = "EUR" // Always use EUR for German market
       const images = property.images || []
       const mainImage = images[0] || "/images/destinations/caribbean-villa.jpg"
       const imageUrl = mainImage.startsWith("http") ? mainImage : `${SITE_URL}${mainImage}`
@@ -118,7 +118,7 @@ export async function GET() {
         escapeCsv(imageUrl),
         escapeCsv(additionalImages),
         "in_stock",
-        escapeCsv(`${price} ${currency}`),
+        escapeCsv(`${price} EUR`),
         escapeCsv(BRAND),
         "new",
         escapeCsv(productType),

@@ -38,17 +38,27 @@ export default async function DashboardPage() {
       redirect("/auth/login")
     }
 
-    // Get user profile with enhanced null checks
-    const { data: profile } =
-      supabase.from && typeof supabase.from === "function"
-        ? await supabase.from("profiles").select("*").eq("id", user.id).single()
-        : { data: null }
+    // Get user profile with enhanced null checks and error handling
+    let profile = null
+    let subscription = null
+    
+    try {
+      if (supabase.from && typeof supabase.from === "function") {
+        const profileResult = await supabase.from("profiles").select("*").eq("id", user.id).single()
+        profile = profileResult.data
+      }
+    } catch (profileError) {
+      console.log("[Dashboard] Profile fetch error (non-critical):", profileError)
+    }
 
-    // Get user subscription with enhanced null checks
-    const { data: subscription } =
-      supabase.from && typeof supabase.from === "function"
-        ? await supabase.from("user_subscriptions").select("*, subscription_plans(*)").eq("user_id", user.id).single()
-        : { data: null }
+    try {
+      if (supabase.from && typeof supabase.from === "function") {
+        const subResult = await supabase.from("user_subscriptions").select("*, subscription_plans(*)").eq("user_id", user.id).single()
+        subscription = subResult.data
+      }
+    } catch (subError) {
+      console.log("[Dashboard] Subscription fetch error (non-critical):", subError)
+    }
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -136,6 +146,11 @@ export default async function DashboardPage() {
       </div>
     )
   } catch (error: any) {
+    // Check if this is a redirect "error" (Next.js throws for redirects)
+    if (error?.digest?.includes("NEXT_REDIRECT")) {
+      throw error // Let Next.js handle the redirect
+    }
+    
     console.error("[Dashboard] Page error:", error?.message || error)
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

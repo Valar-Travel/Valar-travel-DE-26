@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "de_DE",
     url: "https://valartravel.de",
     siteName: "Valar Travel",
     title: "Valar Travel - Luxury Caribbean Villa Rentals",
@@ -58,7 +58,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="de" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
         <div className="relative flex min-h-screen flex-col">
           <Suspense

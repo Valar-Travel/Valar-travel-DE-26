@@ -68,6 +68,11 @@ export default async function OnboardingPage() {
       />
     )
   } catch (error: any) {
+    // Check if this is a redirect "error" (Next.js throws for redirects)
+    if (error?.digest?.includes("NEXT_REDIRECT")) {
+      throw error // Let Next.js handle the redirect
+    }
+    
     console.error("[Onboarding] Page error:", error?.message || error)
     // Still show onboarding even if there's an error
     return (

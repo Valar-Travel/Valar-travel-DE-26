@@ -186,12 +186,12 @@ async function detectUserCurrency(): Promise<string> {
     // Currency detection failed, will use USD default
   }
 
-  // Default to USD if all detection methods fail
-  return "USD"
+  // Default to EUR if all detection methods fail (German market focus)
+  return "EUR"
 }
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrency] = useState<string>("USD")
+  const [currency, setCurrency] = useState<string>("EUR")
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(EXCHANGE_RATES)
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
@@ -211,13 +211,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
               setCurrency(detectedCurrency)
               localStorage.setItem("preferred-currency", detectedCurrency)
             } catch {
-              setCurrency("USD")
-              localStorage.setItem("preferred-currency", "USD")
+              setCurrency("EUR")
+              localStorage.setItem("preferred-currency", "EUR")
             }
           }
         }
       } catch {
-        setCurrency("USD")
+        setCurrency("EUR")
       } finally {
         setIsLoading(false)
       }

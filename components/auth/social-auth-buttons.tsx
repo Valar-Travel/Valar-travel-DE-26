@@ -91,7 +91,8 @@ export function SocialAuthButtons({ redirectTo = "/dashboard", className, onErro
         )}
       </Button>
 
-      {/* Apple Sign In */}
+      {/* Apple Sign In - Hidden until configured */}
+      {/* 
       <Button
         type="button"
         variant="outline"
@@ -110,6 +111,7 @@ export function SocialAuthButtons({ redirectTo = "/dashboard", className, onErro
           </>
         )}
       </Button>
+      */}
     </div>
   )
 }
