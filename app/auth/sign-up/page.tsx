@@ -28,7 +28,7 @@ function SignUpForm() {
     setMessage("")
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -42,6 +42,24 @@ function SignUpForm() {
     if (error) {
       setMessage(error.message)
     } else {
+      // Trigger onboarding (welcome email, mailing list, admin notification)
+      if (data?.user) {
+        try {
+          await fetch("/api/webhooks/new-user", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: data.user.id,
+              email: data.user.email,
+              name: displayName,
+              provider: "email",
+            }),
+          })
+        } catch (e) {
+          // Don't block signup if onboarding fails
+          console.error("Onboarding error:", e)
+        }
+      }
       router.push("/auth/sign-up-success")
     }
     setLoading(false)

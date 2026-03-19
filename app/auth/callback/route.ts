@@ -55,7 +55,27 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/auth/error?message=${encodeURIComponent(error.message)}`)
       }
 
-      console.log("[Auth Callback] Success - user:", data?.user?.email)
+      const user = data?.user
+      console.log("[Auth Callback] Success - user:", user?.email)
+
+      // Trigger new user onboarding (welcome email, add to mailing list, notify admin)
+      if (user) {
+        try {
+          await fetch(`${origin}/api/webhooks/new-user`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: user.id,
+              email: user.email,
+              name: user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.name,
+              provider: user.app_metadata?.provider || "oauth",
+            }),
+          })
+        } catch (onboardingError) {
+          // Don't block login if onboarding fails
+          console.error("[Auth Callback] Onboarding error:", onboardingError)
+        }
+      }
 
       // Success - redirect to destination
       return NextResponse.redirect(`${origin}${next}`)
