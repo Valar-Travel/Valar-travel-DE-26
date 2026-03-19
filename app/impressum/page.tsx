@@ -1,91 +1,182 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Impressum - Valar Travel",
+  description: "Impressum und rechtliche Informationen fur Valar Travel - Luxury Caribbean Villa Rentals",
+}
+
 export default function ImpressumPage() {
   return (
-    <div className="min-h-screen bg-background py-16">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8">Impressum</h1>
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-emerald-800 to-emerald-900 text-white py-16">
+        <div className="container mx-auto px-4 lg:px-6 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Impressum</h1>
+          <p className="text-lg text-emerald-100">Legal Notice / Rechtliche Angaben</p>
+        </div>
+      </section>
 
+      <div className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="prose prose-lg max-w-none space-y-8">
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Company Information</h2>
-            <p>
-              <strong>Valar Travel Ltd.</strong>
-              <br />
-              Luxury Villa Management & Concierge Services
-              <br />
-              Bridgetown, Barbados
+          
+          {/* Company Information */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Angaben gemaß § 5 TMG</h2>
+            <div className="text-gray-700 space-y-2">
+              <p className="font-semibold text-lg">Valar Travel Ltd.</p>
+              <p>Luxury Villa Management & Concierge Services</p>
+              <p>
+                [Straße und Hausnummer]<br />
+                [PLZ Ort]<br />
+                Deutschland / Germany
+              </p>
+              <p className="mt-4">
+                <strong>Sitz der Gesellschaft:</strong> Bridgetown, Barbados<br />
+                <strong>Registergericht:</strong> [Registergericht]<br />
+                <strong>Registernummer:</strong> [Handelsregisternummer]
+              </p>
+            </div>
+          </section>
+
+          {/* Representatives */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Vertreten durch</h2>
+            <p className="text-gray-700">
+              Geschaftsfuhrer: [Name des Geschaftsfuhrers]
             </p>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Contact</h2>
-            <p>
-              Email: hello@valartravel.de
-              <br />
-              Phone: +1 (246) 555-0100
-              <br />
-              Website: www.valartravel.de
+          {/* Contact */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Kontakt</h2>
+            <div className="text-gray-700 space-y-1">
+              <p><strong>Telefon:</strong> +49 (0) [Telefonnummer]</p>
+              <p><strong>E-Mail:</strong> hello@valartravel.de</p>
+              <p><strong>Website:</strong> www.valartravel.de</p>
+            </div>
+          </section>
+
+          {/* VAT */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Umsatzsteuer-ID</h2>
+            <p className="text-gray-700">
+              Umsatzsteuer-Identifikationsnummer gemaß § 27a Umsatzsteuergesetz:<br />
+              <strong>DE [USt-IdNr.]</strong>
             </p>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Represented By</h2>
-            <p>Managing Director: [Name]</p>
+          {/* Responsible for Content */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Verantwortlich fur den Inhalt nach § 55 Abs. 2 RStV</h2>
+            <div className="text-gray-700">
+              <p>[Name]</p>
+              <p>[Adresse]</p>
+              <p>[PLZ Ort]</p>
+            </div>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Registration</h2>
-            <p>
-              Company Registration Number: [Number]
-              <br />
-              VAT ID: [VAT Number]
-              <br />
-              Registered in Barbados
+          {/* Data Protection Officer */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Datenschutzbeauftragter</h2>
+            <div className="text-gray-700">
+              <p>Bei Fragen zum Datenschutz wenden Sie sich bitte an:</p>
+              <p className="mt-2">
+                <strong>E-Mail:</strong> datenschutz@valartravel.de
+              </p>
+              <p className="mt-4">
+                <Link href="/privacy" className="text-emerald-600 hover:underline">
+                  Zur vollstandigen Datenschutzerklarung →
+                </Link>
+              </p>
+            </div>
+          </section>
+
+          {/* EU Dispute Resolution */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">EU-Streitschlichtung</h2>
+            <div className="text-gray-700 space-y-4">
+              <p>
+                Die Europaische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+              </p>
+              <p>
+                <a 
+                  href="https://ec.europa.eu/consumers/odr/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-emerald-600 hover:underline break-all"
+                >
+                  https://ec.europa.eu/consumers/odr/
+                </a>
+              </p>
+              <p>
+                Unsere E-Mail-Adresse finden Sie oben im Impressum.
+              </p>
+            </div>
+          </section>
+
+          {/* Consumer Dispute Resolution */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Verbraucherstreitbeilegung / Universalschlichtungsstelle</h2>
+            <p className="text-gray-700">
+              Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Responsible for Content</h2>
-            <p>
-              According to § 55 Abs. 2 RStV:
-              <br />
-              [Name]
-              <br />
-              [Address]
+          {/* Liability Disclaimers */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Haftungsausschluss</h2>
+            
+            <h3 className="text-xl font-semibold text-gray-800 mt-4 mb-2">Haftung fur Inhalte</h3>
+            <p className="text-gray-700 mb-4">
+              Als Diensteanbieter sind wir gemaß § 7 Abs.1 TMG fur eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, ubermittelte oder gespeicherte fremde Informationen zu uberwachen oder nach Umstanden zu forschen, die auf eine rechtswidrige Tatigkeit hinweisen.
+            </p>
+            <p className="text-gray-700 mb-4">
+              Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberuhrt. Eine diesbezugliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung moglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
+            </p>
+
+            <h3 className="text-xl font-semibold text-gray-800 mt-4 mb-2">Haftung fur Links</h3>
+            <p className="text-gray-700 mb-4">
+              Unser Angebot enthalt Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb konnen wir fur diese fremden Inhalte auch keine Gewahr ubernehmen. Fur die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
+            </p>
+            <p className="text-gray-700">
+              Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mogliche Rechtsverstoße uberpruft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Disclaimer</h2>
-            <h3 className="text-xl font-semibold mb-2">Liability for Content</h3>
-            <p className="mb-4">
-              The contents of our pages have been created with the utmost care. However, we cannot guarantee the
-              contents' accuracy, completeness, or topicality. According to statutory provisions, we are furthermore
-              responsible for our own content on these web pages.
+          {/* Copyright */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Urheberrecht</h2>
+            <p className="text-gray-700 mb-4">
+              Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfaltigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedurfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
             </p>
-
-            <h3 className="text-xl font-semibold mb-2">Liability for Links</h3>
-            <p className="mb-4">
-              Our offer includes links to external third-party websites. We have no influence on the contents of those
-              websites, therefore we cannot guarantee for those contents. Providers or administrators of linked websites
-              are always responsible for their own contents.
-            </p>
-
-            <h3 className="text-xl font-semibold mb-2">Copyright</h3>
-            <p>
-              The content and works published on this website are governed by the copyright laws of Barbados. Any
-              duplication, processing, distribution, or any form of commercialization beyond the scope of copyright law
-              shall require the prior written consent of Valar Travel Ltd.
+            <p className="text-gray-700">
+              Downloads und Kopien dieser Seite sind nur fur den privaten, nicht kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Dispute Resolution</h2>
-            <p>
-              The European Commission provides a platform for online dispute resolution (ODR):
-              https://ec.europa.eu/consumers/odr. We are not willing or obliged to participate in dispute resolution
-              proceedings before a consumer arbitration board.
-            </p>
+          {/* Quick Links */}
+          <section className="bg-emerald-50 p-6 rounded-lg border border-emerald-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Wichtige Links / Important Links</h2>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/privacy" className="text-emerald-600 hover:underline">
+                Datenschutzerklarung
+              </Link>
+              <Link href="/terms" className="text-emerald-600 hover:underline">
+                AGB
+              </Link>
+              <Link href="/refund-policy" className="text-emerald-600 hover:underline">
+                Widerrufsbelehrung
+              </Link>
+              <Link href="/data-deletion" className="text-emerald-600 hover:underline">
+                Datenloschung
+              </Link>
+              <Link href="/contact" className="text-emerald-600 hover:underline">
+                Kontakt
+              </Link>
+            </div>
           </section>
+
         </div>
       </div>
     </div>
