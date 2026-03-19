@@ -58,13 +58,14 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Check if current path is an auth or onboarding page
+  // Check if current path is an auth or onboarding page (for minimal layout)
   const headersList = await headers()
-  const pathname = headersList.get("x-pathname") || headersList.get("x-invoke-path") || ""
-  const isAuthPage = pathname.startsWith("/auth") || pathname.startsWith("/onboarding")
+  const pathname = headersList.get("x-pathname") || ""
+  // Only apply minimal layout for specific auth routes, not dashboard
+  const isMinimalLayoutPage = pathname.startsWith("/auth") || pathname === "/onboarding"
   
-  // For auth/onboarding pages, render minimal layout
-  if (isAuthPage) {
+  // For auth/onboarding pages, render minimal layout (no header/footer)
+  if (isMinimalLayoutPage) {
     return (
       <html lang="de" suppressHydrationWarning>
         <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
