@@ -13,6 +13,43 @@ const HomePageClient = dynamic(() => import("@/components/home-page-client"), {
   ),
 })
 
+// Fallback villas for when database is unavailable
+const FALLBACK_VILLAS = [
+  {
+    id: "fallback-1",
+    name: "Sunset Bay Villa",
+    location: "Barbados",
+    price: 1200,
+    bedrooms: 5,
+    bathrooms: 4,
+    guests: 10,
+    image: "/images/destinations/barbados-beach.jpg",
+    rating: 4.9,
+  },
+  {
+    id: "fallback-2", 
+    name: "Piton View Estate",
+    location: "St. Lucia",
+    price: 1500,
+    bedrooms: 6,
+    bathrooms: 5,
+    guests: 12,
+    image: "/images/destinations/st-lucia-pitons.jpg",
+    rating: 4.8,
+  },
+  {
+    id: "fallback-3",
+    name: "Caribbean Dream Villa",
+    location: "Jamaica",
+    price: 950,
+    bedrooms: 4,
+    bathrooms: 3,
+    guests: 8,
+    image: "/images/destinations/jamaica-coast.webp",
+    rating: 4.7,
+  },
+]
+
 export const metadata: Metadata = {
   title: "Luxury Caribbean Villa Rentals - Barbados, St. Lucia, Jamaica & St. Barthélemy",
   description:
@@ -37,8 +74,15 @@ export default async function HomePage() {
   
   try {
     featuredVillas = await getFeaturedVillas()
+    console.log("[HomePage] Fetched", featuredVillas.length, "featured villas")
   } catch (error) {
-    // Continue with empty array - homepage will still render
+    console.error("[HomePage] Error fetching featured villas:", error)
+  }
+  
+  // Use fallback villas if database returns empty or fails
+  if (!featuredVillas || featuredVillas.length === 0) {
+    console.log("[HomePage] Using fallback villas")
+    featuredVillas = FALLBACK_VILLAS
   }
   
   return <HomePageClient featuredVillas={featuredVillas} />
