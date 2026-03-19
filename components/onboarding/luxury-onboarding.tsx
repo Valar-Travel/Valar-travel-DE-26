@@ -48,7 +48,7 @@ const onboardingSteps: OnboardingStep[] = [
         id: "wellness",
         label: "Wellness & Serenity",
         description: "Rejuvenate mind and soul",
-        image: "/images/destinations/antigua-harbor.jpg",
+        image: "/images/destinations/wellness-spa.jpg",
       },
     ],
   },
