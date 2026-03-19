@@ -14,20 +14,25 @@ export default async function DashboardPage() {
     const supabase = await createClient()
 
     if (!supabase || !supabase.auth || typeof supabase.auth.getUser !== "function") {
-      console.warn("Supabase auth not available, using fallback")
+      console.warn("[Dashboard] Supabase auth not available, using fallback")
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Dashboard</h1>
-            <p className="text-gray-600">Loading...</p>
+            <p className="text-gray-600">Please sign in to continue</p>
+            <a href="/auth/login" className="text-emerald-600 hover:underline mt-4 inline-block">
+              Go to Login
+            </a>
           </div>
         </div>
       )
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError) {
+      console.error("[Dashboard] Auth error:", authError.message)
+    }
 
     if (!user) {
       redirect("/auth/login")
@@ -130,13 +135,16 @@ export default async function DashboardPage() {
         </main>
       </div>
     )
-  } catch (error) {
-    console.error("Dashboard page error:", error)
+  } catch (error: any) {
+    console.error("[Dashboard] Page error:", error?.message || error)
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Dashboard</h1>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 mb-4">Something went wrong. Please try again.</p>
+          <a href="/auth/login" className="text-emerald-600 hover:underline">
+            Go to Login
+          </a>
         </div>
       </div>
     )
