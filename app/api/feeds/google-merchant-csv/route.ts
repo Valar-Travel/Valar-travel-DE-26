@@ -68,6 +68,7 @@ export async function GET() {
       "custom_label_3",
       "custom_label_4",
       "identifier_exists",
+      "shipping",
     ]
 
     let csv = headers.join(",") + "\n"
@@ -116,6 +117,7 @@ export async function GET() {
         escapeCsv(customLabel3),
         escapeCsv(customLabel4),
         "false",
+        "DE::0 EUR", // No shipping - service/accommodation
       ]
 
       csv += row.join(",") + "\n"
