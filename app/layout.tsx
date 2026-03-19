@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import type React from "react"
 import { Suspense } from "react"
+import { headers } from "next/headers"
 import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -52,11 +53,27 @@ export const metadata: Metadata = {
     generator: 'v0.app'
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Check if current path is an auth or onboarding page
+  const headersList = await headers()
+  const pathname = headersList.get("x-pathname") || headersList.get("x-invoke-path") || ""
+  const isAuthPage = pathname.startsWith("/auth") || pathname.startsWith("/onboarding")
+  
+  // For auth/onboarding pages, render minimal layout
+  if (isAuthPage) {
+    return (
+      <html lang="de" suppressHydrationWarning>
+        <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
+          {children}
+        </body>
+      </html>
+    )
+  }
+  
   return (
     <html lang="de" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
