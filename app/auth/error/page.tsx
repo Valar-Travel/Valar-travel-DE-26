@@ -3,7 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { AlertCircle } from "lucide-react"
 
-export default function AuthError() {
+export default async function AuthError({
+  searchParams,
+}: {
+  searchParams: Promise<{ message?: string }>
+}) {
+  const params = await searchParams
+  const errorMessage = params?.message || "There was a problem confirming your email or signing you in"
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
@@ -12,7 +19,7 @@ export default function AuthError() {
             <AlertCircle className="h-6 w-6 text-red-600" />
           </div>
           <CardTitle>Authentication Error</CardTitle>
-          <CardDescription>There was a problem confirming your email or signing you in</CardDescription>
+          <CardDescription>{errorMessage}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg bg-amber-50 p-4">
