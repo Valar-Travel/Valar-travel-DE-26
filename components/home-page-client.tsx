@@ -278,13 +278,13 @@ export default function HomePageClient({ featuredVillas }: HomePageClientProps) 
           </div>
 
           {featuredVillas && featuredVillas.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full" style={{ minHeight: '300px' }}>
               {featuredVillas.map((villa) => (
                 <Card
                   key={villa.id}
-                  className="overflow-hidden hover:shadow-xl transition-all duration-500 border-0 shadow-md group w-full"
+                  className="overflow-hidden hover:shadow-xl transition-all duration-500 border-0 shadow-md group w-full flex flex-col"
                 >
-                  <div className="aspect-[4/3] relative overflow-hidden w-full min-h-[200px]">
+                  <div className="aspect-[4/3] relative overflow-hidden w-full min-h-[200px] flex-shrink-0">
                     <DynamicImage
                       src={villa.image}
                       alt={`${villa.name} - ${villa.location}`}

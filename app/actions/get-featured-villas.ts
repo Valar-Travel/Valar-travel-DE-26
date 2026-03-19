@@ -47,9 +47,17 @@ export async function getFeaturedVillas(): Promise<FeaturedVilla[]> {
         .limit(100),
     )
 
-    if (error || !properties || properties.length === 0) {
+    if (error) {
+      console.error("[getFeaturedVillas] Database error:", error.message)
       return []
     }
+    
+    if (!properties || properties.length === 0) {
+      console.log("[getFeaturedVillas] No properties found in database")
+      return []
+    }
+    
+    console.log("[getFeaturedVillas] Found", properties.length, "properties")
 
     const validProperties = properties.filter(
       (p) => p.images && Array.isArray(p.images) && p.images.length > 0 && p.images[0],

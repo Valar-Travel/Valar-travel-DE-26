@@ -6,7 +6,7 @@ export async function GET() {
   try {
     console.log(`[v0] Triggering test emails to ${testEmail}...`)
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/test-all-emails`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "https://valartravel.de"}/api/test-all-emails`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
