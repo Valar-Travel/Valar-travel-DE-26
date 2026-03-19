@@ -72,7 +72,7 @@ function LoginFormContent({ redirectTo }: { redirectTo: string }) {
             Password
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <Input
               type="password"
               placeholder="Enter your password"
@@ -107,7 +107,7 @@ function LoginFormContent({ redirectTo }: { redirectTo: string }) {
 
 function LoginFormWithParams() {
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect") || "/dashboard"
+  const redirectTo = searchParams.get("redirect") || "/onboarding"
 
   return (
     <Card className="w-full max-w-md border-neutral-200 shadow-lg">

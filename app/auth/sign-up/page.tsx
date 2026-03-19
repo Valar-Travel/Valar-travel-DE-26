@@ -20,7 +20,7 @@ function SignUpForm() {
   const [message, setMessage] = useState("")
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect") || "/dashboard"
+  const redirectTo = searchParams.get("redirect") || "/onboarding"
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
