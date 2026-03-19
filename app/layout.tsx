@@ -4,6 +4,7 @@ import { Suspense } from "react"
 import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { CookieConsent } from "@/components/cookie-consent"
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://valartravel.de"),
@@ -75,6 +76,7 @@ export default function RootLayout({
           </Suspense>
           <main className="flex-1">{children}</main>
           <Footer />
+          <CookieConsent />
         </div>
       </body>
     </html>

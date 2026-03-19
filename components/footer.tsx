@@ -246,16 +246,31 @@ export function Footer() {
             <span className="text-gray-600 hidden sm:inline">•</span>
             <p className="text-gray-400 text-xs sm:text-sm">Contact: Sarah Kuhmichel</p>
           </div>
-          <div className="flex flex-wrap justify-center sm:justify-start gap-4 sm:gap-6 text-xs sm:text-sm">
+          <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm">
             <Link href="/privacy" className="text-gray-400 hover:text-emerald-400 transition-colors">
-              Privacy
+              Datenschutz / Privacy
             </Link>
             <Link href="/terms" className="text-gray-400 hover:text-emerald-400 transition-colors">
-              Terms
+              AGB / Terms
             </Link>
             <Link href="/impressum" className="text-gray-400 hover:text-emerald-400 transition-colors">
               Impressum
             </Link>
+            <Link href="/refund-policy" className="text-gray-400 hover:text-emerald-400 transition-colors">
+              Widerruf / Refund
+            </Link>
+            <Link href="/data-deletion" className="text-gray-400 hover:text-emerald-400 transition-colors">
+              Datenloschung
+            </Link>
+            <button
+              onClick={() => {
+                localStorage.removeItem("cookie-consent")
+                window.location.reload()
+              }}
+              className="text-gray-400 hover:text-emerald-400 transition-colors"
+            >
+              Cookie-Einstellungen
+            </button>
           </div>
         </div>
       </div>
