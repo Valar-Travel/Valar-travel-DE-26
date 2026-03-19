@@ -9,6 +9,9 @@ export async function middleware(request: NextRequest) {
   const finalResponse = response || NextResponse.next()
   const { pathname } = request.nextUrl
 
+  // Set pathname header for layout detection (auth/onboarding pages need minimal layout)
+  finalResponse.headers.set("x-pathname", pathname)
+
   // Admin route protection
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value
