@@ -80,7 +80,7 @@ export async function GET() {
       const location = property.location || "Caribbean"
       const destination = getDestinationFromLocation(location)
       const price = property.price_per_night || 1000
-      const currency = property.currency || "USD"
+      const currency = "EUR" // Always use EUR for German market
       const images = property.images || []
       const mainImage = images[0] || "/images/destinations/caribbean-villa.jpg"
       const imageUrl = mainImage.startsWith("http") ? mainImage : `${SITE_URL}${mainImage}`
@@ -113,7 +113,7 @@ ${images.slice(1, 10).map((img: string) => {
   return `    <g:additional_image_link>${escapeXml(url)}</g:additional_image_link>`
 }).join("\n")}
     <g:availability>in_stock</g:availability>
-    <g:price>${price} ${currency}</g:price>
+    <g:price>${price} EUR</g:price>
     <g:brand>${escapeXml(BRAND)}</g:brand>
     <g:condition>new</g:condition>
     <g:product_type>${escapeXml(productType)}</g:product_type>
