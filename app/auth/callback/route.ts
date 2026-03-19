@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const origin = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin || "https://valartravel.de"
   const code = requestUrl.searchParams.get("code")
-  const next = requestUrl.searchParams.get("next") ?? "/dashboard"
+  const next = requestUrl.searchParams.get("next") ?? "/onboarding"
   const error_description = requestUrl.searchParams.get("error_description")
   const error_code = requestUrl.searchParams.get("error")
 

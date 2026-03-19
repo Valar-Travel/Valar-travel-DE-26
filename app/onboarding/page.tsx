@@ -1,35 +1,41 @@
-"use client"
-import { Suspense } from "react"
-import { useRouter } from "next/navigation"
-import { OnboardingFlow } from "@/components/onboarding-flow"
-import { useAnalytics } from "@/hooks/use-analytics"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
+import { LuxuryOnboarding } from "@/components/onboarding/luxury-onboarding"
 
-function OnboardingContent() {
-  const router = useRouter()
-  const { track } = useAnalytics()
-
-  const handleOnboardingComplete = () => {
-    track("onboarding_completed")
-    router.push("/dashboard")
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <OnboardingFlow userId="user-id" onComplete={handleOnboardingComplete} />
-    </div>
-  )
+export const metadata = {
+  title: "Welcome to Valar Travel | Personalize Your Experience",
+  description: "Tell us about your dream Caribbean escape so we can curate the perfect villas for you.",
 }
 
-export default function OnboardingPage() {
+export default async function OnboardingPage() {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+    redirect("/auth/sign-in")
+  }
+
+  // Check if user has already completed onboarding
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("onboarded_at")
+    .eq("user_id", user.id)
+    .single()
+
+  // If already onboarded, redirect to dashboard
+  if (profile?.onboarded_at) {
+    redirect("/dashboard")
+  }
+
+  const userName = user.user_metadata?.full_name || 
+                   user.user_metadata?.display_name || 
+                   user.user_metadata?.name
+
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-gray-50 py-12 flex items-center justify-center">
-          <p>Loading onboarding...</p>
-        </div>
-      }
-    >
-      <OnboardingContent />
-    </Suspense>
+    <LuxuryOnboarding 
+      userId={user.id} 
+      userName={userName}
+    />
   )
 }
