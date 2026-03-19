@@ -117,7 +117,7 @@ export class ImageStandardizer {
     // Use image proxy for external images
     const proxyUrl = new URL(
       "/api/image-proxy",
-      typeof window !== "undefined" ? window.location.origin : "https://localhost:3000",
+      typeof window !== "undefined" ? window.location.origin : "https://valartravel.de",
     )
 
     proxyUrl.searchParams.set("url", encodeURIComponent(imageUrl))

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
 async function getPost(slug: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/blog-posts`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "https://valartravel.de"}/api/blog-posts`, {
     cache: "no-store",
   })
 
@@ -21,7 +21,7 @@ async function getPost(slug: string) {
 
 async function getRelatedPosts(currentSlug: string, category: string) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/blog-posts?category=${category}`,
+    `${process.env.NEXT_PUBLIC_SITE_URL || "https://valartravel.de"}/api/blog-posts?category=${category}`,
     {
       cache: "no-store",
     },
