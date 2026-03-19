@@ -6,6 +6,7 @@ import { SubscriptionCard } from "@/components/dashboard/subscription-card"
 import { UsageStats } from "@/components/dashboard/usage-stats"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { BookingHistory } from "@/components/dashboard/booking-history"
+import { PersonalizedRecommendations } from "@/components/dashboard/personalized-recommendations"
 
 export const dynamic = "force-dynamic"
 
@@ -75,6 +76,21 @@ export default async function DashboardPage() {
         </Suspense>
 
         <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          {/* Personalized Recommendations - Full Width */}
+          <div className="mb-8">
+            <Suspense fallback={
+              <div className="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-8 border border-emerald-100 animate-pulse">
+                <div className="h-6 bg-emerald-100 rounded w-48 mb-4" />
+                <div className="h-4 bg-emerald-50 rounded w-64" />
+              </div>
+            }>
+              <PersonalizedRecommendations 
+                userId={user.id} 
+                userName={user.user_metadata?.full_name || user.user_metadata?.display_name}
+              />
+            </Suspense>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
