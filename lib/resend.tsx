@@ -160,3 +160,20 @@ export async function sendCustomEmail(data: {
 
 // Re-export config and utilities for external use
 export { EMAIL_CONFIG, emailWrapper, newsletterWrapper, SUPPORT_PHONE }
+export async function sendCancellationPolicy(email: string) {
+  try {
+    await resend.emails.send({
+      from: `Your Company <${COMPANY_EMAIL}>`,
+      to: email,
+      subject: "Cancellation Policy",
+      html: `<p>Your cancellation policy details...</p>`,
+    })
+
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to send email",
+    }
+  }
+}

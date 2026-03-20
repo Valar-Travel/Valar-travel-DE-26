@@ -1,13 +1,15 @@
-export const maxDuration = 30
+import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
 
-export async function GET() {
-  return new Response(
-    JSON.stringify({
-      message: "Chat service is currently using smart responses. No API calls needed.",
-    }),
-    {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    },
-  )
+export const maxDuration = 30;
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = streamText({
+    model: openai("gpt-4o-mini"),
+    messages,
+  });
+
+  return result.toTextStreamResponse();
 }
