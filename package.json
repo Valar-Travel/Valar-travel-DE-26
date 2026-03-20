@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "cross-env NEXT_DISABLE_TURBOPACK=1 next build",
     "dev": "next dev",
     "insert:properties": "tsx scripts/run-sql-insert.ts",
     "lint": "next lint",
@@ -68,6 +68,7 @@
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
+    "cross-env": "^10.1.0",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.5.1",
     "framer-motion": "^12.24.7",
