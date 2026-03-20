@@ -6,6 +6,7 @@ import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { CookieConsent } from "@/components/cookie-consent"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://valartravel.de"),
@@ -70,6 +71,7 @@ export default async function RootLayout({
       <html lang="de" suppressHydrationWarning>
         <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
           {children}
+          <SpeedInsights />
         </body>
       </html>
     )
@@ -96,6 +98,7 @@ export default async function RootLayout({
           <Footer />
           <CookieConsent />
         </div>
+        <SpeedInsights />
       </body>
     </html>
   )
