@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 
 export default function ImpressumPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-emerald-50 to-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-emerald-800 to-emerald-900 text-white py-16">
+      <section className="bg-linear-to-r from-emerald-800 to-emerald-900 text-white py-16">
         <div className="container mx-auto px-4 lg:px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Impressum</h1>
           <p className="text-lg text-emerald-100">Legal Notice / Rechtliche Angaben</p>
@@ -27,14 +27,14 @@ export default function ImpressumPage() {
               <p className="font-semibold text-lg">Valar Travel Ltd.</p>
               <p>Luxury Villa Management & Concierge Services</p>
               <p>
-                [Straße und Hausnummer]<br />
-                [PLZ Ort]<br />
+                [Tacitusstr. 90]<br />
+                [60439 Frankfurt]<br />
                 Deutschland / Germany
               </p>
               <p className="mt-4">
-                <strong>Sitz der Gesellschaft:</strong> Bridgetown, Barbados<br />
+                <strong>Sitz der Gesellschaft:</strong> Frankfurt, Germany<br />
                 <strong>Registergericht:</strong> [Registergericht]<br />
-                <strong>Registernummer:</strong> [Handelsregisternummer]
+                <strong>Registernummer:</strong> [841214134895001]
               </p>
             </div>
           </section>
@@ -43,7 +43,7 @@ export default function ImpressumPage() {
           <section className="bg-white p-6 rounded-lg shadow-sm border">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Vertreten durch</h2>
             <p className="text-gray-700">
-              Geschaftsfuhrer: [Name des Geschaftsfuhrers]
+              Geschaftsfuhrer: [Sarah Kuhmichel]
             </p>
           </section>
 
@@ -51,7 +51,7 @@ export default function ImpressumPage() {
           <section className="bg-white p-6 rounded-lg shadow-sm border">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Kontakt</h2>
             <div className="text-gray-700 space-y-1">
-              <p><strong>Telefon:</strong> +49 (0) [Telefonnummer]</p>
+              <p><strong>Telefon:</strong> +49 (0) [16092527436]</p>
               <p><strong>E-Mail:</strong> hello@valartravel.de</p>
               <p><strong>Website:</strong> www.valartravel.de</p>
             </div>
@@ -62,7 +62,7 @@ export default function ImpressumPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Umsatzsteuer-ID</h2>
             <p className="text-gray-700">
               Umsatzsteuer-Identifikationsnummer gemaß § 27a Umsatzsteuergesetz:<br />
-              <strong>DE [USt-IdNr.]</strong>
+              <strong>DE [346557770]</strong>
             </p>
           </section>
 
@@ -70,9 +70,9 @@ export default function ImpressumPage() {
           <section className="bg-white p-6 rounded-lg shadow-sm border">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Verantwortlich fur den Inhalt nach § 55 Abs. 2 RStV</h2>
             <div className="text-gray-700">
-              <p>[Name]</p>
-              <p>[Adresse]</p>
-              <p>[PLZ Ort]</p>
+              <p>[Sarah Kuhmichel]</p>
+              <p>[Tacitusstr. 90]</p>
+              <p>[60439 Frankfurt]</p>
             </div>
           </section>
 
@@ -82,7 +82,7 @@ export default function ImpressumPage() {
             <div className="text-gray-700">
               <p>Bei Fragen zum Datenschutz wenden Sie sich bitte an:</p>
               <p className="mt-2">
-                <strong>E-Mail:</strong> datenschutz@valartravel.de
+                <strong>E-Mail:</strong> hallo@valartravel.de
               </p>
               <p className="mt-4">
                 <Link href="/privacy" className="text-emerald-600 hover:underline">
