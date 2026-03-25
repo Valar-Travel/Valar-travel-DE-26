@@ -10,9 +10,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
  */
 const nextConfig = {
   outputFileTracingRoot: __dirname,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -22,6 +19,8 @@ const nextConfig = {
     // Responsive breakpoints for luxury visual quality
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Quality levels for image optimization
+    qualities: [75, 85],
     // 1 year cache for optimized images
     minimumCacheTTL: 31536000,
     remotePatterns: [
@@ -127,20 +126,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'date-fns', 'recharts'],
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push('p-limit', 'playwright', 'playwright-core')
-    }
-    // Ignore tw-animate-css which is incompatible with Tailwind CSS v4
-    config.resolve = config.resolve || {}
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'tw-animate-css': false,
-      'tailwindcss-animate': false,
-    }
-    config.plugins = config.plugins || []
-    return config
-  },
+ 
   generateBuildId: async () => {
     // Force fresh build - timestamp: 2026-03-15T12:30
     return `build-${Date.now()}`

@@ -8,6 +8,7 @@ import { Footer } from "@/components/footer"
 import { CookieConsent } from "@/components/cookie-consent"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
+// Build deployment trigger - v0 deployment verification
 export const metadata: Metadata = {
   metadataBase: new URL("https://valartravel.de"),
   title: {
