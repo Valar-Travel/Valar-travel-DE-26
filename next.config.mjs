@@ -19,6 +19,8 @@ const nextConfig = {
     // Responsive breakpoints for luxury visual quality
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Quality levels for image optimization
+    qualities: [75, 85],
     // 1 year cache for optimized images
     minimumCacheTTL: 31536000,
     remotePatterns: [
