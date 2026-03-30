@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | Valar Travel",
   },
   description:
-    "Discover exclusive luxury villa rentals in Barbados, St. Lucia, Jamaica, and St. Barthélemy. Handpicked Caribbean properties with personalized concierge service.",
+    "Experience luxury villa rentals in the Caribbean's most exclusive destinations. Handpicked properties, personalized concierge, private beach access. Your perfect Caribbean escape awaits.",
   keywords: [
     "luxury villas",
     "Caribbean rentals",
@@ -50,21 +50,26 @@ export const metadata: Metadata = {
     url: "https://valartravel.de",
     siteName: "Valar Travel",
     title: "Valar Travel - Luxury Caribbean Villa Rentals",
-    description: "Discover exclusive luxury villa rentals in Barbados, St. Lucia, Jamaica, and St. Barthélemy.",
+    description: "Experience luxury villa rentals in the Caribbean's most exclusive destinations. Handpicked properties, personalized concierge, private beach access. Your perfect Caribbean escape awaits.",
     images: [
       {
         url: "https://valartravel.de/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Valar Travel - Luxury Caribbean Villa Rentals",
+        type: "image/jpeg",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
+    site: "@valartravel",
     title: "Valar Travel - Luxury Caribbean Villa Rentals",
-    description: "Discover exclusive luxury villa rentals in Barbados, St. Lucia, Jamaica, and St. Barthélemy.",
+    description: "Experience luxury villa rentals in the Caribbean's most exclusive destinations. Handpicked properties, personalized concierge, private beach access.",
     images: ["https://valartravel.de/og-image.jpg"],
+  },
+  verification: {
+    google: "your-google-site-verification-code",
   },
     generator: 'v0.app'
 }
